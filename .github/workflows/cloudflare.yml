@@ -42,7 +42,9 @@ jobs:
         run: bun test
 
       - name: Apply D1 migrations
-        if: secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != ''
+        if: env.CF_OK == 'true'
+        env:
+          CF_OK: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -50,7 +52,9 @@ jobs:
           command: d1 migrations apply DB --remote
 
       - name: Seed D1（首次或需要重置内容时勾选 run_seed）
-        if: inputs.run_seed && secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != ''
+        if: inputs.run_seed && env.CF_OK == 'true'
+        env:
+          CF_OK: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -58,7 +62,9 @@ jobs:
           command: d1 execute DB --remote --file=db/seed-d1.sql
 
       - name: Deploy to Cloudflare Workers
-        if: secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != ''
+        if: env.CF_OK == 'true'
+        env:
+          CF_OK: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
