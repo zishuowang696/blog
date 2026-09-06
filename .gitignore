@@ -1,0 +1,16 @@
+# 依赖与构建产物
+node_modules/
+bun.lockb
+dist/
+
+# 运行时生成
+db/*.sqlite
+db/*.sqlite-wal
+db/*.sqlite-shm
+tests/.tmp-test.sqlite*
+
+# 日志与环境
+*.log
+.env
+.env.*
+!.env.example
