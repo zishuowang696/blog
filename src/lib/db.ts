@@ -1,16 +1,6 @@
-import { Database } from 'bun:sqlite'
-import { randomBytes } from 'node:crypto'
-import { readFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
-import { mkdirSync } from 'node:fs'
 import { renderMarkdown } from './md.ts'
 import { renderPageSource, renderPostSource, type PageInput, type PostInput } from './content.ts'
-
-export const rootDir = resolve(import.meta.dir, '..', '..')
-export const dbFile = Bun.env.BLOG_DB_FILE
-  ? resolve(Bun.env.BLOG_DB_FILE)
-  : join(rootDir, 'db', 'blog.sqlite')
-const schemaFile = join(rootDir, 'db', 'schema.sql')
+import { useEngine } from './engine.ts'
 
 export const POSTS_PER_PAGE = 3
 
@@ -78,194 +68,202 @@ interface PostRow {
   tags: string | null
 }
 
-let db: Database | null = null
+interface UserRow {
+  id: number
+  username: string
+  email: string
+  display_name: string
+  password_hash: string
+  role: string
+  created_at: string
+  updated_at: string
+}
 
 function nowIso(): string {
   return new Date().toISOString()
 }
 
-function ensureColumn(table: string, column: string, ddl: string): void {
-  const d = openDb()
-  const cols = d.query(`PRAGMA table_info(${table})`).all() as unknown as { name: string }[]
-  if (!cols.some((c) => c.name === column)) {
-    d.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`)
-  }
-}
-
-export function openDb(): Database {
-  if (db) return db
-  mkdirSync(join(rootDir, 'db'), { recursive: true })
-  db = new Database(dbFile)
-  db.exec('PRAGMA journal_mode = WAL;')
-  db.exec('PRAGMA foreign_keys = ON;')
-  db.exec(readSchema())
-  ensureColumn('posts', 'source_md', "TEXT NOT NULL DEFAULT ''")
-  ensureColumn('pages', 'source_md', "TEXT NOT NULL DEFAULT ''")
-  return db
-}
-
-function readSchema(): string {
-  return readFileSync(schemaFile, 'utf8')
-}
-
-function rowToPost(r: PostRow): Post {
+function postFrom(r: PostRow): Post {
   return {
-    ...r,
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    summary: r.summary,
+    content_html: r.content_html,
+    source_md: r.source_md,
+    series: r.series,
     published: r.published === 1,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
     tags: r.tags ? r.tags.split(',').filter(Boolean) : [],
   }
 }
 
-function queryTags(d: Database, postId: number): string[] {
-  const rows = d.query('SELECT t.name FROM tags t JOIN post_tags pt ON pt.tag_id = t.id WHERE pt.post_id = ?').all(postId) as unknown as { name: string }[]
-  return rows.map((r) => r.name)
-}
-
-function getAnyPost(slug: string): Post | null {
-  const d = openDb()
-  const row = d.query(`SELECT p.* FROM posts p WHERE p.slug = ?`).get(slug) as unknown as PostRow | null
-  if (!row) return null
-  return { ...rowToPost(row), tags: queryTags(d, row.id) }
-}
-
-export function syncTags(d: Database, postId: number, tags: string[]): void {
-  const upsert = d.prepare('INSERT INTO tags (name) VALUES (?) ON CONFLICT(name) DO NOTHING')
-  const findTag = d.prepare('SELECT id FROM tags WHERE name = ?')
-  const unlink = d.prepare('DELETE FROM post_tags WHERE post_id = ?')
-  const link = d.prepare('INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)')
-  unlink.run(postId)
-  for (const raw of tags) {
-    const name = raw.trim()
-    if (!name) continue
-    upsert.run(name)
-    const row = findTag.get(name) as { id: number }
-    link.run(postId, row.id)
+export function toUserRow(r: UserRow) {
+  return {
+    id: r.id,
+    username: r.username,
+    email: r.email,
+    display_name: r.display_name,
+    password_hash: r.password_hash,
+    role: r.role === 'admin' ? ('admin' as const) : ('user' as const),
+    created_at: r.created_at,
+    updated_at: r.updated_at,
   }
 }
 
-export function savePost(input: PostInput): Post {
-  const d = openDb()
+function rowTags(): string {
+  return `(SELECT GROUP_CONCAT(t.name, ',') FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id = posts.id) AS tags`
+}
+
+function postSelectSql(): string {
+  return `SELECT posts.id, posts.slug, posts.title, posts.summary, posts.content_html, posts.source_md,
+                 posts.series, posts.published, posts.created_at, posts.updated_at,
+                 ${rowTags()} FROM posts`
+}
+
+function getPostByWhere(sql: string, params: (string | number)[]): Promise<Post | null> {
+  return useEngine()
+    .first(sql, params)
+    .then((r) => (r ? postFrom(r as unknown as PostRow) : null))
+}
+
+export async function getPost(slug: string): Promise<Post | null> {
+  return getPostByWhere(`${postSelectSql()} WHERE posts.slug = ? AND posts.published = 1`, [slug])
+}
+
+async function getAnyPost(slug: string): Promise<Post | null> {
+  return getPostByWhere(`${postSelectSql()} WHERE posts.slug = ?`, [slug])
+}
+
+export function getPostSource(slug: string): Promise<Post | null> {
+  return getAnyPost(slug)
+}
+
+export async function savePost(input: PostInput): Promise<Post> {
+  const e = useEngine()
   const contentHtml = renderMarkdown(input.body)
   const sourceMd = renderPostSource(input)
   const created = input.date || nowIso().slice(0, 10)
-  const existing = getAnyPost(input.slug)
   const updated = nowIso()
+  const existing = await e.first('SELECT id FROM posts WHERE slug = ?', [input.slug])
   if (existing) {
-    d.query(
-      `UPDATE posts SET title = ?, summary = ?, content_html = ?, source_md = ?, series = ?, published = ?, created_at = ?, updated_at = ?
-       WHERE slug = ?`,
-    ).run(input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated, input.slug)
+    await e.run(
+      `UPDATE posts SET title = ?, summary = ?, content_html = ?, source_md = ?, series = ?, published = ?, created_at = ?, updated_at = ? WHERE slug = ?`,
+      [input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated, input.slug],
+    )
   } else {
-    d.query(
+    await e.run(
       `INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(input.slug, input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated)
+      [input.slug, input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated],
+    )
   }
-  const row = getAnyPost(input.slug)!
-  syncTags(d, row.id, input.tags)
-  return getAnyPost(input.slug)!
+  const row = await e.first('SELECT id FROM posts WHERE slug = ?', [input.slug])
+  if (row) {
+    await syncTags(Number(row.id), input.tags)
+  }
+  return (await getAnyPost(input.slug))!
 }
 
-export function deletePost(slug: string): boolean {
-  const d = openDb()
-  const post = d.query('SELECT id FROM posts WHERE slug = ?').get(slug) as { id: number } | null
+export async function deletePost(slug: string): Promise<boolean> {
+  const e = useEngine()
+  const post = await e.first('SELECT id FROM posts WHERE slug = ?', [slug])
   if (!post) return false
-  d.query('DELETE FROM post_tags WHERE post_id = ?').run(post.id)
-  d.query('DELETE FROM comments WHERE post_slug = ?').run(slug)
-  d.query('DELETE FROM posts WHERE slug = ?').run(slug)
+  await syncTags(Number(post.id), [])
+  await e.run('DELETE FROM comments WHERE post_slug = ?', [slug])
+  await e.run('DELETE FROM posts WHERE slug = ?', [slug])
   return true
 }
 
-export function listAllPostsMeta(): PostMeta[] {
-  const d = openDb()
-  const rows = d
-    .query(
-      `SELECT p.slug, p.title, p.published, p.created_at,
-              (SELECT GROUP_CONCAT(t.name, ',') FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id = p.id) AS tags
-       FROM posts p ORDER BY p.created_at DESC, p.id DESC`,
-    )
-    .all() as unknown as (Pick<PostRow, 'slug' | 'title' | 'published' | 'created_at'> & { tags: string | null })[]
-  return rows.map((r) => ({
-    slug: r.slug,
-    title: r.title,
-    date: r.created_at.slice(0, 10),
-    tags: r.tags ? r.tags.split(',').filter(Boolean) : [],
-    published: r.published === 1,
-  }))
+async function syncTags(postId: number, tags: string[]): Promise<void> {
+  const e = useEngine()
+  await e.run('DELETE FROM post_tags WHERE post_id = ?', [postId])
+  for (const raw of tags) {
+    const name = raw.trim()
+    if (!name) continue
+    await e.run('INSERT INTO tags (name) VALUES (?) ON CONFLICT(name) DO NOTHING', [name])
+    const t = await e.first('SELECT id FROM tags WHERE name = ?', [name])
+    if (t) {
+      await e.run('INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)', [postId, Number(t.id)])
+    }
+  }
 }
 
-export function getPostSource(slug: string): Post | null {
-  const d = openDb()
-  const row = d.query('SELECT p.* FROM posts p WHERE p.slug = ?').get(slug) as unknown as PostRow | null
-  if (!row) return null
-  return { ...rowToPost(row), tags: queryTags(d, row.id) }
+export async function listAllPostsMeta(): Promise<PostMeta[]> {
+  const rows = await useEngine().all(
+    `SELECT posts.slug, posts.title, posts.published, posts.created_at, ${rowTags()} FROM posts
+     ORDER BY posts.created_at DESC, posts.id DESC`,
+  )
+  return rows.map((r) => {
+    const rr = r as unknown as { slug: string; title: string; published: number; created_at: string; tags: string | null }
+    return {
+      slug: rr.slug,
+      title: rr.title,
+      date: rr.created_at.slice(0, 10),
+      tags: rr.tags ? rr.tags.split(',').filter(Boolean) : [],
+      published: rr.published === 1,
+    }
+  })
 }
 
-export function savePage(input: PageInput): Page {
-  const d = openDb()
+export async function savePage(input: PageInput): Promise<Page> {
+  const e = useEngine()
   const contentHtml = renderMarkdown(input.body)
   const sourceMd = renderPageSource(input)
   const created = input.date || nowIso().slice(0, 10)
   const updated = nowIso()
-  d.query(
+  await e.run(
     `INSERT INTO pages (slug, title, content_html, source_md, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(slug) DO UPDATE SET
        title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md,
        created_at = excluded.created_at, updated_at = excluded.updated_at`,
-  ).run(input.slug, input.title, contentHtml, sourceMd, created, updated)
-  return getPage(input.slug)!
+    [input.slug, input.title, contentHtml, sourceMd, created, updated],
+  )
+  return (await getPage(input.slug))!
 }
 
-export function deletePage(slug: string): boolean {
-  const result = openDb().query('DELETE FROM pages WHERE slug = ?').run(slug)
-  return Number(result.changes) > 0
+export async function deletePage(slug: string): Promise<boolean> {
+  const r = await useEngine().run('DELETE FROM pages WHERE slug = ?', [slug])
+  return r.changes > 0
 }
 
-export function listAllPagesMeta(): PageMeta[] {
-  const d = openDb()
-  const rows = d
-    .query('SELECT slug, title, created_at FROM pages ORDER BY created_at ASC')
-    .all() as unknown as { slug: string; title: string; created_at: string }[]
-  return rows.map((r) => ({ slug: r.slug, title: r.title, date: r.created_at.slice(0, 10) }))
+export async function listAllPagesMeta(): Promise<PageMeta[]> {
+  const rows = await useEngine().all('SELECT slug, title, created_at FROM pages ORDER BY created_at ASC')
+  return rows.map((r) => {
+    const rr = r as unknown as { slug: string; title: string; created_at: string }
+    return { slug: rr.slug, title: rr.title, date: rr.created_at.slice(0, 10) }
+  })
 }
 
-export function listPosts(opts: { page?: number; tag?: string; q?: string } = {}): PostList {
-  const d = openDb()
+export async function listPosts(opts: { page?: number; tag?: string; q?: string } = {}): Promise<PostList> {
+  const e = useEngine()
   const page = Math.max(1, opts.page ?? 1)
   const limit = POSTS_PER_PAGE
   const offset = (page - 1) * limit
 
-  const where: string[] = ['p.published = 1']
+  const where: string[] = ['posts.published = 1']
   const args: (string | number)[] = []
   if (opts.tag) {
     where.push(`EXISTS (SELECT 1 FROM post_tags pt JOIN tags t ON t.id = pt.tag_id
-                  WHERE pt.post_id = p.id AND t.name = ?)`)
+                  WHERE pt.post_id = posts.id AND t.name = ?)`)
     args.push(opts.tag)
   }
   if (opts.q) {
-    where.push(`(p.title LIKE ? OR p.summary LIKE ? OR p.content_html LIKE ? OR p.series LIKE ?)`)
+    where.push(`(posts.title LIKE ? OR posts.summary LIKE ? OR posts.content_html LIKE ? OR posts.series LIKE ?)`)
     const like = `%${opts.q}%`
     args.push(like, like, like, like)
   }
   const whereSql = `WHERE ${where.join(' AND ')}`
 
-  const total = (d.query(`SELECT COUNT(*) AS n FROM posts p ${whereSql}`).get(...args) as { n: number }).n
+  const totalRow = await e.first(`SELECT COUNT(*) AS n FROM posts ${whereSql}`, args)
+  const total = Number(totalRow?.n ?? 0)
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
-  const rows = d
-    .query(
-      `SELECT p.id, p.slug, p.title, p.summary, p.content_html, p.source_md, p.series, p.published, p.created_at, p.updated_at,
-              (SELECT GROUP_CONCAT(t.name, ',') FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id = p.id) AS tags
-       FROM posts p
-       ${whereSql}
-       ORDER BY p.created_at DESC, p.id DESC
-       LIMIT ? OFFSET ?`,
-    )
-    .all(...args, limit, offset) as unknown as PostRow[]
-
+  const rows = await e.all(`${postSelectSql()} ${whereSql} ORDER BY posts.created_at DESC, posts.id DESC LIMIT ? OFFSET ?`, [...args, limit, offset])
   return {
-    items: rows.map(rowToPost),
+    items: rows.map((r) => postFrom(r as unknown as PostRow)),
     hasMore: page < totalPages,
     page,
     totalPages,
@@ -273,60 +271,44 @@ export function listPosts(opts: { page?: number; tag?: string; q?: string } = {}
   }
 }
 
-export function getPost(slug: string): Post | null {
-  const d = openDb()
-  const row = d
-    .query(
-      `SELECT p.*,
-              (SELECT GROUP_CONCAT(t.name, ',') FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id = p.id) AS tags
-       FROM posts p
-       WHERE p.slug = ? AND p.published = 1`,
-    )
-    .get(slug) as unknown as PostRow | null
-  return row ? rowToPost(row) : null
+export async function getPage(slug: string): Promise<Page | null> {
+  const row = await useEngine().first(
+    `SELECT slug, title, content_html, source_md, created_at, updated_at FROM pages WHERE slug = ?`,
+    [slug],
+  )
+  return row ? (row as unknown as Page) : null
 }
 
-export function getPage(slug: string): Page | null {
-  const d = openDb()
-  const row = d
-    .query('SELECT slug, title, content_html, source_md, created_at, updated_at FROM pages WHERE slug = ?')
-    .get(slug) as unknown as Page | null
-  return row ?? null
+export async function listTags(): Promise<TagCount[]> {
+  const rows = await useEngine().all(
+    `SELECT t.name AS name, COUNT(pt.post_id) AS count
+     FROM tags t
+     JOIN post_tags pt ON pt.tag_id = t.id
+     JOIN posts p ON p.id = pt.post_id
+     WHERE p.published = 1
+     GROUP BY t.name
+     ORDER BY count DESC, t.name ASC`,
+  )
+  return rows as unknown as TagCount[]
 }
 
-export function listTags(): TagCount[] {
-  const d = openDb()
-  const rows = d
-    .query(
-      `SELECT t.name AS name, COUNT(pt.post_id) AS count
-       FROM tags t
-       JOIN post_tags pt ON pt.tag_id = t.id
-       JOIN posts p ON p.id = pt.post_id
-       WHERE p.published = 1
-       GROUP BY t.name
-       ORDER BY count DESC, t.name ASC`,
-    )
-    .all() as unknown as TagCount[]
-  return rows
-}
-
-export function getAdjacentPosts(slug: string): { older: Post | null; newer: Post | null } {
-  const current = getPost(slug)
+export async function getAdjacentPosts(slug: string): Promise<{ older: Post | null; newer: Post | null }> {
+  const current = await getPost(slug)
   if (!current) return { older: null, newer: null }
-  const d = openDb()
-  const olderRow = d
-    .query(
-      `SELECT p.* FROM posts p WHERE p.published = 1 AND (p.created_at < ? OR (p.created_at = ? AND p.id < ?)) ORDER BY p.created_at DESC, p.id DESC LIMIT 1`,
-    )
-    .get(current.created_at, current.created_at, current.id) as unknown as PostRow | null
-  const newerRow = d
-    .query(
-      `SELECT p.* FROM posts p WHERE p.published = 1 AND (p.created_at > ? OR (p.created_at = ? AND p.id > ?)) ORDER BY p.created_at ASC, p.id ASC LIMIT 1`,
-    )
-    .get(current.created_at, current.created_at, current.id) as unknown as PostRow | null
+  const e = useEngine()
+  const older = await e.first(
+    `${postSelectSql()} WHERE posts.published = 1 AND (posts.created_at < ? OR (posts.created_at = ? AND posts.id < ?))
+     ORDER BY posts.created_at DESC, posts.id DESC LIMIT 1`,
+    [current.created_at, current.created_at, current.id],
+  )
+  const newer = await e.first(
+    `${postSelectSql()} WHERE posts.published = 1 AND (posts.created_at > ? OR (posts.created_at = ? AND posts.id > ?))
+     ORDER BY posts.created_at ASC, posts.id ASC LIMIT 1`,
+    [current.created_at, current.created_at, current.id],
+  )
   return {
-    older: olderRow ? rowToPost(olderRow) : null,
-    newer: newerRow ? rowToPost(newerRow) : null,
+    older: older ? postFrom(older as unknown as PostRow) : null,
+    newer: newer ? postFrom(newer as unknown as PostRow) : null,
   }
 }
 
@@ -361,51 +343,42 @@ export interface Comment {
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
-function toRole(v: string): Role {
-  return v === 'admin' ? 'admin' : 'user'
+function randomHex(bytes: number): string {
+  const arr = new Uint8Array(bytes)
+  crypto.getRandomValues(arr)
+  let hex = ''
+  for (const b of arr) hex += b.toString(16).padStart(2, '0')
+  return hex
 }
 
-interface UserRow {
-  id: number
-  username: string
-  email: string
-  display_name: string
-  password_hash: string
-  role: string
-  created_at: string
-  updated_at: string
+function userFromRow(r: unknown): User {
+  return toUserRow(r as unknown as UserRow)
 }
 
-function rowToUser(r: UserRow): User {
-  return { ...r, role: toRole(r.role) }
+export async function getUserByUsername(username: string): Promise<User | null> {
+  const row = await useEngine().first('SELECT * FROM users WHERE username = ?', [username])
+  return row ? userFromRow(row) : null
 }
 
-export function getUserByUsername(username: string): User | null {
-  const row = openDb().query('SELECT * FROM users WHERE username = ?').get(username) as UserRow | null
-  return row ? rowToUser(row) : null
+export async function getUserById(id: number): Promise<User | null> {
+  const row = await useEngine().first('SELECT * FROM users WHERE id = ?', [id])
+  return row ? userFromRow(row) : null
 }
 
-export function getUserById(id: number): User | null {
-  const row = openDb().query('SELECT * FROM users WHERE id = ?').get(id) as UserRow | null
-  return row ? rowToUser(row) : null
-}
-
-export function createUser(input: {
+export async function createUser(input: {
   username: string
   email?: string
   display_name?: string
   password_hash: string
   role?: Role
-}): User {
-  const d = openDb()
+}): Promise<User> {
+  const e = useEngine()
   const username = input.username.trim().toLowerCase()
   const now = nowIso()
-  const result = d
-    .query(
-      `INSERT INTO users (username, email, display_name, password_hash, role, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .run(
+  await e.run(
+    `INSERT INTO users (username, email, display_name, password_hash, role, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
       username,
       (input.email ?? '').trim().toLowerCase(),
       (input.display_name ?? username).trim(),
@@ -413,90 +386,89 @@ export function createUser(input: {
       input.role ?? 'user',
       now,
       now,
-    )
-  return getUserById(Number(result.lastInsertRowid))!
+    ],
+  )
+  return (await getUserByUsername(username))!
 }
 
-export function setUserRole(id: number, role: Role): boolean {
-  const result = openDb().query('UPDATE users SET role = ?, updated_at = ? WHERE id = ?').run(role, nowIso(), id)
-  return Number(result.changes) > 0
+export async function setUserRole(id: number, role: Role): Promise<boolean> {
+  const r = await useEngine().run('UPDATE users SET role = ?, updated_at = ? WHERE id = ?', [role, nowIso(), id])
+  return r.changes > 0
 }
 
-export function createSession(userId: number): Session {
-  const d = openDb()
-  const token = randomBytes(32).toString('hex')
+export async function createSession(userId: number): Promise<Session> {
+  const e = useEngine()
+  const token = randomHex(32)
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString()
-  d.query('INSERT INTO sessions (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)').run(
+  await e.run('INSERT INTO sessions (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)', [
     token,
     userId,
     expiresAt,
     nowIso(),
-  )
-  return { token, expires_at: expiresAt, user: getUserById(userId)! }
+  ])
+  return { token, expires_at: expiresAt, user: (await getUserById(userId))! }
 }
 
-export function findSession(token: string): Session | null {
-  const d = openDb()
-  const row = d
-    .query(
-      `SELECT s.token, s.expires_at, u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?`,
-    )
-    .get(token) as (UserRow & { token: string; expires_at: string }) | null
+export async function findSession(token: string): Promise<Session | null> {
+  const e = useEngine()
+  const row = await e.first(
+    `SELECT s.token AS token, s.expires_at AS expires_at, u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?`,
+    [token],
+  )
   if (!row) return null
-  if (row.expires_at <= nowIso()) {
-    deleteSession(token)
+  const rr = row as unknown as { token: string; expires_at: string } & UserRow
+  if (rr.expires_at <= nowIso()) {
+    await deleteSession(token)
     return null
   }
-  return { token: row.token, expires_at: row.expires_at, user: rowToUser(row) }
+  return { token: rr.token, expires_at: rr.expires_at, user: toUserRow(rr) }
 }
 
-export function deleteSession(token: string): void {
-  openDb().query('DELETE FROM sessions WHERE token = ?').run(token)
+export async function deleteSession(token: string): Promise<void> {
+  await useEngine().run('DELETE FROM sessions WHERE token = ?', [token])
 }
 
-export function pruneSessions(): void {
-  openDb().query('DELETE FROM sessions WHERE expires_at <= ?').run(nowIso())
+export async function pruneSessions(): Promise<void> {
+  await useEngine().run('DELETE FROM sessions WHERE expires_at <= ?', [nowIso()])
 }
 
-export function listComments(postSlug: string): Comment[] {
-  const rows = openDb()
-    .query(
-      `SELECT c.id, c.post_slug, c.user_id, c.body, c.created_at,
-              u.username, u.display_name
-       FROM comments c JOIN users u ON u.id = c.user_id
-       WHERE c.post_slug = ?
-       ORDER BY c.created_at ASC, c.id ASC`,
-    )
-    .all(postSlug) as unknown as Comment[]
-  return rows
+export async function listComments(postSlug: string): Promise<Comment[]> {
+  const rows = await useEngine().all(
+    `SELECT c.id, c.post_slug, c.user_id, c.body, c.created_at, u.username, u.display_name
+     FROM comments c JOIN users u ON u.id = c.user_id
+     WHERE c.post_slug = ?
+     ORDER BY c.created_at ASC, c.id ASC`,
+    [postSlug],
+  )
+  return rows as unknown as Comment[]
 }
 
-export function createComment(postSlug: string, userId: number, body: string): Comment | null {
-  const d = openDb()
-  const post = d.query('SELECT id FROM posts WHERE slug = ? AND published = 1').get(postSlug) as
-    | { id: number }
-    | null
+export async function createComment(postSlug: string, userId: number, body: string): Promise<Comment | null> {
+  const e = useEngine()
+  const post = await e.first('SELECT id FROM posts WHERE slug = ? AND published = 1', [postSlug])
   if (!post) return null
-  const result = d
-    .query('INSERT INTO comments (post_slug, user_id, body, created_at) VALUES (?, ?, ?, ?)')
-    .run(postSlug, userId, body, nowIso())
-  const id = Number(result.lastInsertRowid)
-  return listComments(postSlug).find((c) => c.id === id) ?? null
+  const res = await e.run('INSERT INTO comments (post_slug, user_id, body, created_at) VALUES (?, ?, ?, ?)', [
+    postSlug,
+    userId,
+    body,
+    nowIso(),
+  ])
+  const id = res.lastInsertRowid
+  const list = await listComments(postSlug)
+  return list.find((c) => c.id === id) ?? null
 }
 
-export function deleteComment(id: number): boolean {
-  const result = openDb().query('DELETE FROM comments WHERE id = ?').run(id)
-  return Number(result.changes) > 0
+export async function deleteComment(id: number): Promise<boolean> {
+  const r = await useEngine().run('DELETE FROM comments WHERE id = ?', [id])
+  return r.changes > 0
 }
 
-export function getCommentById(id: number): Comment | null {
-  const row = openDb()
-    .query(
-      `SELECT c.id, c.post_slug, c.user_id, c.body, c.created_at,
-              u.username, u.display_name
-       FROM comments c JOIN users u ON u.id = c.user_id
-       WHERE c.id = ?`,
-    )
-    .get(id) as unknown as Comment | null
-  return row ?? null
+export async function getCommentById(id: number): Promise<Comment | null> {
+  const row = await useEngine().first(
+    `SELECT c.id, c.post_slug, c.user_id, c.body, c.created_at, u.username, u.display_name
+     FROM comments c JOIN users u ON u.id = c.user_id
+     WHERE c.id = ?`,
+    [id],
+  )
+  return row ? (row as unknown as Comment) : null
 }

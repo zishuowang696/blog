@@ -1,10 +1,11 @@
 import { Hono } from 'hono'
 import { listPosts, listTags } from '../lib/db.ts'
+import { envStr } from '../lib/env.ts'
 
 export const sitemapRoutes = new Hono()
 
 function siteUrl(): string {
-  const base = process.env.SITE_URL?.replace(/\/+$/, '') ?? 'http://localhost:3000'
+  const base = envStr('SITE_URL')?.replace(/\/+$/, '') ?? 'http://localhost:3000'
   return base
 }
 
@@ -12,18 +13,17 @@ function xmlEscape(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-sitemapRoutes.get('/sitemap.xml', (c) => {
+sitemapRoutes.get('/sitemap.xml', async (c) => {
   const base = siteUrl()
-  const posts = listPosts({ page: 1 }).items
+  const posts = (await listPosts({ page: 1 })).items
   const today = new Date().toISOString().slice(0, 10)
 
   const staticUrls = ['', '/tags', '/about', '/search'].map((p) => {
-    const path = p === '' ? '' : p
     const lastmod = p === '' ? today : today
-    return `<url><loc>${base}${path}</loc><lastmod>${lastmod}</lastmod><changefreq>${p === '' ? 'daily' : 'weekly'}</changefreq></url>`
+    return `<url><loc>${base}${p}</loc><lastmod>${lastmod}</lastmod><changefreq>${p === '' ? 'daily' : 'weekly'}</changefreq></url>`
   })
 
-  const tagUrls = listTags().map(
+  const tagUrls = (await listTags()).map(
     (t) => `<url><loc>${base}/tags/${xmlEscape(encodeURIComponent(t.name))}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq></url>`,
   )
 

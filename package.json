@@ -8,17 +8,22 @@
     "dev": "bun --hot src/index.ts",
     "start": "bun src/index.ts",
     "build": "bun run typecheck",
+    "build:bin": "bun build --compile --minify ./src/index.ts --outfile ./dist/blog-server",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test",
     "db:init": "bun src/scripts/db-init.ts",
     "db:import": "bun src/scripts/db-import.ts",
-    "db:promote": "bun src/scripts/admin-promote.ts"
+    "db:promote": "bun src/scripts/admin-promote.ts",
+    "schema:gen": "bun src/scripts/gen-schema.ts",
+    "drizzle:generate": "bunx drizzle-kit generate"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.2",
     "hono": "^4"
   },
   "devDependencies": {
     "@types/bun": "^1",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^5"
   }
 }

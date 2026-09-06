@@ -1,0 +1,23 @@
+name = "blog-worker"
+main = "src/worker.ts"
+compatibility_date = "2026-09-06"
+
+# 静态资源由 Workers 平台托管（public/ 下的 css/vendor 等）
+[assets]
+directory = "./public"
+not_found_handling = "none"
+
+# Worker 端可读的环境变量（对应 src/lib/env.ts 的 envStr/setVars）
+[vars]
+ADMIN_USERNAMES = ""
+SITE_URL = "https://blog.example.com"
+
+# D1：先在 Cloudflare 控制台创建数据库，把 database_id 填进来
+[[d1_databases]]
+binding = "DB"
+database_name = "blog"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+migrations_dir = "migrations/drizzle"
+
+[observability]
+enabled = true

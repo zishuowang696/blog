@@ -16,15 +16,15 @@ function isHx(c: Context): boolean {
 
 export const tagRoutes = new Hono()
 
-tagRoutes.get('/', (c) => {
-  const body = <TagsIndexView tags={listTags()} />
-  return c.html(renderHtml(c, { title: '标签', active: 'tags', body }))
+tagRoutes.get('/', async (c) => {
+  const body = <TagsIndexView tags={await listTags()} />
+  return c.html(await renderHtml(c, { title: '标签', active: 'tags', body }))
 })
 
-tagRoutes.get('/:tag', (c) => {
+tagRoutes.get('/:tag', async (c) => {
   const tag = c.req.param('tag')
   const page = pageNum(c)
-  const list = listPosts({ page, tag })
+  const list = await listPosts({ page, tag })
   const moreUrl = list.hasMore ? `/tags/${encodeURIComponent(tag)}?page=${page + 1}` : undefined
 
   if (isHx(c)) {
@@ -32,5 +32,5 @@ tagRoutes.get('/:tag', (c) => {
   }
 
   const body = <TagPostsView tag={tag} posts={list.items} moreUrl={moreUrl} total={list.total} />
-  return c.html(renderHtml(c, { title: `标签：${tag}`, active: 'tags', body }))
+  return c.html(await renderHtml(c, { title: `标签：${tag}`, active: 'tags', body }))
 })

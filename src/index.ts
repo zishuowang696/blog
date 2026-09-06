@@ -1,8 +1,17 @@
+import { serveStatic } from 'hono/bun'
+import { join } from 'node:path'
 import { app } from './app.tsx'
-import { openDb } from './lib/db.ts'
+import { initLocalDb, rootDir } from './lib/engine/sqlite.ts'
 import { SITE_NAME } from './templates/util.ts'
 
-openDb()
+const publicRoot = join(rootDir, 'public')
+for (const prefix of ['/css', '/js', '/vendor', '/img']) {
+  app.use(`${prefix}/*`, serveStatic({ root: publicRoot }))
+}
+app.get('/favicon.svg', serveStatic({ root: publicRoot }))
+app.get('/robots.txt', serveStatic({ root: publicRoot }))
+
+await initLocalDb()
 
 const port = Number(Bun.env.PORT ?? 3000)
 const host = Bun.env.HOST ?? '0.0.0.0'

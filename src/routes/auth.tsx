@@ -25,19 +25,19 @@ function safeNext(raw: string | null): string {
 
 async function finishLogin(c: Context, user: User, nextRaw: string | null) {
   if (roleFor(user.username) === 'admin' && user.role !== 'admin') {
-    setUserRole(user.id, 'admin')
+    await setUserRole(user.id, 'admin')
     user = { ...user, role: 'admin' }
   }
-  pruneSessions()
-  const session = createSession(user.id)
+  await pruneSessions()
+  const session = await createSession(user.id)
   setSessionCookie(c, session.token)
   return c.redirect(safeNext(nextRaw), 303)
 }
 
-authRoutes.get('/login', (c) => {
+authRoutes.get('/login', async (c) => {
   const error = c.req.query('err') ? '登录失败，请检查用户名或密码' : undefined
   const body = <AuthView mode="login" error={error} next={c.req.query('next') ?? undefined} />
-  return c.html(renderHtml(c, { title: '登录', body }))
+  return c.html(await renderHtml(c, { title: '登录', body }))
 })
 
 authRoutes.post('/login', async (c) => {
@@ -46,18 +46,18 @@ authRoutes.post('/login', async (c) => {
   const password = String(fd.get('password') ?? '')
   const next = String(fd.get('next') ?? c.req.query('next') ?? '')
 
-  const user = username ? getUserByUsername(username) : null
+  const user = username ? await getUserByUsername(username) : null
   const ok = user !== null && (await verifyPassword(password, user.password_hash))
   if (!ok || !user) {
     const body = <AuthView mode="login" error="用户名或密码不正确" next={safeNext(next)} />
-    return c.html(renderHtml(c, { title: '登录', body }), 400)
+    return c.html(await renderHtml(c, { title: '登录', body }), 400)
   }
   return finishLogin(c, user, next)
 })
 
-authRoutes.get('/register', (c) => {
+authRoutes.get('/register', async (c) => {
   const body = <AuthView mode="register" next={c.req.query('next') ?? undefined} />
-  return c.html(renderHtml(c, { title: '注册', body }))
+  return c.html(await renderHtml(c, { title: '注册', body }))
 })
 
 authRoutes.post('/register', async (c) => {
@@ -73,16 +73,16 @@ authRoutes.post('/register', async (c) => {
   if (!error) error = validateEmail(email)
   const username = normalizeUsername(rawUsername)
 
-  if (!error && username && getUserByUsername(username)) {
+  if (!error && username && (await getUserByUsername(username))) {
     error = '该用户名已被注册'
   }
   if (error) {
     const body = <AuthView mode="register" error={error} next={safeNext(next)} />
-    return c.html(renderHtml(c, { title: '注册', body }), 400)
+    return c.html(await renderHtml(c, { title: '注册', body }), 400)
   }
 
   const passwordHash = await hashPassword(password)
-  const user = createUser({
+  const user = await createUser({
     username,
     email,
     display_name: displayName || username,
@@ -92,7 +92,7 @@ authRoutes.post('/register', async (c) => {
   return finishLogin(c, user, next)
 })
 
-authRoutes.post('/logout', (c) => {
-  destroySession(c)
+authRoutes.post('/logout', async (c) => {
+  await destroySession(c)
   return c.redirect('/', 303)
 })

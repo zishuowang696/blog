@@ -16,15 +16,15 @@ function isHx(c: Context): boolean {
 
 export const homeRoutes = new Hono()
 
-homeRoutes.get('/', (c) => {
+homeRoutes.get('/', async (c) => {
   const page = pageParam(c)
-  const list = listPosts({ page })
+  const list = await listPosts({ page })
   const moreUrl = list.hasMore ? `/?page=${page + 1}` : undefined
 
   if (isHx(c)) {
     return c.html(String(<PostList posts={list.items} moreUrl={moreUrl} />))
   }
 
-  const body = <HomeView posts={list.items} moreUrl={moreUrl} page={page} tags={listTags()} postsPerPage={POSTS_PER_PAGE} />
-  return c.html(renderHtml(c, { title: '首页', active: 'home', body }))
+  const body = <HomeView posts={list.items} moreUrl={moreUrl} page={page} tags={await listTags()} postsPerPage={POSTS_PER_PAGE} />
+  return c.html(await renderHtml(c, { title: '首页', active: 'home', body }))
 })

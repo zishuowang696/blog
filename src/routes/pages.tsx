@@ -5,9 +5,9 @@ import { StaticPageView } from '../views/page.tsx'
 
 export const pageRoutes = new Hono()
 
-pageRoutes.get('/about', (c) => {
-  const page = getPage('about')
-  if (!page) return c.html(renderHtml(c, { title: '404', body: <NotFoundView /> }), 404)
+pageRoutes.get('/about', async (c) => {
+  const page = await getPage('about')
+  if (!page) return c.html(await renderHtml(c, { title: '404', body: <NotFoundView /> }), 404)
   const body = <StaticPageView page={page} />
-  return c.html(renderHtml(c, { title: page.title, active: 'about', body }))
+  return c.html(await renderHtml(c, { title: page.title, active: 'about', body }))
 })
