@@ -9,14 +9,14 @@ not_found_handling = "none"
 
 # Worker 端可读的环境变量（对应 src/lib/env.ts 的 envStr/setVars）
 [vars]
-ADMIN_USERNAMES = ""
-SITE_URL = "https://blog.example.com"
+ADMIN_USERNAMES = "wb"
+SITE_URL = "https://blog-worker.zishuowang696.workers.dev"
 
 # D1：先在 Cloudflare 控制台创建数据库，把 database_id 填进来
 [[d1_databases]]
 binding = "DB"
 database_name = "blog"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "a107f46f-e49b-44ff-92f3-b4fef99984d7"
 migrations_dir = "migrations/drizzle"
 
 [observability]
