@@ -9,7 +9,7 @@ not_found_handling = "none"
 
 # Worker 端可读的环境变量（对应 src/lib/env.ts 的 envStr/setVars）
 [vars]
-ADMIN_USERNAMES = "wb"
+ADMIN_USERNAMES = "wangzishuo"
 SITE_URL = "https://blog-worker.zishuowang696.workers.dev"
 
 # D1：先在 Cloudflare 控制台创建数据库，把 database_id 填进来
