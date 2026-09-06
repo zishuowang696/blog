@@ -7,12 +7,12 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Curl home
+      - name: Curl checks
         run: |
           set +e
-          curl -sS -m 30 -o /tmp/body.txt -w 'HTTP %{http_code} time=%{time_total}s\n' https://blog-worker.zishuowang696.workers.dev/
-          echo "--- body head ---"
-          head -c 500 /tmp/body.txt
-          echo
-          echo "--- dns ---"
-          getent hosts blog-worker.zishuowang696.workers.dev || true
+          B=https://blog-worker.zishuowang696.workers.dev
+          for p in / /css/style.css /tags /posts/yocto-recipe-hello /register /sitemap.xml; do
+            curl -sS -m 30 -o /tmp/body.txt -w "$p -> HTTP %{http_code}\n" "$B$p"
+          done
+          echo "--- register page markers ---"
+          curl -sS -m 30 "$B/register" | grep -oE '创建账号|name="username"' | sort -u
