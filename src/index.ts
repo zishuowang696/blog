@@ -1,12 +1,8 @@
 import { app } from './app.tsx'
-import { openDb, syncContent } from './lib/db.ts'
+import { openDb } from './lib/db.ts'
 import { SITE_NAME } from './templates/util.ts'
 
 openDb()
-const result = syncContent()
-console.log(
-  `[content] posts: ${result.upsertedPosts} synced${result.unpublishedPosts ? `, ${result.unpublishedPosts} unpublished` : ''}; pages: ${result.upsertedPages}`,
-)
 
 const port = Number(Bun.env.PORT ?? 3000)
 const host = Bun.env.HOST ?? '0.0.0.0'

@@ -29,7 +29,8 @@ bun run start          # 生产运行
 bun run typecheck      # bunx tsc --noEmit
 bun run lint           # bunx eslint（如有配置）
 bun test               # 运行测试（bun:test）
-bun run db:init        # 按 db/schema.sql 初始化 SQLite
+bun run db:init        # 建表 + 迁移（只动结构，不导入内容）
+bun run db:import      # 从 content/archive/*.md 灌入/覆盖文章与静态页（upsert）
 bun run db:promote <用户名>  # 将某用户提升为管理员（写入 users.role）
 ```
 
@@ -44,21 +45,21 @@ blog/
 ├── package.json / tsconfig.json / bunfig.toml / .gitignore
 ├── AGENTS.md / .env.example
 ├── src/
-│   ├── index.ts            # 入口：openDb + syncContent + 监听端口
+│   ├── index.ts            # 入口：openDb（建表）+ 监听端口
 │   ├── app.tsx             # 装配 Hono app、静态资源、全局中间件
 │   ├── routes/             # home / posts / tags / pages / search / sitemap / auth / comments / admin（.tsx，取数后渲染视图）
 │   ├── views/              # 页面视图组件（.tsx）：home / post / tags / search / page / auth / admin
 │   ├── templates/          # layout.tsx（Layout/renderHtml + 头部账号区）/ components.tsx（htmx 片段原子组件）/ util.ts（fmtDate/tagHref 等）
 │   ├── lib/
-│   │   ├── db.ts           # SQLite 打开、syncContent、全部查询（唯一 DB 入口）
+│   │   ├── db.ts           # SQLite 打开、全部查询与 CRUD（唯一 DB 入口）
+│   │   ├── content.ts      # PostInput/PageInput + md 序列化/解析（编辑器与导入共用）
 │   │   ├── md.ts           # Markdown + frontmatter 解析渲染
 │   │   ├── auth.ts         # 密码散列、Cookie 会话、角色工具
 │   │   └── slug.ts         # 标题转 slug 等工具
 │   ├── middleware/         # http.ts：访问日志、安全头
-│   └── scripts/            # db-init.ts / admin-promote.ts
+│   └── scripts/            # db-init.ts / db-import.ts / admin-promote.ts
 ├── content/
-│   ├── posts/              # *.md 文章（frontmatter + 正文）
-│   └── pages/              # 关于/项目等静态页
+│   └── archive/            # 种子 md 存档（posts/ 与 pages/），仅作 db:import 源，日常不再读写
 ├── db/
 │   ├── schema.sql          # 启动/init 时整体 exec（幂等，CREATE IF NOT EXISTS）
 │   └── blog.sqlite         # 运行时生成，勿提交
@@ -67,7 +68,7 @@ blog/
 └── tests/                  # md / slug / db 单测；db 测试用 BLOG_DB_FILE 指向临时库
 ```
 
-> 内容同步机制：`index.ts` 与 `db:init` 均会调用 `syncContent()`——把 `content/*.md` 渲染后幂等 upsert 进 SQLite；磁盘上不再存在的文章自动下架（posts.published=0 / 删除 pages 行）。改内容后重启即可生效。**后台写作同样走 md 文件**：`/admin` 保存/删除时写/删 `content/posts/*.md` 再调用 `syncContent()`。
+> **内容以数据库为源**：文章/静态页的正文存 DB（含 `source_md` 原文，供后台编辑器往返）。`content/archive` 仅为一次性导入种子：`bun run db:import`（幂等 upsert）把历史 md 灌库后即可归档；运行时不读这些文件。后台 `/admin` 的新建/编辑/删除全部写 DB。
 
 ## 约定
 
@@ -82,16 +83,17 @@ blog/
 - **只允许**通过 `src/lib/db.ts` 访问数据库，禁止散落直接 `new Database()`。
 - 一律使用**参数化查询**（`?` 占位符），禁止字符串拼接 SQL；动态 IN 列表也以数组整体作为参数传入。
 - 库文件路径默认 `db/blog.sqlite`，测试通过环境变量 `BLOG_DB_FILE` 指到临时文件（在 import db 前设置）。
-- 结构变更：先改 `db/schema.sql`（启动与 `db:init` 都会整份 exec，CREATE 均带 IF NOT EXISTS）；有存量数据时新增 `migrations/` 文件并记录已执行版本。
-- 常用表（以实际 schema 为准）：`posts`(slug, title, summary, content_html, series, published, created_at, updated_at)、`tags`、`post_tags`、`pages`(slug, title, content_html, …)、`users`(username, email, display_name, password_hash, role, …)、`sessions`(token, user_id, expires_at)、`comments`(post_slug, user_id, body)。时间统一存 ISO 字符串，frontmatter 的 `date`（YYYY-MM-DD）写入 `created_at`。
-- `syncContent()` 负责把 `content/posts/*.md` 与 `content/pages/*.md` 渲染入库：upsert、重建 tag 关联、下架/删除已消失文件。
+- 结构变更：先改 `db/schema.sql`（启动与 `db:init` 都会整份 exec，CREATE 均带 IF NOT EXISTS）；有存量数据时新增 `migrations/` 文件并记录已执行版本；新增列这类简单变更可在 `openDb()` 里用 `ensureColumn()`（PRAGMA table_info 判断后 ALTER）。
+- 常用表（以实际 schema 为准）：`posts`(slug, title, summary, content_html, source_md, series, published, created_at, updated_at)、`tags`、`post_tags`、`pages`(slug, title, content_html, source_md, …)、`users`(username, email, display_name, password_hash, role, …)、`sessions`(token, user_id, expires_at)、`comments`(post_slug, user_id, body)。时间统一存 ISO 字符串。
+- 内容以 **DB 为源**：`savePost()`/`savePage()` 负责写入并渲染 `content_html`、重建 tag 关联；`source_md` 存规范化 Markdown 供后台编辑器往返。无文件写入、无开机文件同步。
+- 删除文章 `deletePost()` 会连带清理其 `post_tags` 与评论；slug 一经创建不改。
 
 ### 用户 / 权限 / 后台
 - **只允许**通过 `src/lib/auth.ts` 处理认证：密码用 `Bun.password`（argon2id）散列，会话为 DB 内 token + `sid` Cookie（HttpOnly、SameSite=Lax、https 下 Secure）。
-- 角色存 `users.role`（`user`/`admin`）。注册即普通用户；管理员来源：`.env` 的 `ADMIN_USERNAMES` 命中（登录/注册时授予），或 `bun run db:promote <用户名>`。
+- 角色存 `users.role`（`user`/`admin`）。注册即普通用户；管理员来源：`.env` 的 `ADMIN_USERNAMES` 命中（登录/注册时授予），或 `bun run db:promote <用户名>`。**登录只升级不降级**，避免覆盖手工 promote。
 - 页面渲染统一走 `renderHtml(c, opts)`（在 layout.tsx 内根据会话注入登录态导航），不要手动拼头部账号区。
 - `/admin` 仅管理员可访问（`adminRoutes` 内 `adminOnly` 拦截，未登录跳登录、非管理员 403）。
-- 前台只展示 `published=1` 的文章；后台可新建/编辑（slug 不可改）/删除 md 源文件，保存后立即 `syncContent()`。写文件前校验 slug 用 `SLUG_RE`，防路径穿越。
+- 前台只展示 `published=1` 的文章。后台全部读写 DB：文章管理/写新文章（`/admin`、`/admin/new`）、按 slug 编辑/删除（slug 不可改）、**导入 Markdown**（`/admin/import`，多文件上传、slug 取自文件名、存在即覆盖）、静态页管理（`/admin/pages`，含 `/about`）。写前统一校验 slug（`SLUG_RE`）与 frontmatter 字段。
 
 ### Hono 路由
 - 路由全部收敛到 `src/routes/`，`app.ts` 只负责挂载、静态资源与中间件。
@@ -113,7 +115,7 @@ blog/
 - 客户端 JS 保持最小（仅 `public/vendor/htmx.min.js` 一个本地化文件），不引框架、不做全站 SPA 化。
 
 ### 内容写作约定（重要）
-- 每篇文章为 `content/posts/<slug>.md`，frontmatter 至少包含：
+- 日常写作在后台 `/admin` 完成，正文直接存 DB。若用本地 md 导入（`/admin/import` 或 `db:import`），归档目录为 `content/archive/posts/<slug>.md`，frontmatter 至少包含：
   ```yaml
   ---
   title: ""
@@ -138,7 +140,7 @@ blog/
 
 ## 测试
 - 用 `bun:test`，与源码同构的 `tests/` 目录。
-- 路由/DB 相关测试优先对 `lib/db` 的查询与 markdown 渲染做单元测试；涉及 htmx 片段可做轻量集成测试。
+- 路由/DB 相关测试优先对 `lib/db` 的查询与 markdown/内容解析做单元测试；db 用例以 `savePost/savePage` 直接写临时库做种子；涉及 htmx 片段可做轻量集成测试。
 - 新增功能应附带测试；运行 `bun test` 通过后再交付。
 
 ## 验收

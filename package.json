@@ -11,6 +11,7 @@
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test",
     "db:init": "bun src/scripts/db-init.ts",
+    "db:import": "bun src/scripts/db-import.ts",
     "db:promote": "bun src/scripts/admin-promote.ts"
   },
   "dependencies": {
