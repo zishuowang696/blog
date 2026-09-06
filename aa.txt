@@ -1,0 +1,7 @@
+# ① 直接访问（不指定 IP）→ 看域名本身通不通
+curl -sS -m 15 -o /dev/null -w 'domain: %{http_code}\n' https://blog-worker.zishuowang696.workers.dev/
+
+# ② 强制走这个 IP 访问（绕过 DNS）→ 看 IP 层通不通
+curl -sS -m 15 -o /dev/null -w 'ip:     %{http_code}\n' \
+  --resolve blog-worker.zishuowang696.workers.dev:443:103.252.114.101 \
+  https://blog-worker.zishuowang696.workers.dev/
