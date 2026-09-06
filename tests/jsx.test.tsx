@@ -8,6 +8,7 @@ const post: Post = {
   title: '标题 <script>alert(1)</script>',
   summary: '摘要 & 引号"',
   content_html: '',
+  source_md: '',
   series: 'AI 网关实战',
   published: true,
   created_at: '2026-08-01',
