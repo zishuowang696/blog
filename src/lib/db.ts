@@ -1,19 +1,16 @@
 import { Database } from 'bun:sqlite'
 import { randomBytes } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { readdirSync, readFileSync, mkdirSync } from 'node:fs'
-import { parseFrontmatter, renderMarkdown } from './md.ts'
+import { mkdirSync } from 'node:fs'
+import { renderMarkdown } from './md.ts'
+import { renderPageSource, renderPostSource, type PageInput, type PostInput } from './content.ts'
 
 export const rootDir = resolve(import.meta.dir, '..', '..')
 export const dbFile = Bun.env.BLOG_DB_FILE
   ? resolve(Bun.env.BLOG_DB_FILE)
   : join(rootDir, 'db', 'blog.sqlite')
 const schemaFile = join(rootDir, 'db', 'schema.sql')
-const contentDir = join(rootDir, 'content', 'posts')
-const pagesDir = join(rootDir, 'content', 'pages')
-
-export const postsDir = contentDir
-export const pagesContentDir = pagesDir
 
 export const POSTS_PER_PAGE = 3
 
@@ -23,6 +20,7 @@ export interface Post {
   title: string
   summary: string
   content_html: string
+  source_md: string
   series: string
   published: boolean
   created_at: string
@@ -34,8 +32,23 @@ export interface Page {
   slug: string
   title: string
   content_html: string
+  source_md: string
   created_at: string
   updated_at: string
+}
+
+export interface PostMeta {
+  slug: string
+  title: string
+  date: string
+  tags: string[]
+  published: boolean
+}
+
+export interface PageMeta {
+  slug: string
+  title: string
+  date: string
 }
 
 export interface PostList {
@@ -57,6 +70,7 @@ interface PostRow {
   title: string
   summary: string
   content_html: string
+  source_md: string
   series: string
   published: number
   created_at: string
@@ -66,13 +80,32 @@ interface PostRow {
 
 let db: Database | null = null
 
+function nowIso(): string {
+  return new Date().toISOString()
+}
+
+function ensureColumn(table: string, column: string, ddl: string): void {
+  const d = openDb()
+  const cols = d.query(`PRAGMA table_info(${table})`).all() as unknown as { name: string }[]
+  if (!cols.some((c) => c.name === column)) {
+    d.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`)
+  }
+}
+
 export function openDb(): Database {
   if (db) return db
   mkdirSync(join(rootDir, 'db'), { recursive: true })
   db = new Database(dbFile)
   db.exec('PRAGMA journal_mode = WAL;')
-  db.exec(readFileSync(schemaFile, 'utf8'))
+  db.exec('PRAGMA foreign_keys = ON;')
+  db.exec(readSchema())
+  ensureColumn('posts', 'source_md', "TEXT NOT NULL DEFAULT ''")
+  ensureColumn('pages', 'source_md', "TEXT NOT NULL DEFAULT ''")
   return db
+}
+
+function readSchema(): string {
+  return readFileSync(schemaFile, 'utf8')
 }
 
 function rowToPost(r: PostRow): Post {
@@ -83,133 +116,118 @@ function rowToPost(r: PostRow): Post {
   }
 }
 
-function nowIso(): string {
-  return new Date().toISOString()
+function queryTags(d: Database, postId: number): string[] {
+  const rows = d.query('SELECT t.name FROM tags t JOIN post_tags pt ON pt.tag_id = t.id WHERE pt.post_id = ?').all(postId) as unknown as { name: string }[]
+  return rows.map((r) => r.name)
 }
 
-function resolveDate(date: unknown): string {
-  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(date)) return date.slice(0, 10)
-  return nowIso()
-}
-
-function readMarkdownFiles(dir: string): string[] {
-  if (!dirExists(dir)) return []
-  return readdirSync(dir).filter((f) => f.endsWith('.md')).sort()
-}
-
-function dirExists(dir: string): boolean {
-  try {
-    readdirSync(dir)
-    return true
-  } catch {
-    return false
-  }
-}
-
-export interface SyncResult {
-  upsertedPosts: number
-  unpublishedPosts: number
-  upsertedPages: number
-  removedPages: number
-}
-
-export function syncContent(): SyncResult {
+function getAnyPost(slug: string): Post | null {
   const d = openDb()
-  const upsertPost = d.prepare(
-    `INSERT INTO posts (slug, title, summary, content_html, series, published, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET
-       title = excluded.title,
-       summary = excluded.summary,
-       content_html = excluded.content_html,
-       series = excluded.series,
-       published = excluded.published,
-       created_at = excluded.created_at,
-       updated_at = excluded.updated_at`,
-  )
-  const upsertTags = d.prepare('INSERT INTO tags (name) VALUES (?) ON CONFLICT(name) DO NOTHING')
+  const row = d.query(`SELECT p.* FROM posts p WHERE p.slug = ?`).get(slug) as unknown as PostRow | null
+  if (!row) return null
+  return { ...rowToPost(row), tags: queryTags(d, row.id) }
+}
+
+export function syncTags(d: Database, postId: number, tags: string[]): void {
+  const upsert = d.prepare('INSERT INTO tags (name) VALUES (?) ON CONFLICT(name) DO NOTHING')
   const findTag = d.prepare('SELECT id FROM tags WHERE name = ?')
-  const linkTag = d.prepare('INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)')
-  const unlinkAll = d.prepare('DELETE FROM post_tags WHERE post_id = ?')
-  const findPostId = d.prepare('SELECT id FROM posts WHERE slug = ?')
-
-  let upsertedPosts = 0
-  const mdSlugs = new Set<string>()
-
-  for (const file of readMarkdownFiles(contentDir)) {
-    const slug = file.slice(0, -3)
-    mdSlugs.add(slug)
-    const src = readFileSync(join(contentDir, file), 'utf8')
-    const { data, body } = parseFrontmatter(src)
-    const tags = Array.isArray(data.tags) ? data.tags.map(String) : []
-    const published = data.published !== false
-    const created = resolveDate(data.date)
-    const updated = nowIso()
-    upsertPost.run(
-      slug,
-      String(data.title ?? slug),
-      String(data.summary ?? ''),
-      renderMarkdown(body),
-      String(data.series ?? ''),
-      published ? 1 : 0,
-      created,
-      updated,
-    )
-    const post = findPostId.get(slug) as { id: number }
-    unlinkAll.run(post.id)
-    for (const tag of tags) {
-      const name = tag.trim()
-      if (!name) continue
-      upsertTags.run(name)
-      const row = findTag.get(name) as { id: number }
-      linkTag.run(post.id, row.id)
-    }
-    upsertedPosts++
+  const unlink = d.prepare('DELETE FROM post_tags WHERE post_id = ?')
+  const link = d.prepare('INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)')
+  unlink.run(postId)
+  for (const raw of tags) {
+    const name = raw.trim()
+    if (!name) continue
+    upsert.run(name)
+    const row = findTag.get(name) as { id: number }
+    link.run(postId, row.id)
   }
+}
 
-  let unpublishedPosts = 0
-  if (mdSlugs.size > 0) {
-    const slugs = Array.from(mdSlugs)
-    const qmarks = slugs.map(() => '?').join(',')
-    const result = d.run(
-      `UPDATE posts SET published = 0 WHERE published = 1 AND slug NOT IN (${qmarks})`,
-      slugs,
-    )
-    unpublishedPosts = Number(result.changes)
+export function savePost(input: PostInput): Post {
+  const d = openDb()
+  const contentHtml = renderMarkdown(input.body)
+  const sourceMd = renderPostSource(input)
+  const created = input.date || nowIso().slice(0, 10)
+  const existing = getAnyPost(input.slug)
+  const updated = nowIso()
+  if (existing) {
+    d.query(
+      `UPDATE posts SET title = ?, summary = ?, content_html = ?, source_md = ?, series = ?, published = ?, created_at = ?, updated_at = ?
+       WHERE slug = ?`,
+    ).run(input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated, input.slug)
+  } else {
+    d.query(
+      `INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(input.slug, input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated)
   }
+  const row = getAnyPost(input.slug)!
+  syncTags(d, row.id, input.tags)
+  return getAnyPost(input.slug)!
+}
 
-  const upsertPage = d.prepare(
-    `INSERT INTO pages (slug, title, content_html, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?)
+export function deletePost(slug: string): boolean {
+  const d = openDb()
+  const post = d.query('SELECT id FROM posts WHERE slug = ?').get(slug) as { id: number } | null
+  if (!post) return false
+  d.query('DELETE FROM post_tags WHERE post_id = ?').run(post.id)
+  d.query('DELETE FROM comments WHERE post_slug = ?').run(slug)
+  d.query('DELETE FROM posts WHERE slug = ?').run(slug)
+  return true
+}
+
+export function listAllPostsMeta(): PostMeta[] {
+  const d = openDb()
+  const rows = d
+    .query(
+      `SELECT p.slug, p.title, p.published, p.created_at,
+              (SELECT GROUP_CONCAT(t.name, ',') FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id = p.id) AS tags
+       FROM posts p ORDER BY p.created_at DESC, p.id DESC`,
+    )
+    .all() as unknown as (Pick<PostRow, 'slug' | 'title' | 'published' | 'created_at'> & { tags: string | null })[]
+  return rows.map((r) => ({
+    slug: r.slug,
+    title: r.title,
+    date: r.created_at.slice(0, 10),
+    tags: r.tags ? r.tags.split(',').filter(Boolean) : [],
+    published: r.published === 1,
+  }))
+}
+
+export function getPostSource(slug: string): Post | null {
+  const d = openDb()
+  const row = d.query('SELECT p.* FROM posts p WHERE p.slug = ?').get(slug) as unknown as PostRow | null
+  if (!row) return null
+  return { ...rowToPost(row), tags: queryTags(d, row.id) }
+}
+
+export function savePage(input: PageInput): Page {
+  const d = openDb()
+  const contentHtml = renderMarkdown(input.body)
+  const sourceMd = renderPageSource(input)
+  const created = input.date || nowIso().slice(0, 10)
+  const updated = nowIso()
+  d.query(
+    `INSERT INTO pages (slug, title, content_html, source_md, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(slug) DO UPDATE SET
-       title = excluded.title,
-       content_html = excluded.content_html,
-       created_at = excluded.created_at,
-       updated_at = excluded.updated_at`,
-  )
-  const pageSlugs = new Set<string>()
-  for (const file of readMarkdownFiles(pagesDir)) {
-    const slug = file.slice(0, -3)
-    pageSlugs.add(slug)
-    const src = readFileSync(join(pagesDir, file), 'utf8')
-    const { data, body } = parseFrontmatter(src)
-    upsertPage.run(
-      slug,
-      String(data.title ?? slug),
-      renderMarkdown(body),
-      resolveDate(data.date),
-      nowIso(),
-    )
-  }
-  let removedPages = 0
-  if (pageSlugs.size > 0) {
-    const slugs = Array.from(pageSlugs)
-    const qmarks = slugs.map(() => '?').join(',')
-    const result = d.run(`DELETE FROM pages WHERE slug NOT IN (${qmarks})`, slugs)
-    removedPages = Number(result.changes)
-  }
+       title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md,
+       created_at = excluded.created_at, updated_at = excluded.updated_at`,
+  ).run(input.slug, input.title, contentHtml, sourceMd, created, updated)
+  return getPage(input.slug)!
+}
 
-  return { upsertedPosts, unpublishedPosts, upsertedPages: pageSlugs.size, removedPages }
+export function deletePage(slug: string): boolean {
+  const result = openDb().query('DELETE FROM pages WHERE slug = ?').run(slug)
+  return Number(result.changes) > 0
+}
+
+export function listAllPagesMeta(): PageMeta[] {
+  const d = openDb()
+  const rows = d
+    .query('SELECT slug, title, created_at FROM pages ORDER BY created_at ASC')
+    .all() as unknown as { slug: string; title: string; created_at: string }[]
+  return rows.map((r) => ({ slug: r.slug, title: r.title, date: r.created_at.slice(0, 10) }))
 }
 
 export function listPosts(opts: { page?: number; tag?: string; q?: string } = {}): PostList {
@@ -237,7 +255,7 @@ export function listPosts(opts: { page?: number; tag?: string; q?: string } = {}
 
   const rows = d
     .query(
-      `SELECT p.id, p.slug, p.title, p.summary, p.content_html, p.series, p.published, p.created_at, p.updated_at,
+      `SELECT p.id, p.slug, p.title, p.summary, p.content_html, p.source_md, p.series, p.published, p.created_at, p.updated_at,
               (SELECT GROUP_CONCAT(t.name, ',') FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id = p.id) AS tags
        FROM posts p
        ${whereSql}
@@ -270,9 +288,9 @@ export function getPost(slug: string): Post | null {
 
 export function getPage(slug: string): Page | null {
   const d = openDb()
-  const row = d.query(`SELECT slug, title, content_html, created_at, updated_at FROM pages WHERE slug = ?`).get(slug) as
-    | Omit<Page, 'content_html'> & { content_html: string }
-    | undefined
+  const row = d
+    .query('SELECT slug, title, content_html, source_md, created_at, updated_at FROM pages WHERE slug = ?')
+    .get(slug) as unknown as Page | null
   return row ?? null
 }
 
@@ -482,4 +500,3 @@ export function getCommentById(id: number): Comment | null {
     .get(id) as unknown as Comment | null
   return row ?? null
 }
-

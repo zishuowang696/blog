@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS posts (
   title         TEXT NOT NULL,
   summary       TEXT NOT NULL DEFAULT '',
   content_html  TEXT NOT NULL,
+  source_md     TEXT NOT NULL DEFAULT '',
   series        TEXT NOT NULL DEFAULT '',
   published     INTEGER NOT NULL DEFAULT 1,
   created_at    TEXT NOT NULL,
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS pages (
   slug          TEXT NOT NULL UNIQUE,
   title         TEXT NOT NULL,
   content_html  TEXT NOT NULL,
+  source_md     TEXT NOT NULL DEFAULT '',
   created_at    TEXT NOT NULL,
   updated_at    TEXT NOT NULL
 );
