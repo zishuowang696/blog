@@ -25,6 +25,7 @@
 bun install            # 安装依赖
 bun run dev            # 本地开发（--hot 热重载）
 bun run build          # 类型检查 + 预编译（如适用）
+bun run build:bin      # bun build --compile 打包单文件可执行（进 dist/）
 bun run start          # 生产运行
 bun run typecheck      # bunx tsc --noEmit
 bun run lint           # bunx eslint（如有配置）
@@ -32,32 +33,44 @@ bun test               # 运行测试（bun:test）
 bun run db:init        # 建表 + 迁移（只动结构，不导入内容）
 bun run db:import      # 从 content/archive/*.md 灌入/覆盖文章与静态页（upsert）
 bun run db:promote <用户名>  # 将某用户提升为管理员（写入 users.role）
+bun run db:seed-d1   # 从 content/archive 生成 D1 首灌种子 SQL（db/seed-d1.sql）
+bun run schema:gen     # 结构变更后：db/schema.sql → src/lib/schema.ts（重新内嵌）
 ```
 
-> 环境变量（见 `.env.example`）：`PORT`/`HOST`/`SITE_URL`（https 时 Cookie 加 Secure，sitemap 域名）、`ADMIN_USERNAMES`（逗号分隔，命中即授予 admin 角色）、`BLOG_DB_FILE`（测试指临时库）。Bun 启动时自动加载 `.env`。
+> 环境变量（见 `.env.example`）：`PORT`/`HOST`/`SITE_URL`（https 时 Cookie 加 Secure，sitemap 域名）、`ADMIN_USERNAMES`（逗号分隔，命中即授予 admin 角色）、`BLOG_DB_FILE`（测试指临时库）、`BLOG_ROOT`（单文件二进制部署时指向含 public/ 与 db/ 的工作目录）。Bun 启动时自动加载 `.env`。
 
-> 若以上脚本尚不存在（项目初始化阶段），以 package.json 实际 script 为准，并在有改动后同步更新本文件。
+> GitHub Actions：`.github/workflows/build-release.yml`（`bun run build:bin` 生成 Linux/macOS 二进制，打 tag `v*` 时附加到 GitHub Release）；`.github/workflows/cloudflare.yml`（默认关闭，需仓库变量 `CF_DEPLOY=true` + Secrets `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`；会先 `wrangler d1 migrations apply` 再 deploy，勾选 run_seed 时执行 `db/seed-d1.sql` 首灌）。`wrangler.toml` 需把 `database_id` 换成真实 D1 id。
+
+> 脚本以 package.json 实际 script 为准；若有新增脚本/约定，请同步更新本文件。
 
 ## 目录结构（目标约定）
 
 ```
 blog/
-├── package.json / tsconfig.json / bunfig.toml / .gitignore
+├── package.json / tsconfig.json / bunfig.toml / .gitignore / wrangler.toml
+├── .github/workflows/    # build-release.yml（二进制）/ cloudflare.yml（Workers，需先 D1 适配）
 ├── AGENTS.md / .env.example
 ├── src/
-│   ├── index.ts            # 入口：openDb（建表）+ 监听端口
-│   ├── app.tsx             # 装配 Hono app、静态资源、全局中间件
-│   ├── routes/             # home / posts / tags / pages / search / sitemap / auth / comments / admin（.tsx，取数后渲染视图）
+│   ├── index.ts            # Bun 入口：initLocalDb + 静态资源挂载 + 监听端口
+│   ├── app.tsx             # 装配 Hono app（不含静态/引擎，Worker 与本地共用）
+│   ├── routes/             # home / posts / tags / pages / search / sitemap / auth / comments / admin（.tsx，async 取数后渲染视图）
 │   ├── views/              # 页面视图组件（.tsx）：home / post / tags / search / page / auth / admin
-│   ├── templates/          # layout.tsx（Layout/renderHtml + 头部账号区）/ components.tsx（htmx 片段原子组件）/ util.ts（fmtDate/tagHref 等）
+│   ├── templates/          # layout.tsx（Layout/renderHtml async + 头部账号区）/ components.tsx（htmx 片段原子组件）/ util.ts（fmtDate/tagHref 等）
 │   ├── lib/
-│   │   ├── db.ts           # SQLite 打开、全部查询与 CRUD（唯一 DB 入口）
+│   │   ├── db.ts           # 全部查询与 CRUD（async，唯一 DB 入口）
+│   │   ├── engine.ts       # 存储引擎接口 + useEngine()
+│   │   ├── engine/sqlite.ts # 本地 bun:sqlite 引擎（initLocalDb）
+│   │   ├── engine/d1.ts    # Cloudflare D1 引擎（initD1Db）
 │   │   ├── content.ts      # PostInput/PageInput + md 序列化/解析（编辑器与导入共用）
+│   │   ├── schema.ts       # 内嵌 SCHEMA_SQL（schema:gen 生成，勿手改）
+│   │   ├── tables.ts       # Drizzle 表定义（与 db/schema.sql 保持一致，D1 迁移源）
 │   │   ├── md.ts           # Markdown + frontmatter 解析渲染
-│   │   ├── auth.ts         # 密码散列、Cookie 会话、角色工具
+│   │   ├── auth.ts         # PBKDF2 散列、Cookie 会话、角色工具
+│   │   ├── env.ts          # envStr/setVars（跨 Bun/Worker 读环境变量）
 │   │   └── slug.ts         # 标题转 slug 等工具
 │   ├── middleware/         # http.ts：访问日志、安全头
-│   └── scripts/            # db-init.ts / db-import.ts / admin-promote.ts
+│   ├── worker.ts          # CF Workers 入口（assets + D1 + vars 注入）
+│   └── scripts/            # db-init.ts / db-import.ts / admin-promote.ts / gen-schema.ts / d1-seed.ts
 ├── content/
 │   └── archive/            # 种子 md 存档（posts/ 与 pages/），仅作 db:import 源，日常不再读写
 ├── db/
@@ -79,17 +92,20 @@ blog/
 - 保持函数小而单一，复用 `lib/` 与 `views/` 下工具/组件。
 - 不加额外依赖前先确认是否可用现有工具实现（避免引入重型库）。
 
-### DB / SQLite
-- **只允许**通过 `src/lib/db.ts` 访问数据库，禁止散落直接 `new Database()`。
-- 一律使用**参数化查询**（`?` 占位符），禁止字符串拼接 SQL；动态 IN 列表也以数组整体作为参数传入。
-- 库文件路径默认 `db/blog.sqlite`，测试通过环境变量 `BLOG_DB_FILE` 指到临时文件（在 import db 前设置）。
-- 结构变更：先改 `db/schema.sql`（启动与 `db:init` 都会整份 exec，CREATE 均带 IF NOT EXISTS）；有存量数据时新增 `migrations/` 文件并记录已执行版本；新增列这类简单变更可在 `openDb()` 里用 `ensureColumn()`（PRAGMA table_info 判断后 ALTER）。
+### DB / SQLite（双引擎）
+- **只允许**通过 `src/lib/db.ts` 访问数据库，禁止散落直接 `new Database()` 或 `env.DB`。
+- `lib/db.ts` 全部 **async**，只写参数化 SQL（`?` 占位符）；运行存储抽成 **引擎接口**（`lib/engine.ts` + `useEngine()`）：本地 `lib/engine/sqlite.ts`（bun:sqlite，脚本/测试用 `initLocalDb()`）与 Cloudflare `lib/engine/d1.ts`（Worker，`initD1Db(env.DB)`）。db.ts 不得依赖 bun 专属 API（Worker 才能打包）。
+- 表结构映射在 `src/lib/tables.ts`（Drizzle schema，D1 迁移源）；D1 迁移用 `bun run drizzle:generate` 产出到 `migrations/drizzle/`，由 `wrangler d1 migrations apply` 应用；本地仍由 `db/schema.sql → SCHEMA_SQL` 建表，改表两边同步（schema:gen 内嵌 + drizzle:generate 出迁移）。
+- Cloudflare 部署：`src/worker.ts` 入口（assets 托管 public、`[[d1_databases]]`、`[vars]` 的 ADMIN_USERNAMES/SITE_URL 经 `lib/env.ts` 读取）；种子首灌：`bun run db:seed-d1` 生成 `db/seed-d1.sql`，再用 `wrangler d1 execute DB --remote --file` 灌入（幂等）。
+- 认证已跨端可移植：密码 **WebCrypto PBKDF2**（`pbkdf2$...`）、会话 token 用 `crypto.getRandomValues`；旧 argon2 哈希不兼容，需重设密码（本地已重设 tester）。
+- 库文件路径默认 `db/blog.sqlite`，测试通过环境变量 `BLOG_DB_FILE` 指到临时文件（在 import db/initLocalDb 前设置）。
+- 结构变更：先改 `db/schema.sql` 并运行 `bun run schema:gen`（`src/lib/schema.ts` 内嵌同一 SQL，单文件二进制也要能建表）；CREATE 均带 IF NOT EXISTS；有存量数据时新增 `migrations/` 文件并记录已执行版本；新增列这类简单变更可在 `openDb()` 里用 `ensureColumn()`（PRAGMA table_info 判断后 ALTER）。
 - 常用表（以实际 schema 为准）：`posts`(slug, title, summary, content_html, source_md, series, published, created_at, updated_at)、`tags`、`post_tags`、`pages`(slug, title, content_html, source_md, …)、`users`(username, email, display_name, password_hash, role, …)、`sessions`(token, user_id, expires_at)、`comments`(post_slug, user_id, body)。时间统一存 ISO 字符串。
 - 内容以 **DB 为源**：`savePost()`/`savePage()` 负责写入并渲染 `content_html`、重建 tag 关联；`source_md` 存规范化 Markdown 供后台编辑器往返。无文件写入、无开机文件同步。
 - 删除文章 `deletePost()` 会连带清理其 `post_tags` 与评论；slug 一经创建不改。
 
 ### 用户 / 权限 / 后台
-- **只允许**通过 `src/lib/auth.ts` 处理认证：密码用 `Bun.password`（argon2id）散列，会话为 DB 内 token + `sid` Cookie（HttpOnly、SameSite=Lax、https 下 Secure）。
+- **只允许**通过 `src/lib/auth.ts` 处理认证：密码用 WebCrypto PBKDF2（跨 bun/Workers 可移植）散列，会话为 DB 内 token + `sid` Cookie（HttpOnly、SameSite=Lax、https 下 Secure）。
 - 角色存 `users.role`（`user`/`admin`）。注册即普通用户；管理员来源：`.env` 的 `ADMIN_USERNAMES` 命中（登录/注册时授予），或 `bun run db:promote <用户名>`。**登录只升级不降级**，避免覆盖手工 promote。
 - 页面渲染统一走 `renderHtml(c, opts)`（在 layout.tsx 内根据会话注入登录态导航），不要手动拼头部账号区。
 - `/admin` 仅管理员可访问（`adminRoutes` 内 `adminOnly` 拦截，未登录跳登录、非管理员 403）。

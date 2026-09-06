@@ -29,13 +29,13 @@ export const adminRoutes = new Hono()
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,60}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-function adminOnly(c: Context): Response | null {
-  const user = getSessionUser(c)
+async function adminOnly(c: Context): Promise<Response | null> {
+  const user = await getSessionUser(c)
   if (!user) {
     return c.redirect('/login?next=' + encodeURIComponent(c.req.path), 302)
   }
   if (user.role !== 'admin') {
-    return c.html(renderHtml(c, { title: '需要管理员权限', body: <ForbiddenView /> }), 403)
+    return c.html(await renderHtml(c, { title: '需要管理员权限', body: <ForbiddenView /> }), 403)
   }
   return null
 }
@@ -102,58 +102,63 @@ async function readPageForm(c: Context, slug: string): Promise<PageInput> {
   }
 }
 
-adminRoutes.get('/', (c) => {
-  const gate = adminOnly(c)
+async function renderEditor(
+  c: Context,
+  opts: { post: PostInput; action: string; heading: string; slugLocked: boolean; error?: string; title: string; status?: 400 },
+): Promise<Response> {
+  const body = <AdminEditorView post={opts.post} action={opts.action} heading={opts.heading} slugLocked={opts.slugLocked} error={opts.error} />
+  return c.html(await renderHtml(c, { title: opts.title, active: 'console', body }), opts.status ?? 200)
+}
+
+adminRoutes.get('/', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
-  const body = <AdminListView rows={listAllPostsMeta()} />
-  return c.html(renderHtml(c, { title: '控制台', active: 'console', body }))
+  const body = <AdminListView rows={await listAllPostsMeta()} />
+  return c.html(await renderHtml(c, { title: '控制台', active: 'console', body }))
 })
 
-adminRoutes.get('/new', (c) => {
-  const gate = adminOnly(c)
+adminRoutes.get('/new', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
-  const body = (
-    <AdminEditorView
-      post={{ slug: '', title: '', date: today(), tags: [], summary: '', series: '', published: true, body: '' }}
-      action="/admin/new"
-      heading="写新文章"
-      slugLocked={false}
-    />
-  )
-  return c.html(renderHtml(c, { title: '写新文章', active: 'console', body }))
+  return renderEditor(c, {
+    post: { slug: '', title: '', date: today(), tags: [], summary: '', series: '', published: true, body: '' },
+    action: '/admin/new',
+    heading: '写新文章',
+    slugLocked: false,
+    title: '写新文章',
+  })
 })
 
 adminRoutes.post('/new', async (c) => {
-  const gate = adminOnly(c)
+  const gate = await adminOnly(c)
   if (gate) return gate
   const post = await readPostForm(c)
   const err = validatePost(post)
-  const dup = !err && getPostSource(post.slug) !== null
+  const dup = !err && (await getPostSource(post.slug)) !== null
   if (err || dup) {
-    const body = (
-      <AdminEditorView
-        post={post}
-        action="/admin/new"
-        heading="写新文章"
-        slugLocked={false}
-        error={err ?? '该 slug 已存在，请编辑已有文章'}
-      />
-    )
-    return c.html(renderHtml(c, { title: '写新文章', active: 'console', body }), 400)
+    return renderEditor(c, {
+      post,
+      action: '/admin/new',
+      heading: '写新文章',
+      slugLocked: false,
+      error: err ?? '该 slug 已存在，请编辑已有文章',
+      title: '写新文章',
+      status: 400,
+    })
   }
-  savePost(post)
+  await savePost(post)
   return c.redirect('/admin', 303)
 })
 
-adminRoutes.get('/import', (c) => {
-  const gate = adminOnly(c)
+adminRoutes.get('/import', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
   const body = <AdminImportView />
-  return c.html(renderHtml(c, { title: '导入 Markdown', active: 'console', body }))
+  return c.html(await renderHtml(c, { title: '导入 Markdown', active: 'console', body }))
 })
 
 adminRoutes.post('/import', async (c) => {
-  const gate = adminOnly(c)
+  const gate = await adminOnly(c)
   if (gate) return gate
   const fd = await c.req.formData()
   const results: ImportResult[] = []
@@ -187,29 +192,29 @@ adminRoutes.post('/import', async (c) => {
       results.push({ slug, title: post.title, status: 'error', message: err })
       continue
     }
-    savePost(post)
+    await savePost(post)
     results.push({ slug, title: post.title, status: 'ok', message: '' })
   }
   if (results.length === 0) {
     results.push({ slug: '-', title: '', status: 'error', message: '未收到 .md 文件' })
   }
   const body = <AdminImportView results={results} />
-  return c.html(renderHtml(c, { title: '导入 Markdown', active: 'console', body }))
+  return c.html(await renderHtml(c, { title: '导入 Markdown', active: 'console', body }))
 })
 
-adminRoutes.get('/pages', (c) => {
-  const gate = adminOnly(c)
+adminRoutes.get('/pages', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
-  const body = <AdminPagesView pages={listAllPagesMeta()} />
-  return c.html(renderHtml(c, { title: '静态页面', active: 'console', body }))
+  const body = <AdminPagesView pages={await listAllPagesMeta()} />
+  return c.html(await renderHtml(c, { title: '静态页面', active: 'console', body }))
 })
 
-adminRoutes.get('/pages/:slug/edit', (c) => {
-  const gate = adminOnly(c)
+adminRoutes.get('/pages/:slug/edit', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
   const slug = c.req.param('slug')
-  const page = getPage(slug)
-  if (!page) return c.html(renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  const page = await getPage(slug)
+  if (!page) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
   const parsed = parseMarkdown(page.source_md || '')
   const input: PageInput = {
     slug: page.slug,
@@ -218,64 +223,74 @@ adminRoutes.get('/pages/:slug/edit', (c) => {
     body: parsed.body,
   }
   const body = <AdminPageEditorView page={input} action={`/admin/pages/${page.slug}/edit`} />
-  return c.html(renderHtml(c, { title: `编辑：${page.title}`, active: 'console', body }))
+  return c.html(await renderHtml(c, { title: `编辑：${page.title}`, active: 'console', body }))
 })
 
 adminRoutes.post('/pages/:slug/edit', async (c) => {
-  const gate = adminOnly(c)
+  const gate = await adminOnly(c)
   if (gate) return gate
   const slug = c.req.param('slug')
-  if (!getPage(slug)) return c.html(renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  if (!(await getPage(slug))) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
   const input = await readPageForm(c, slug)
   const err = validatePage(input)
   if (err) {
     const body = <AdminPageEditorView page={input} action={`/admin/pages/${slug}/edit`} error={err} />
-    return c.html(renderHtml(c, { title: `编辑：${input.title}`, active: 'console', body }), 400)
+    return c.html(await renderHtml(c, { title: `编辑：${input.title}`, active: 'console', body }), 400)
   }
-  savePage(input)
+  await savePage(input)
   return c.redirect('/admin/pages', 303)
 })
 
-adminRoutes.get('/:slug/edit', (c) => {
-  const gate = adminOnly(c)
+adminRoutes.get('/:slug/edit', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
   const slug = c.req.param('slug')
-  const post = getPostSource(slug)
-  if (!post) return c.html(renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
-  const body = (
-    <AdminEditorView post={pageFromPostSource(post)} action={`/admin/${slug}/edit`} heading={`编辑：${post.title}`} slugLocked={true} />
-  )
-  return c.html(renderHtml(c, { title: `编辑：${post.title}`, active: 'console', body }))
+  const post = await getPostSource(slug)
+  if (!post) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  return renderEditor(c, {
+    post: pageFromPostSource(post),
+    action: `/admin/${slug}/edit`,
+    heading: `编辑：${post.title}`,
+    slugLocked: true,
+    title: `编辑：${post.title}`,
+  })
 })
 
 adminRoutes.post('/:slug/edit', async (c) => {
-  const gate = adminOnly(c)
+  const gate = await adminOnly(c)
   if (gate) return gate
   const slug = c.req.param('slug')
-  const existing = getPostSource(slug)
-  if (!existing) return c.html(renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  const existing = await getPostSource(slug)
+  if (!existing) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
   const post = await readPostForm(c, slug)
   const err = validatePost(post)
   if (err) {
-    const body = <AdminEditorView post={post} action={`/admin/${slug}/edit`} heading={`编辑：${post.title}`} slugLocked={true} error={err} />
-    return c.html(renderHtml(c, { title: `编辑：${post.title}`, active: 'console', body }), 400)
+    return renderEditor(c, {
+      post,
+      action: `/admin/${slug}/edit`,
+      heading: `编辑：${post.title}`,
+      slugLocked: true,
+      error: err,
+      title: `编辑：${post.title}`,
+      status: 400,
+    })
   }
-  savePost(post)
+  await savePost(post)
   return c.redirect('/admin', 303)
 })
 
-adminRoutes.post('/:slug/delete', (c) => {
-  const gate = adminOnly(c)
+adminRoutes.post('/:slug/delete', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
   const slug = c.req.param('slug')
-  if (SLUG_RE.test(slug)) deletePost(slug)
+  if (SLUG_RE.test(slug)) await deletePost(slug)
   return c.redirect('/admin', 303)
 })
 
-adminRoutes.post('/pages/:slug/delete', (c) => {
-  const gate = adminOnly(c)
+adminRoutes.post('/pages/:slug/delete', async (c) => {
+  const gate = await adminOnly(c)
   if (gate) return gate
   const slug = c.req.param('slug')
-  if (SLUG_RE.test(slug)) deletePage(slug)
+  if (SLUG_RE.test(slug)) await deletePage(slug)
   return c.redirect('/admin/pages', 303)
 })

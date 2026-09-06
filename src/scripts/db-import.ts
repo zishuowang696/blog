@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseMarkdown } from '../lib/content.ts'
-import { openDb, savePage, savePost } from '../lib/db.ts'
+import { savePage, savePost } from '../lib/db.ts'
+import { initLocalDb } from '../lib/engine/sqlite.ts'
 
 const archiveRoot = join(import.meta.dir, '..', '..', 'content', 'archive')
 const postsDir = join(archiveRoot, 'posts')
@@ -14,7 +15,7 @@ function mdFiles(dir: string): string[] {
   return readdirSync(dir).filter((f) => f.endsWith('.md')).sort()
 }
 
-openDb()
+await initLocalDb()
 
 console.log('db:import 开始（upsert，存在即更新）')
 const postFiles = mdFiles(postsDir)
@@ -27,7 +28,7 @@ for (const file of postFiles) {
     continue
   }
   const parsed = parseMarkdown(readFileSync(join(postsDir, file), 'utf8'))
-  savePost({ ...parsed, slug })
+  await savePost({ ...parsed, slug })
   console.log(`  posts/${file}`)
 }
 
@@ -38,7 +39,7 @@ for (const file of pageFiles) {
     continue
   }
   const parsed = parseMarkdown(readFileSync(join(pagesDir, file), 'utf8'))
-  savePage({ slug, title: parsed.title, date: parsed.date, body: parsed.body })
+  await savePage({ slug, title: parsed.title, date: parsed.date, body: parsed.body })
   console.log(`  pages/${file}`)
 }
 

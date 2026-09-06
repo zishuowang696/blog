@@ -1,9 +1,10 @@
-import { openDb } from '../lib/db.ts'
+import { useEngine } from '../lib/engine.ts'
+import { initLocalDb } from '../lib/engine/sqlite.ts'
 
-openDb()
-const d = openDb()
-const posts = (d.query('SELECT COUNT(*) AS n FROM posts').get() as { n: number }).n
-const pages = (d.query('SELECT COUNT(*) AS n FROM pages').get() as { n: number }).n
+await initLocalDb()
+const e = useEngine()
+const posts = Number((await e.first('SELECT COUNT(*) AS n FROM posts'))?.n ?? 0)
+const pages = Number((await e.first('SELECT COUNT(*) AS n FROM pages'))?.n ?? 0)
 console.log('db:init ok (schema ensured, foreign_keys on)')
 console.log(`  posts in DB : ${posts}`)
 console.log(`  pages in DB : ${pages}`)

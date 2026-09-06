@@ -20,10 +20,10 @@ function isHx(c: Context): boolean {
   return c.req.header('hx-request') === 'true'
 }
 
-searchRoutes.get('/', (c) => {
+searchRoutes.get('/', async (c) => {
   const q = qParam(c)
   const page = pageNum(c)
-  const list = listPosts({ q, page })
+  const list = await listPosts({ q, page })
   const moreHref =
     list.hasMore && list.items.length > 0 ? `/search?q=${encodeURIComponent(q)}&page=${page + 1}` : undefined
 
@@ -35,7 +35,7 @@ searchRoutes.get('/', (c) => {
   }
 
   const body = (
-    <SearchView q={q} posts={list.items} total={list.total} moreHref={moreHref} tags={listTags()} />
+    <SearchView q={q} posts={list.items} total={list.total} moreHref={moreHref} tags={await listTags()} />
   )
-  return c.html(renderHtml(c, { title: q ? `搜索：${q}` : '搜索', body }))
+  return c.html(await renderHtml(c, { title: q ? `搜索：${q}` : '搜索', body }))
 })

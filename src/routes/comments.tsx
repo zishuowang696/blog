@@ -11,13 +11,13 @@ function isHx(c: Context): boolean {
   return c.req.header('hx-request') === 'true'
 }
 
-function currentUser(c: Context): User | null {
+async function currentUser(c: Context): Promise<User | null> {
   return getSessionUser(c)
 }
 
-function boxResponse(c: Context, slug: string, user: User, error?: string): Response {
+async function boxResponse(c: Context, slug: string, user: User, error?: string): Promise<Response> {
   if (isHx(c)) {
-    return c.html(String(<CommentsBox postSlug={slug} comments={listComments(slug)} user={user} error={error} />))
+    return c.html(String(<CommentsBox postSlug={slug} comments={await listComments(slug)} user={user} error={error} />))
   }
   const err = error ? `?err=${encodeURIComponent(error)}` : ''
   return c.redirect(`/posts/${slug}#comments${err}`, 303)
@@ -25,7 +25,7 @@ function boxResponse(c: Context, slug: string, user: User, error?: string): Resp
 
 commentRoutes.post('/posts/:slug/comments', async (c) => {
   const slug = c.req.param('slug')
-  const user = currentUser(c)
+  const user = await currentUser(c)
   if (!user) return c.redirect(`/login?next=/posts/${encodeURIComponent(slug)}`, 303)
 
   const fd = await c.req.formData()
@@ -33,16 +33,16 @@ commentRoutes.post('/posts/:slug/comments', async (c) => {
   if (body.length === 0 || body.length > 2000) {
     return boxResponse(c, slug, user, '评论内容需在 1-2000 字之间')
   }
-  createComment(slug, user.id, body)
+  await createComment(slug, user.id, body)
   return boxResponse(c, slug, user)
 })
 
 commentRoutes.post('/comments/:id/delete', async (c) => {
-  const user = currentUser(c)
+  const user = await currentUser(c)
   if (!user) return c.redirect('/login', 303)
 
   const id = Number(c.req.param('id'))
-  const comment: Comment | null = Number.isInteger(id) ? getCommentById(id) : null
+  const comment: Comment | null = Number.isInteger(id) ? await getCommentById(id) : null
   if (!comment) {
     if (isHx(c)) return c.html('<p class="flash error">评论不存在</p>', 404)
     return c.redirect('/posts', 303)
@@ -52,9 +52,9 @@ commentRoutes.post('/comments/:id/delete', async (c) => {
     if (isHx(c)) return c.html('<p class="flash error">无权删除</p>', 403)
     return c.redirect(`/posts/${comment.post_slug}`, 303)
   }
-  deleteComment(comment.id)
+  await deleteComment(comment.id)
   if (isHx(c)) {
-    return c.html(String(<CommentsBox postSlug={comment.post_slug} comments={listComments(comment.post_slug)} user={user} />))
+    return c.html(String(<CommentsBox postSlug={comment.post_slug} comments={await listComments(comment.post_slug)} user={user} />))
   }
   return c.redirect(`/posts/${comment.post_slug}#comments`, 303)
 })
