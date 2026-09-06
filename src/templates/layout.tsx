@@ -89,15 +89,14 @@ export interface PageOpts {
   body: Child
 }
 
-export function renderHtml(c: Context, opts: PageOpts): string {
-  const user = getSessionUser(c)
-  return (
+export function renderHtml(c: Context, opts: PageOpts): Promise<string> {
+  return getSessionUser(c).then((user) =>
     '<!doctype html>\n' +
     String(
       <Layout title={opts.title} description={opts.description} active={opts.active} user={user}>
         {opts.body}
       </Layout>,
-    )
+    ),
   )
 }
 
