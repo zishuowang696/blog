@@ -16,20 +16,20 @@ export function normalizeUsername(raw: string): string {
 
 export function validateUsername(raw: string): string | null {
   const name = normalizeUsername(raw)
-  if (!/^[a-z0-9_-]{3,24}$/.test(name)) return 'Username must be 3-24 chars (lowercase letters, digits, _ or -)'
+  if (!/^[a-z0-9_-]{3,24}$/.test(name)) return 'user_format'
   return null
 }
 
 export function validatePassword(pw: string): string | null {
-  if (pw.length < 8) return 'Password must be at least 8 characters'
-  if (pw.length > 128) return 'Password too long'
+  if (pw.length < 8) return 'pw_short'
+  if (pw.length > 128) return 'pw_long'
   return null
 }
 
 export function validateEmail(raw: string): string | null {
   const email = raw.trim()
   if (email === '') return null
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Invalid email format'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'email'
   return null
 }
 

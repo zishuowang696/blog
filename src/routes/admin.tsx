@@ -14,6 +14,7 @@ import {
   savePost,
   type Post,
 } from '../lib/db.ts'
+import { resolveLang } from '../lib/locale.ts'
 import { ForbiddenView, NotFoundView, renderHtml } from '../templates/layout.tsx'
 import {
   AdminEditorView,
@@ -35,7 +36,7 @@ async function adminOnly(c: Context): Promise<Response | null> {
     return c.redirect('/login?next=' + encodeURIComponent(c.req.path), 302)
   }
   if (user.role !== 'admin') {
-    return c.html(await renderHtml(c, { title: '需要管理员权限', body: <ForbiddenView /> }), 403)
+    return c.html(await renderHtml(c, { title: '需要管理员权限', body: <ForbiddenView lang={resolveLang(c)} /> }), 403)
   }
   return null
 }
@@ -74,6 +75,9 @@ function pageFromPostSource(post: Post): PostInput {
     series: parsed.series || post.series,
     published: post.published,
     body: parsed.body,
+    title_en: post.title_en ?? '',
+    summary_en: post.summary_en ?? '',
+    body_en: post.body_en ?? '',
   }
 }
 
@@ -89,6 +93,9 @@ async function readPostForm(c: Context, slugFromPath?: string): Promise<PostInpu
     series: String(fd.get('series') ?? '').trim(),
     published: fd.get('published') === '1',
     body: String(fd.get('body') ?? ''),
+    title_en: String(fd.get('title_en') ?? '').trim(),
+    summary_en: String(fd.get('summary_en') ?? '').trim(),
+    body_en: String(fd.get('body_en') ?? ''),
   }
 }
 
@@ -214,7 +221,7 @@ adminRoutes.get('/pages/:slug/edit', async (c) => {
   if (gate) return gate
   const slug = c.req.param('slug')
   const page = await getPage(slug)
-  if (!page) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  if (!page) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView lang={resolveLang(c)} /> }), 404)
   const parsed = parseMarkdown(page.source_md || '')
   const input: PageInput = {
     slug: page.slug,
@@ -230,7 +237,7 @@ adminRoutes.post('/pages/:slug/edit', async (c) => {
   const gate = await adminOnly(c)
   if (gate) return gate
   const slug = c.req.param('slug')
-  if (!(await getPage(slug))) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  if (!(await getPage(slug))) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView lang={resolveLang(c)} /> }), 404)
   const input = await readPageForm(c, slug)
   const err = validatePage(input)
   if (err) {
@@ -246,7 +253,7 @@ adminRoutes.get('/:slug/edit', async (c) => {
   if (gate) return gate
   const slug = c.req.param('slug')
   const post = await getPostSource(slug)
-  if (!post) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  if (!post) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView lang={resolveLang(c)} /> }), 404)
   return renderEditor(c, {
     post: pageFromPostSource(post),
     action: `/admin/${slug}/edit`,
@@ -261,7 +268,7 @@ adminRoutes.post('/:slug/edit', async (c) => {
   if (gate) return gate
   const slug = c.req.param('slug')
   const existing = await getPostSource(slug)
-  if (!existing) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView /> }), 404)
+  if (!existing) return c.html(await renderHtml(c, { title: '未找到', body: <NotFoundView lang={resolveLang(c)} /> }), 404)
   const post = await readPostForm(c, slug)
   const err = validatePost(post)
   if (err) {

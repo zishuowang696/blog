@@ -10,6 +10,9 @@ export interface PostInput {
   series: string
   published: boolean
   body: string
+  title_en?: string
+  summary_en?: string
+  body_en?: string
 }
 
 export interface PageInput {

@@ -16,6 +16,10 @@ export interface Post {
   created_at: string
   updated_at: string
   tags: string[]
+  title_en?: string
+  summary_en?: string
+  body_en?: string
+  content_html_en?: string
 }
 
 export interface Page {
@@ -65,6 +69,10 @@ interface PostRow {
   published: number
   created_at: string
   updated_at: string
+  title_en: string
+  summary_en: string
+  body_en: string
+  content_html_en: string
   tags: string | null
 }
 
@@ -96,6 +104,10 @@ function postFrom(r: PostRow): Post {
     created_at: r.created_at,
     updated_at: r.updated_at,
     tags: r.tags ? r.tags.split(',').filter(Boolean) : [],
+    title_en: r.title_en,
+    summary_en: r.summary_en,
+    body_en: r.body_en,
+    content_html_en: r.content_html_en,
   }
 }
 
@@ -116,10 +128,25 @@ function rowTags(): string {
   return `(SELECT GROUP_CONCAT(t.name, ',') FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id = posts.id) AS tags`
 }
 
-function postSelectSql(): string {
-  return `SELECT posts.id, posts.slug, posts.title, posts.summary, posts.content_html, posts.source_md,
-                 posts.series, posts.published, posts.created_at, posts.updated_at,
-                 ${rowTags()} FROM posts`
+type Lang = 'zh' | 'en'
+
+function pickField(zhCol: string, enCol: string, lang: Lang): string {
+  if (lang !== 'en') return `posts.${zhCol}`
+  return `CASE WHEN posts.${enCol} IS NOT NULL AND posts.${enCol} <> '' THEN posts.${enCol} ELSE posts.${zhCol} END`
+}
+
+function canonicalSelect(): string {
+  return `SELECT posts.id, posts.slug, posts.title, posts.title_en, posts.summary, posts.summary_en,
+                 posts.content_html, posts.content_html_en, posts.source_md, posts.body_en,
+                 posts.series, posts.published, posts.created_at, posts.updated_at, ${rowTags()} FROM posts`
+}
+
+function localizedSelect(lang: Lang): string {
+  return `SELECT posts.id, posts.slug, ${pickField('title', 'title_en', lang)} AS title,
+                 ${pickField('summary', 'summary_en', lang)} AS summary,
+                 ${pickField('content_html', 'content_html_en', lang)} AS content_html,
+                 posts.source_md, posts.body_en, posts.series, posts.published, posts.created_at, posts.updated_at,
+                 posts.title_en, posts.summary_en, posts.content_html_en, ${rowTags()} FROM posts`
 }
 
 function getPostByWhere(sql: string, params: (string | number)[]): Promise<Post | null> {
@@ -128,16 +155,12 @@ function getPostByWhere(sql: string, params: (string | number)[]): Promise<Post 
     .then((r) => (r ? postFrom(r as unknown as PostRow) : null))
 }
 
-export async function getPost(slug: string): Promise<Post | null> {
-  return getPostByWhere(`${postSelectSql()} WHERE posts.slug = ? AND posts.published = 1`, [slug])
+export async function getPost(slug: string, lang: Lang = 'en'): Promise<Post | null> {
+  return getPostByWhere(`${localizedSelect(lang)} WHERE posts.slug = ? AND posts.published = 1`, [slug])
 }
 
-async function getAnyPost(slug: string): Promise<Post | null> {
-  return getPostByWhere(`${postSelectSql()} WHERE posts.slug = ?`, [slug])
-}
-
-export function getPostSource(slug: string): Promise<Post | null> {
-  return getAnyPost(slug)
+export async function getPostSource(slug: string): Promise<Post | null> {
+  return getPostByWhere(`${canonicalSelect()} WHERE posts.slug = ?`, [slug])
 }
 
 export async function savePost(input: PostInput): Promise<Post> {
@@ -146,24 +169,34 @@ export async function savePost(input: PostInput): Promise<Post> {
   const sourceMd = renderPostSource(input)
   const created = input.date || nowIso().slice(0, 10)
   const updated = nowIso()
-  const existing = await e.first('SELECT id FROM posts WHERE slug = ?', [input.slug])
+  const prev = await e.first('SELECT title_en, summary_en, body_en, content_html_en FROM posts WHERE slug = ?', [input.slug])
+  const keep = (newVal: string | undefined, oldVal: string | null | undefined): string =>
+    newVal !== undefined ? newVal : (oldVal ?? '')
+  const titleEn = keep(input.title_en, prev?.title_en as string | undefined)
+  const summaryEn = keep(input.summary_en, prev?.summary_en as string | undefined)
+  const bodyEn = keep(input.body_en, prev?.body_en as string | undefined)
+  const contentHtmlEnFinal = input.body_en !== undefined
+    ? (input.body_en ? renderMarkdown(input.body_en) : '')
+    : (prev?.content_html_en as string ?? '')
+  const existing = prev !== null && prev !== undefined
+  const enSql = `title_en = ?, summary_en = ?, body_en = ?, content_html_en = ?`
   if (existing) {
     await e.run(
-      `UPDATE posts SET title = ?, summary = ?, content_html = ?, source_md = ?, series = ?, published = ?, created_at = ?, updated_at = ? WHERE slug = ?`,
-      [input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated, input.slug],
+      `UPDATE posts SET title = ?, summary = ?, content_html = ?, source_md = ?, series = ?, published = ?, created_at = ?, updated_at = ?, ${enSql} WHERE slug = ?`,
+      [input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated, titleEn, summaryEn, bodyEn, contentHtmlEnFinal, input.slug],
     )
   } else {
     await e.run(
-      `INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [input.slug, input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated],
+      `INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [input.slug, input.title, input.summary, contentHtml, sourceMd, input.series, input.published ? 1 : 0, created, updated, titleEn, summaryEn, bodyEn, contentHtmlEnFinal],
     )
   }
   const row = await e.first('SELECT id FROM posts WHERE slug = ?', [input.slug])
   if (row) {
     await syncTags(Number(row.id), input.tags)
   }
-  return (await getAnyPost(input.slug))!
+  return (await getPostSource(input.slug))!
 }
 
 export async function deletePost(slug: string): Promise<boolean> {
@@ -237,8 +270,9 @@ export async function listAllPagesMeta(): Promise<PageMeta[]> {
   })
 }
 
-export async function listPosts(opts: { page?: number; tag?: string; q?: string } = {}): Promise<PostList> {
+export async function listPosts(opts: { page?: number; tag?: string; q?: string; lang?: Lang } = {}): Promise<PostList> {
   const e = useEngine()
+  const lang = opts.lang ?? 'en'
   const page = Math.max(1, opts.page ?? 1)
   const limit = POSTS_PER_PAGE
   const offset = (page - 1) * limit
@@ -251,9 +285,12 @@ export async function listPosts(opts: { page?: number; tag?: string; q?: string 
     args.push(opts.tag)
   }
   if (opts.q) {
-    where.push(`(posts.title LIKE ? OR posts.summary LIKE ? OR posts.content_html LIKE ? OR posts.series LIKE ?)`)
+    where.push(
+      `(posts.title LIKE ? OR posts.summary LIKE ? OR posts.content_html LIKE ? OR posts.series LIKE ?
+        OR posts.title_en LIKE ? OR posts.summary_en LIKE ? OR posts.content_html_en LIKE ?)`,
+    )
     const like = `%${opts.q}%`
-    args.push(like, like, like, like)
+    args.push(like, like, like, like, like, like, like)
   }
   const whereSql = `WHERE ${where.join(' AND ')}`
 
@@ -261,7 +298,7 @@ export async function listPosts(opts: { page?: number; tag?: string; q?: string 
   const total = Number(totalRow?.n ?? 0)
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
-  const rows = await e.all(`${postSelectSql()} ${whereSql} ORDER BY posts.created_at DESC, posts.id DESC LIMIT ? OFFSET ?`, [...args, limit, offset])
+  const rows = await e.all(`${localizedSelect(lang)} ${whereSql} ORDER BY posts.created_at DESC, posts.id DESC LIMIT ? OFFSET ?`, [...args, limit, offset])
   return {
     items: rows.map((r) => postFrom(r as unknown as PostRow)),
     hasMore: page < totalPages,
@@ -292,17 +329,17 @@ export async function listTags(): Promise<TagCount[]> {
   return rows as unknown as TagCount[]
 }
 
-export async function getAdjacentPosts(slug: string): Promise<{ older: Post | null; newer: Post | null }> {
-  const current = await getPost(slug)
+export async function getAdjacentPosts(slug: string, lang: Lang = 'en'): Promise<{ older: Post | null; newer: Post | null }> {
+  const current = await getPost(slug, lang)
   if (!current) return { older: null, newer: null }
   const e = useEngine()
   const older = await e.first(
-    `${postSelectSql()} WHERE posts.published = 1 AND (posts.created_at < ? OR (posts.created_at = ? AND posts.id < ?))
+    `${localizedSelect(lang)} WHERE posts.published = 1 AND (posts.created_at < ? OR (posts.created_at = ? AND posts.id < ?))
      ORDER BY posts.created_at DESC, posts.id DESC LIMIT 1`,
     [current.created_at, current.created_at, current.id],
   )
   const newer = await e.first(
-    `${postSelectSql()} WHERE posts.published = 1 AND (posts.created_at > ? OR (posts.created_at = ? AND posts.id > ?))
+    `${localizedSelect(lang)} WHERE posts.published = 1 AND (posts.created_at > ? OR (posts.created_at = ? AND posts.id > ?))
      ORDER BY posts.created_at ASC, posts.id ASC LIMIT 1`,
     [current.created_at, current.created_at, current.id],
   )
