@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
 import { listPosts, listTags } from '../lib/db.ts'
-import { PostList } from '../templates/components.tsx'
+import { ListChunk } from '../templates/components.tsx'
 import { renderHtml } from '../templates/layout.tsx'
 import { TagsIndexView, TagPostsView } from '../views/tags.tsx'
 
@@ -18,7 +18,7 @@ export const tagRoutes = new Hono()
 
 tagRoutes.get('/', async (c) => {
   const body = <TagsIndexView tags={await listTags()} />
-  return c.html(await renderHtml(c, { title: '标签', active: 'tags', body }))
+  return c.html(await renderHtml(c, { title: 'Tags', active: 'tags', body }))
 })
 
 tagRoutes.get('/:tag', async (c) => {
@@ -28,9 +28,9 @@ tagRoutes.get('/:tag', async (c) => {
   const moreUrl = list.hasMore ? `/tags/${encodeURIComponent(tag)}?page=${page + 1}` : undefined
 
   if (isHx(c)) {
-    return c.html(String(<PostList posts={list.items} moreUrl={moreUrl} />))
+    return c.html(String(<ListChunk posts={list.items} moreUrl={moreUrl} />))
   }
 
   const body = <TagPostsView tag={tag} posts={list.items} moreUrl={moreUrl} total={list.total} />
-  return c.html(await renderHtml(c, { title: `标签：${tag}`, active: 'tags', body }))
+  return c.html(await renderHtml(c, { title: `Tag: ${tag}`, active: 'tags', body }))
 })

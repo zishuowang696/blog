@@ -37,5 +37,5 @@ searchRoutes.get('/', async (c) => {
   const body = (
     <SearchView q={q} posts={list.items} total={list.total} moreHref={moreHref} tags={await listTags()} />
   )
-  return c.html(await renderHtml(c, { title: q ? `搜索：${q}` : '搜索', body }))
+  return c.html(await renderHtml(c, { title: q ? `Search: ${q}` : 'Search', body }))
 })

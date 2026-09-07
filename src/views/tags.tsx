@@ -5,8 +5,8 @@ export function TagsIndexView({ tags }: { tags: TagCount[] }) {
   return (
     <>
       <section class="page-head">
-        <h1>标签</h1>
-        <p class="muted">按主题归档：OpenWrt / Yocto / Jetson / AI 网关…</p>
+        <h1>Tags</h1>
+        <p class="muted">Grouped by topic: OpenWrt / Yocto / Jetson / AI gateway…</p>
       </section>
       <section>
         <TagCloud tags={tags} />
@@ -32,7 +32,7 @@ export function TagPostsView({
         <h1>
           <span class="tag">{tag}</span>
         </h1>
-        <p class="muted">共 {total} 篇</p>
+        <p class="muted">{total} posts</p>
       </section>
       <section>
         <PostList posts={posts} moreUrl={moreUrl} />
