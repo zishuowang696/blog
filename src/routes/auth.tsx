@@ -35,9 +35,9 @@ async function finishLogin(c: Context, user: User, nextRaw: string | null) {
 }
 
 authRoutes.get('/login', async (c) => {
-  const error = c.req.query('err') ? '登录失败，请检查用户名或密码' : undefined
+  const error = c.req.query('err') ? 'Log in failed. Check your username and password.' : undefined
   const body = <AuthView mode="login" error={error} next={c.req.query('next') ?? undefined} />
-  return c.html(await renderHtml(c, { title: '登录', body }))
+  return c.html(await renderHtml(c, { title: 'Log in', body }))
 })
 
 authRoutes.post('/login', async (c) => {
@@ -49,15 +49,15 @@ authRoutes.post('/login', async (c) => {
   const user = username ? await getUserByUsername(username) : null
   const ok = user !== null && (await verifyPassword(password, user.password_hash))
   if (!ok || !user) {
-    const body = <AuthView mode="login" error="用户名或密码不正确" next={safeNext(next)} />
-    return c.html(await renderHtml(c, { title: '登录', body }), 400)
+    const body = <AuthView mode="login" error="Incorrect username or password" next={safeNext(next)} />
+    return c.html(await renderHtml(c, { title: 'Log in', body }), 400)
   }
   return finishLogin(c, user, next)
 })
 
 authRoutes.get('/register', async (c) => {
   const body = <AuthView mode="register" next={c.req.query('next') ?? undefined} />
-  return c.html(await renderHtml(c, { title: '注册', body }))
+  return c.html(await renderHtml(c, { title: 'Sign up', body }))
 })
 
 authRoutes.post('/register', async (c) => {
@@ -74,11 +74,11 @@ authRoutes.post('/register', async (c) => {
   const username = normalizeUsername(rawUsername)
 
   if (!error && username && (await getUserByUsername(username))) {
-    error = '该用户名已被注册'
+    error = 'That username is already taken'
   }
   if (error) {
     const body = <AuthView mode="register" error={error} next={safeNext(next)} />
-    return c.html(await renderHtml(c, { title: '注册', body }), 400)
+    return c.html(await renderHtml(c, { title: 'Sign up', body }), 400)
   }
 
   const passwordHash = await hashPassword(password)

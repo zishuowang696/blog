@@ -25,9 +25,9 @@ export function SearchView({
       role="search"
       {...{ 'hx-get': '/search', 'hx-target': '#search-results', 'hx-swap': 'outerHTML', 'hx-trigger': 'input changed delay:350ms, search, submit' }}
     >
-      <input type="search" name="q" value={q} placeholder="搜索文章…" aria-label="搜索" autofocus />
+      <input type="search" name="q" value={q} placeholder="Search posts…" aria-label="Search" autofocus />
       <button class="btn" type="submit">
-        搜索
+        Search
       </button>
     </form>
   )
@@ -36,7 +36,7 @@ export function SearchView({
   ) : (
     <div id="search-results">
       <section>
-        <p class="muted">支持对标题、摘要、系列与正文全文检索。</p>
+        <p class="muted">Full-text search across titles, summaries, series and content.</p>
         <TagCloud tags={tags} />
       </section>
     </div>
@@ -45,7 +45,7 @@ export function SearchView({
   return (
     <>
       <section class="page-head">
-        <h1>搜索</h1>
+        <h1>Search</h1>
       </section>
       {form}
       {results}

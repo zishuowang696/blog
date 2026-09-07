@@ -30,20 +30,20 @@ export function PostView({
       <article class="post">
         <header class="post-head">
           <p class="crumbs">
-            <a href="/">← 全部文章</a>
+            <a href="/">← All posts</a>
           </p>
           <h1>{post.title}</h1>
           <div class="post-meta">
             <time datetime={post.created_at}>{fmtDate(post.created_at)}</time>
-            {post.series ? <span class="badge">系列：{post.series}</span> : null}
+            {post.series ? <span class="badge">Series: {post.series}</span> : null}
             <TagLinks tags={post.tags} />
           </div>
         </header>
         <div class="markdown-body" dangerouslySetInnerHTML={{ __html: post.content_html }} />
         <footer class="post-foot">
           <nav class="pager neighbors">
-            <Neighbor label="上一篇" post={older} />
-            <Neighbor label="下一篇" post={newer} />
+            <Neighbor label="Older" post={older} />
+            <Neighbor label="Newer" post={newer} />
           </nav>
         </footer>
       </article>
