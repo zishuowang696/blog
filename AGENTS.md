@@ -72,7 +72,8 @@ blog/
 │   ├── worker.ts          # CF Workers 入口（assets + D1 + vars 注入）
 │   └── scripts/            # db-init.ts / db-import.ts / admin-promote.ts / gen-schema.ts / d1-seed.ts
 ├── content/
-│   └── archive/            # 种子 md 存档（posts/ 与 pages/），仅作 db:import 源，日常不再读写
+│   ├── archive/            # 种子 md 存档（posts/ 与 pages/），仅作 db:import 源，日常不再读写
+│   └── en/                 # 英文版文章正文（seed-en 灌入 posts 的 *_en 列）
 ├── db/
 │   ├── schema.sql          # 启动/init 时整体 exec（幂等，CREATE IF NOT EXISTS）
 │   └── blog.sqlite         # 运行时生成，勿提交
