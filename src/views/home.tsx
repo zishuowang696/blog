@@ -18,25 +18,25 @@ export function HomeView({
   return (
     <>
       <section class="hero">
-        <h1>嵌入式学习与边缘 AI 网关</h1>
+        <h1>Embedded Learning & Edge AI Gateway</h1>
         <p class="muted">{SITE_DESC}</p>
       </section>
       <form class="searchbar" action="/search" method="get" role="search">
-        <input type="search" name="q" placeholder="搜索文章…（例如 menuconfig / recipe / TensorRT）" aria-label="搜索" />
+        <input type="search" name="q" placeholder="Search posts… (e.g. menuconfig / recipe / TensorRT)" aria-label="Search" />
         <button class="btn" type="submit">
-          搜索
+          Search
         </button>
       </form>
       <section class="cards-wrap">
         <PostList posts={posts} moreUrl={moreUrl} />
         {page > 1 ? (
           <p class="muted page-info">
-            第 {page} 页（每页 {postsPerPage} 篇）
+            Page {page} ({postsPerPage} posts per page)
           </p>
         ) : null}
       </section>
       <section class="topics">
-        <h2>标签</h2>
+        <h2>Tags</h2>
         <TagCloud tags={tags} />
       </section>
     </>

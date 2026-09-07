@@ -20,7 +20,7 @@ export function setEngine(e: Engine): void {
 }
 
 export function useEngine(): Engine {
-  if (!engine) throw new Error('storage engine 未初始化：请先调用 initLocalDb() 或 initD1Db()')
+  if (!engine) throw new Error('storage engine not initialized: call initLocalDb() or initD1Db() first')
   return engine
 }
 

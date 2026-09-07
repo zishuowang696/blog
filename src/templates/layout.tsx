@@ -10,8 +10,8 @@ function AccountArea({ user }: { user: User | null }) {
   if (!user) {
     return (
       <span class="nav-account">
-        <a href="/login">登录</a>
-        <a href="/register">注册</a>
+        <a href="/login">Log in</a>
+        <a href="/register">Sign up</a>
       </span>
     )
   }
@@ -20,10 +20,10 @@ function AccountArea({ user }: { user: User | null }) {
       <span class="whoami" title={user.username}>
         {user.display_name}
       </span>
-      {isAdmin(user) ? <a href="/admin">控制台</a> : null}
+      {isAdmin(user) ? <a href="/admin">Console</a> : null}
       <form class="inline" action="/logout" method="post">
         <button class="linkish" type="submit">
-          退出
+          Log out
         </button>
       </form>
     </span>
@@ -63,9 +63,9 @@ export function Layout({ title, description, active, user, children }: LayoutPro
               {SITE_NAME}
             </a>
             <nav class="nav-links">
-              {nav('home', '文章', '/')}
-              {nav('tags', '标签', '/tags')}
-              {nav('about', '关于', '/about')}
+              {nav('home', 'Posts', '/')}
+              {nav('tags', 'Tags', '/tags')}
+              {nav('about', 'About', '/about')}
               <AccountArea user={user} />
             </nav>
           </div>
@@ -104,9 +104,9 @@ export function NotFoundView() {
   return (
     <section class="nf">
       <h1>404</h1>
-      <p>页面不存在或文章尚未发布。</p>
+      <p>Page not found, or the article is not published yet.</p>
       <a class="btn" href="/">
-        返回首页
+        Back to home
       </a>
     </section>
   )
@@ -116,9 +116,9 @@ export function ForbiddenView() {
   return (
     <section class="nf">
       <h1>403</h1>
-      <p>需要管理员权限。</p>
+      <p>Admin access required.</p>
       <a class="btn" href="/">
-        返回首页
+        Back to home
       </a>
     </section>
   )

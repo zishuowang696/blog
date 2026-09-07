@@ -21,7 +21,7 @@ function PostCard({ post }: { post: Post }) {
       <header class="card-head">
         <time datetime={post.created_at}>{fmtDate(post.created_at)}</time>
         {post.series ? (
-          <span class="badge" title={`系列：${post.series}`}>
+          <span class="badge" title={`Series: ${post.series}`}>
             {post.series}
           </span>
         ) : null}
@@ -41,25 +41,43 @@ export function PostGrid({ posts }: { posts: Post[] }) {
   return <>{posts.map((p) => <PostCard key={p.id} post={p} />)}</>
 }
 
-const loadMoreHx = (url: string) => ({ 'hx-get': url, 'hx-target': '#post-list', 'hx-swap': 'outerHTML' })
+const loadMoreHx = (url: string) => ({
+  'hx-get': url,
+  'hx-target': '#post-list',
+  'hx-swap': 'beforeend',
+  'hx-on::after-request': "this.closest('.loadmore').remove()",
+})
+
+function LoadMore({ url }: { url: string }) {
+  return (
+    <div class="loadmore">
+      <a class="btn" href={url} {...loadMoreHx(url)}>
+        Load more
+      </a>
+    </div>
+  )
+}
 
 export function PostList({ posts, moreUrl }: { posts: Post[]; moreUrl?: string }) {
   return (
     <div id="post-list">
       <PostGrid posts={posts} />
-      {moreUrl ? (
-        <div class="loadmore">
-          <a class="btn" href={moreUrl} {...loadMoreHx(moreUrl)}>
-            加载更多
-          </a>
-        </div>
-      ) : null}
+      {moreUrl ? <LoadMore url={moreUrl} /> : null}
     </div>
   )
 }
 
+export function ListChunk({ posts, moreUrl }: { posts: Post[]; moreUrl?: string }) {
+  return (
+    <>
+      <PostGrid posts={posts} />
+      {moreUrl ? <LoadMore url={moreUrl} /> : null}
+    </>
+  )
+}
+
 export function TagCloud({ tags }: { tags: TagCount[] }) {
-  if (tags.length === 0) return <p class="empty">暂无标签</p>
+  if (tags.length === 0) return <p class="empty">No tags yet</p>
   return (
     <p class="tag-cloud">
       {tags.map((t) => (
@@ -82,7 +100,7 @@ function CommentItem({ comment, user }: { comment: Comment; user: User | null })
     'hx-post': `/comments/${comment.id}/delete`,
     'hx-target': '#comments-box',
     'hx-swap': 'outerHTML',
-    'hx-confirm': '确认删除这条评论？',
+    'hx-confirm': 'Delete this comment?',
   }
   return (
     <li class="comment" id={`comment-${comment.id}`}>
@@ -92,7 +110,7 @@ function CommentItem({ comment, user }: { comment: Comment; user: User | null })
         {canDelete ? (
           <form class="inline" action={`/comments/${comment.id}/delete`} method="post" {...deleteHx}>
             <button class="linkish danger" type="submit">
-              删除
+              Delete
             </button>
           </form>
         ) : null}
@@ -121,11 +139,11 @@ export function CommentsBox({
   return (
     <section class="comments" id="comments-box">
       <h2 class="section-title">
-        评论 <span class="count">{comments.length}</span>
+        Comments <span class="count">{comments.length}</span>
       </h2>
       {error ? <p class="flash error">{error}</p> : null}
       {comments.length === 0 ? (
-        <p class="empty">还没有评论，来抢沙发～</p>
+        <p class="empty">No comments yet — be the first!</p>
       ) : (
         <ul class="comments-list">
           {comments.map((c) => (
@@ -136,22 +154,21 @@ export function CommentsBox({
       {user ? (
         <form class="comment-form" action={`/posts/${postSlug}/comments`} method="post" {...commentHx}>
           <label class="visually-hidden" htmlFor="comment-body">
-            评论内容
+            Comment
           </label>
-          <textarea id="comment-body" name="body" rows={4} minlength={1} maxlength={2000} placeholder="分享你的看法（以纯文本展示）" required>
+          <textarea id="comment-body" name="body" rows={4} minlength={1} maxlength={2000} placeholder="Share your thoughts (shown as plain text)" required>
             {''}
           </textarea>
           <div class="form-actions">
-            <span class="muted">以 {user.display_name} 的身份发表</span>
+            <span class="muted">Comment as {user.display_name}</span>
             <button class="btn" type="submit">
-              发表评论
+              Post comment
             </button>
           </div>
         </form>
       ) : (
         <p class="auth-hint">
-          <a href={`/login?next=/posts/${postSlug}`}>登录</a>
-          后即可参与评论
+          <a href={`/login?next=/posts/${postSlug}`}>Log in</a> to comment
         </p>
       )}
     </section>
@@ -173,7 +190,7 @@ export function SearchResults({
 }) {
   const body =
     posts.length === 0 ? (
-      <p class="empty">未找到与关键词匹配的文章</p>
+      <p class="empty">No posts match your search.</p>
     ) : (
       <PostGrid posts={posts} />
     )
@@ -183,19 +200,19 @@ export function SearchResults({
         {q ? (
           <>
             <p class="muted">
-              “{q}” 共 {total} 条结果
+              {total} results for “{q}”
             </p>
             {body}
             {moreHref ? (
               <p class="muted more-link">
                 <a class="btn ghost" href={moreHref}>
-                  还有 {total - posts.length} 篇，下一页 →
+                  {total - posts.length} more →
                 </a>
               </p>
             ) : null}
           </>
         ) : (
-          placeholder ?? <p class="empty">输入关键词开始搜索</p>
+          placeholder ?? <p class="empty">Type a keyword to start searching</p>
         )}
       </section>
     </div>

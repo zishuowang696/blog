@@ -31,7 +31,7 @@ commentRoutes.post('/posts/:slug/comments', async (c) => {
   const fd = await c.req.formData()
   const body = String(fd.get('body') ?? '').trim()
   if (body.length === 0 || body.length > 2000) {
-    return boxResponse(c, slug, user, '评论内容需在 1-2000 字之间')
+    return boxResponse(c, slug, user, 'Comment must be between 1 and 2000 characters')
   }
   await createComment(slug, user.id, body)
   return boxResponse(c, slug, user)
@@ -44,12 +44,12 @@ commentRoutes.post('/comments/:id/delete', async (c) => {
   const id = Number(c.req.param('id'))
   const comment: Comment | null = Number.isInteger(id) ? await getCommentById(id) : null
   if (!comment) {
-    if (isHx(c)) return c.html('<p class="flash error">评论不存在</p>', 404)
+    if (isHx(c)) return c.html('<p class="flash error">Comment not found</p>', 404)
     return c.redirect('/posts', 303)
   }
   const canDelete = user.role === 'admin' || user.id === comment.user_id
   if (!canDelete) {
-    if (isHx(c)) return c.html('<p class="flash error">无权删除</p>', 403)
+    if (isHx(c)) return c.html('<p class="flash error">Not allowed to delete</p>', 403)
     return c.redirect(`/posts/${comment.post_slug}`, 303)
   }
   await deleteComment(comment.id)
