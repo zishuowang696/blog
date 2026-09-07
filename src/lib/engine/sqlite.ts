@@ -40,6 +40,10 @@ export async function initLocalDb(): Promise<void> {
   handle.exec(SCHEMA_SQL)
   ensureColumn('posts', 'source_md', "TEXT NOT NULL DEFAULT ''")
   ensureColumn('pages', 'source_md', "TEXT NOT NULL DEFAULT ''")
+  ensureColumn('posts', 'title_en', "TEXT NOT NULL DEFAULT ''")
+  ensureColumn('posts', 'summary_en', "TEXT NOT NULL DEFAULT ''")
+  ensureColumn('posts', 'body_en', "TEXT NOT NULL DEFAULT ''")
+  ensureColumn('posts', 'content_html_en', "TEXT NOT NULL DEFAULT ''")
 
   const engine: Engine = {
     all(sql, params = []) {

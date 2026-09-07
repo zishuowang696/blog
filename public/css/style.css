@@ -272,3 +272,8 @@ button.linkish.danger:hover { color: #ff6b6b; }
 .editor-card form label.check input { width: auto; }
 .admin-preview { flex: 0 1 420px; min-width: 320px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 18px 18px; }
 .admin-preview h3 { font-size: 0.95rem; color: var(--fg-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+.lang-switch { margin-right: 4px; }
+.lang-switch a { color: var(--fg-muted); font-size: 0.85rem; border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; }
+.lang-switch a:hover { color: var(--fg); border-color: var(--accent-dim); text-decoration: none; }
+.editor-card h2.en-block { font-size: 1.02rem; border-top: 1px dashed var(--border); padding-top: 16px; margin: 6px 0 0; }

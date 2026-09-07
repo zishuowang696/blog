@@ -133,6 +133,21 @@ export function AdminEditorView({
               {post.body}
             </textarea>
           </label>
+          <h2 class="en-block">English version（可选；留空则访问者回退中文）</h2>
+          <label>
+            English title
+            <input type="text" name="title_en" value={post.title_en ?? ''} maxlength={160} />
+          </label>
+          <label>
+            English summary
+            <input type="text" name="summary_en" value={post.summary_en ?? ''} maxlength={300} />
+          </label>
+          <label>
+            English body (Markdown)
+            <textarea name="body_en" rows={18}>
+              {post.body_en ?? ''}
+            </textarea>
+          </label>
           <label class="check">
             <input type="checkbox" name="published" value="1" checked={post.published} /> 发布（不勾选为草稿，前台不可见）
           </label>

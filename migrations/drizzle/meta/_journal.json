@@ -8,6 +8,13 @@
       "when": 1788702463680,
       "tag": "0000_freezing_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788742313559,
+      "tag": "0001_high_wind_dancer",
+      "breakpoints": true
     }
   ]
 }
