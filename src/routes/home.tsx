@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
 import { listPosts, listTags, POSTS_PER_PAGE } from '../lib/db.ts'
+import { resolveLang, t } from '../lib/locale.ts'
 import { ListChunk } from '../templates/components.tsx'
 import { renderHtml } from '../templates/layout.tsx'
 import { HomeView } from '../views/home.tsx'
@@ -17,14 +18,15 @@ function isHx(c: Context): boolean {
 export const homeRoutes = new Hono()
 
 homeRoutes.get('/', async (c) => {
+  const lang = resolveLang(c)
   const page = pageParam(c)
-  const list = await listPosts({ page })
+  const list = await listPosts({ page, lang })
   const moreUrl = list.hasMore ? `/?page=${page + 1}` : undefined
 
   if (isHx(c)) {
-    return c.html(String(<ListChunk posts={list.items} moreUrl={moreUrl} />))
+    return c.html(String(<ListChunk posts={list.items} moreUrl={moreUrl} lang={lang} />))
   }
 
-  const body = <HomeView posts={list.items} moreUrl={moreUrl} page={page} tags={await listTags()} postsPerPage={POSTS_PER_PAGE} />
-  return c.html(await renderHtml(c, { title: 'Home', active: 'home', body }))
+  const body = <HomeView posts={list.items} moreUrl={moreUrl} page={page} tags={await listTags()} postsPerPage={POSTS_PER_PAGE} lang={lang} />
+  return c.html(await renderHtml(c, { title: t(lang, 'nav.posts'), active: 'home', body }))
 })

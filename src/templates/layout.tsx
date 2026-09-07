@@ -2,16 +2,17 @@ import type { Context } from 'hono'
 import type { Child } from 'hono/jsx'
 import type { User } from '../lib/db.ts'
 import { getSessionUser, isAdmin } from '../lib/auth.ts'
+import { resolveLang, t, type Lang } from '../lib/locale.ts'
 import { SITE_DESC, SITE_NAME } from './util.ts'
 
 export type NavKey = 'home' | 'tags' | 'about' | 'console' | ''
 
-function AccountArea({ user }: { user: User | null }) {
+function AccountArea({ user, lang }: { user: User | null; lang: Lang }) {
   if (!user) {
     return (
       <span class="nav-account">
-        <a href="/login">Log in</a>
-        <a href="/register">Sign up</a>
+        <a href="/login">{t(lang, 'acct.login')}</a>
+        <a href="/register">{t(lang, 'acct.signup')}</a>
       </span>
     )
   }
@@ -20,10 +21,10 @@ function AccountArea({ user }: { user: User | null }) {
       <span class="whoami" title={user.username}>
         {user.display_name}
       </span>
-      {isAdmin(user) ? <a href="/admin">Console</a> : null}
+      {isAdmin(user) ? <a href="/admin">{t(lang, 'nav.console')}</a> : null}
       <form class="inline" action="/logout" method="post">
         <button class="linkish" type="submit">
-          Log out
+          {t(lang, 'acct.logout')}
         </button>
       </form>
     </span>
@@ -35,18 +36,22 @@ interface LayoutProps {
   description?: string
   active?: NavKey
   user: User | null
+  lang: Lang
+  path: string
   children?: Child
 }
 
-export function Layout({ title, description, active, user, children }: LayoutProps) {
+export function Layout({ title, description, active, user, lang, path, children }: LayoutProps) {
   const docTitle = title === SITE_NAME ? SITE_NAME : `${title} · ${SITE_NAME}`
   const nav = (key: NavKey, label: string, href: string) => (
     <a href={href} aria-current={active === key ? 'page' : undefined}>
       {label}
     </a>
   )
+  const switchLabel = t(lang, lang === 'zh' ? 'acct.to_en' : 'acct.to_zh')
+  const switchHref = `/lang?lang=${lang === 'zh' ? 'en' : 'zh'}&next=${encodeURIComponent(path)}`
   return (
-    <html lang="zh-CN">
+    <html lang={lang}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -63,10 +68,13 @@ export function Layout({ title, description, active, user, children }: LayoutPro
               {SITE_NAME}
             </a>
             <nav class="nav-links">
-              {nav('home', 'Posts', '/')}
-              {nav('tags', 'Tags', '/tags')}
-              {nav('about', 'About', '/about')}
-              <AccountArea user={user} />
+              {nav('home', t(lang, 'nav.posts'), '/')}
+              {nav('tags', t(lang, 'nav.tags'), '/tags')}
+              {nav('about', t(lang, 'nav.about'), '/about')}
+              <span class="lang-switch">
+                <a href={switchHref}>{switchLabel}</a>
+              </span>
+              <AccountArea user={user} lang={lang} />
             </nav>
           </div>
         </header>
@@ -90,35 +98,37 @@ export interface PageOpts {
 }
 
 export function renderHtml(c: Context, opts: PageOpts): Promise<string> {
+  const lang = resolveLang(c)
+  const path = new URL(c.req.url).pathname
   return getSessionUser(c).then((user) =>
     '<!doctype html>\n' +
     String(
-      <Layout title={opts.title} description={opts.description} active={opts.active} user={user}>
+      <Layout title={opts.title} description={opts.description} active={opts.active} user={user} lang={lang} path={path}>
         {opts.body}
       </Layout>,
     ),
   )
 }
 
-export function NotFoundView() {
+export function NotFoundView({ lang }: { lang: Lang }) {
   return (
     <section class="nf">
       <h1>404</h1>
-      <p>Page not found, or the article is not published yet.</p>
+      <p>{t(lang, 'nf.msg')}</p>
       <a class="btn" href="/">
-        Back to home
+        {t(lang, 'ui.back_home')}
       </a>
     </section>
   )
 }
 
-export function ForbiddenView() {
+export function ForbiddenView({ lang }: { lang: Lang }) {
   return (
     <section class="nf">
       <h1>403</h1>
-      <p>Admin access required.</p>
+      <p>{t(lang, 'nf.forbidden')}</p>
       <a class="btn" href="/">
-        Back to home
+        {t(lang, 'ui.back_home')}
       </a>
     </section>
   )

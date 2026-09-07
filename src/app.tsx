@@ -4,11 +4,13 @@ import { adminRoutes } from './routes/admin.tsx'
 import { authRoutes } from './routes/auth.tsx'
 import { commentRoutes } from './routes/comments.tsx'
 import { homeRoutes } from './routes/home.tsx'
+import { langRoutes } from './routes/lang.tsx'
 import { postRoutes } from './routes/posts.tsx'
 import { tagRoutes } from './routes/tags.tsx'
 import { pageRoutes } from './routes/pages.tsx'
 import { searchRoutes } from './routes/search.tsx'
 import { sitemapRoutes } from './routes/sitemap.ts'
+import { resolveLang } from './lib/locale.ts'
 import { NotFoundView, renderHtml } from './templates/layout.tsx'
 
 export const app = new Hono()
@@ -16,6 +18,7 @@ export const app = new Hono()
 app.use('*', accessLogger, securityHeaders)
 
 app.route('/', homeRoutes)
+app.route('/lang', langRoutes)
 app.route('/posts', postRoutes)
 app.route('/tags', tagRoutes)
 app.route('/', pageRoutes)
@@ -25,4 +28,4 @@ app.route('/', authRoutes)
 app.route('/', commentRoutes)
 app.route('/admin', adminRoutes)
 
-app.notFound(async (c) => c.html(await renderHtml(c, { title: '404', body: <NotFoundView /> }), 404))
+app.notFound(async (c) => c.html(await renderHtml(c, { title: '404', body: <NotFoundView lang={resolveLang(c)} /> }), 404))

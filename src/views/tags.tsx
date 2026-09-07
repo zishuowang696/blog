@@ -1,15 +1,17 @@
 import type { Post, TagCount } from '../lib/db.ts'
+import type { Lang } from '../lib/locale.ts'
+import { t } from '../lib/locale.ts'
 import { PostList, TagCloud } from '../templates/components.tsx'
 
-export function TagsIndexView({ tags }: { tags: TagCount[] }) {
+export function TagsIndexView({ tags, lang }: { tags: TagCount[]; lang: Lang }) {
   return (
     <>
       <section class="page-head">
-        <h1>Tags</h1>
-        <p class="muted">Grouped by topic: OpenWrt / Yocto / Jetson / AI gateway…</p>
+        <h1>{t(lang, 'tags.title')}</h1>
+        <p class="muted">{t(lang, 'tags.muted')}</p>
       </section>
       <section>
-        <TagCloud tags={tags} />
+        <TagCloud tags={tags} lang={lang} />
       </section>
     </>
   )
@@ -20,11 +22,13 @@ export function TagPostsView({
   posts,
   moreUrl,
   total,
+  lang,
 }: {
   tag: string
   posts: Post[]
   moreUrl?: string
   total: number
+  lang: Lang
 }) {
   return (
     <>
@@ -32,10 +36,10 @@ export function TagPostsView({
         <h1>
           <span class="tag">{tag}</span>
         </h1>
-        <p class="muted">{total} posts</p>
+        <p class="muted">{t(lang, 'tags.count', { n: total })}</p>
       </section>
       <section>
-        <PostList posts={posts} moreUrl={moreUrl} />
+        <PostList posts={posts} moreUrl={moreUrl} lang={lang} />
       </section>
     </>
   )
