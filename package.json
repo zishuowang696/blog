@@ -14,6 +14,7 @@
     "db:init": "bun src/scripts/db-init.ts",
     "db:import": "bun src/scripts/db-import.ts",
     "db:promote": "bun src/scripts/admin-promote.ts",
+    "docs:sync": "bun src/scripts/sync-embedai-docs.ts",
     "schema:gen": "bun src/scripts/gen-schema.ts",
     "drizzle:generate": "bunx drizzle-kit generate"
   },
