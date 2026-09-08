@@ -17,3 +17,6 @@ tests/.tmp-test.sqlite*
 
 # 编辑器残留
 *.swp
+
+# 临时克隆的上游仓库
+upstream-embedai/

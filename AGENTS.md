@@ -39,7 +39,7 @@ bun run schema:gen     # 结构变更后：db/schema.sql → src/lib/schema.ts�
 
 > 环境变量（见 `.env.example`）：`PORT`/`HOST`/`SITE_URL`（https 时 Cookie 加 Secure，sitemap 域名）、`ADMIN_USERNAMES`（逗号分隔，命中即授予 admin 角色）、`BLOG_DB_FILE`（测试指临时库）、`BLOG_ROOT`（单文件二进制部署时指向含 public/ 与 db/ 的工作目录）。Bun 启动时自动加载 `.env`。
 
-> GitHub Actions：`.github/workflows/build-release.yml`（`bun run build:bin` 生成 Linux/macOS 二进制，打 tag `v*` 时附加到 GitHub Release）；`.github/workflows/cloudflare.yml`（默认关闭，需仓库变量 `CF_DEPLOY=true` + Secrets `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`；会先 `wrangler d1 migrations apply` 再 deploy，勾选 run_seed 时执行 `db/seed-d1.sql` 首灌）。`wrangler.toml` 需把 `database_id` 换成真实 D1 id。
+> GitHub Actions：`.github/workflows/build-release.yml`（`bun run build:bin` 生成 Linux/macOS 二进制，打 tag `v*` 时附加到 GitHub Release）；`.github/workflows/cloudflare.yml`（默认关闭，需仓库变量 `CF_DEPLOY=true` + Secrets `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`；会先 `wrangler d1 migrations apply` 再 deploy，勾选 run_seed 时执行 `db/seed-d1.sql` 首灌）；`.github/workflows/sync-embedai-docs.yml`（手动触发，按 `content/docs-manifest.json` 把 embedai 仓库 docs 拉成 `content/upstream/embedai/` 快照并自动提交，英文/中文文章内容仍需人工更新）。`wrangler.toml` 需把 `database_id` 换成真实 D1 id。
 
 > 脚本以 package.json 实际 script 为准；若有新增脚本/约定，请同步更新本文件。
 
@@ -73,7 +73,9 @@ blog/
 │   └── scripts/            # db-init.ts / db-import.ts / admin-promote.ts / gen-schema.ts / d1-seed.ts
 ├── content/
 │   ├── archive/            # 种子 md 存档（posts/ 与 pages/），仅作 db:import 源，日常不再读写
-│   └── en/                 # 英文版文章正文（seed-en 灌入 posts 的 *_en 列）
+│   ├── en/                 # 英文版文章正文（seed-en 灌入 posts 的 *_en 列）
+│   ├── docs-manifest.json  # embedai docs → 博客文章映射（sync-embedai-docs 用）
+│   └── upstream/embedai/   # embedai 源 doc 快照 + REF/CHANGES（Action 自动提交）
 ├── db/
 │   ├── schema.sql          # 启动/init 时整体 exec（幂等，CREATE IF NOT EXISTS）
 │   └── blog.sqlite         # 运行时生成，勿提交
