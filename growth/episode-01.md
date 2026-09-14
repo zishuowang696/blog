@@ -1,139 +1,118 @@
-# 第 1 期素材包：为什么从 git submodule 迁到 KAS
+# 第 1 期素材包：GitHub 下载加速 + 让 CI 当下载代理
 
-- 关联文章：`/posts/yocto-tegra-kas-migration`
-- 关联仓库：`embedai`
-- 形式：屏录 + 板子特写（不露脸）+ TTS 配音
+- 关联文章：`/posts/github-download-acceleration`
+- 关联仓库：`embedai`（`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`）
+- 形式：屏录（终端为主）+ 不露脸，TTS 配音
+- 核心数据（真实）：直连 GitHub 超时；ghproxy.net 1.19 MB/s；6 路并行 ~6 MB/s；GitHub Actions fetch 20.6 GB 约 40 分钟；Release 缓存 11 分卷
 
 ---
 
 ## 一、YouTube（英文）
 
 ### 标题候选
-1. Why I Dropped Git Submodules for KAS (Yocto, Jetson Orin Nano)
-2. One kas.yml to Pin Your Whole Yocto Build Tree
-3. Managing a Jetson Yocto Distro: Submodules vs KAS
+1. My First Build Took 3 Days — So I Made GitHub Download Everything (20 GB in 40 min)
+2. Using GitHub Actions as a Download Proxy (Offline Reproducible Builds)
+3. GitHub Download Acceleration: Measure First, Then Let CI Fetch
 
-> 推荐 1（含关键词 + 反差）。
+> 推荐 1（有反差 + 具体数字）。
 
-### 前 15 秒（钩子，必须先给结果）
-> "I used to manage my Jetson Yocto distro with git submodules. Every layer drifted, every build was a mystery. Then I moved the whole thing to a single `kas.yml` — and my builds became reproducible. Here's why."
+### 前 15 秒（钩子）
+> "My first Yocto build took three days. The bottleneck wasn't compiling — it was downloading. So I made GitHub Actions download everything for me: 20 GB in about 40 minutes. Here's the trick."
 
-### 正文脚本（约 8–10 分钟，配合屏录）
+### 正文脚本（8–12 分钟）
+**0:00–0:30 结果先行**
+- 屏幕：Release 页面 11 个分卷 / 20.6 GB；本地 `kas build` 离线跑起来。
+- 口播：结论 + 今天讲什么。
 
-**0:00–0:20 结果先行**
-- 屏幕：`kas build` 成功输出 / `kas.yml` 文件。
-- 口播：一句话结论 + 本期你会看到什么。
+**0:30–2:00 问题：不是编译慢，是下载慢**
+- 展示：一堆上游源（GitHub / kernel.org / SourceForge / huggingface），墙下随便一个卡一天。
+- 金句："Download and compile are two different problems. Separate them."
 
-**0:20–2:00 问题：submodule 的痛**
-- 展示 `.gitmodules`、多个子模块。
-- 三个痛点：逐层 init/update；版本各自漂移；加层要改 bblayers。
+**2:00–3:30 第一步：先测速**
+- 演示 `scripts/speedtest-github.sh`，展示表格（直连超时 vs ghproxy.net 1.19 MB/s）。
+- 强调：别凭印象选镜像。
 
-**2:00–4:30 方案：一个 kas.yml**
-- 打开 `embedai/kas.yml`，讲 `header.version`、`repos`（commit 锁定）、`layers`（优先级）、`machine` / `distro` / `target`。
-- 强调：整棵树 = 一个可复现快照。
+**3:30–5:00 第二步：小文件用代理前缀**
+- 演示 `curl -L -C - -O "https://ghproxy.net/https://github.com/..."` + 并行 + sha256。
 
-**4:30–6:30 日常三条命令**
-- 屏幕演示：`kas checkout` → `kas build` → `kas shell`；排障用 `kas dump`。
+**5:00–8:00 第三步：让 GitHub 当下载代理（核心）**
+- 讲存储选型：Actions cache 10 GB 上限 vs **Release assets 不限总量**。
+- 展示 `fetch-cache.yml`：runner 上 `bitbake --runall=fetch` → 打包 1.9 GB 分卷 → 上传 Release。
 
-**6:30–8:00 自建层 meta-embedai**
-- 展示目录：`conf/distro/embedai.conf`、`conf/images`、`recipes-bsp/arm-trusted-firmware`、`recipes-core`。
-- 讲"上游干净、覆盖集中"。
+**8:00–10:00 第四步：本地拉回 + 离线构建**
+- 演示 `EMBEDAI_MIRROR=https://ghproxy.net scripts/pull-dl-cache.sh`。
+- `BB_NO_NETWORK=1 kas build kas.yml` —— 缺源立刻报错。
 
-**8:00–9:00 收尾 + CTA**
-- 结论：可复现是发行版最值钱的属性。
-- CTA："Full write-up and the repo in the description. Subscribe if you maintain embedded Linux."
+**10:00–11:00 收尾**
+- 三条经验：先测速 / 下载与编译分离 / 大缓存用 Release。
+- CTA："Scripts in the repo. Subscribe for embedded Linux builds."
 
-### 简介模板（Description）
+### 简介
 ```
-I migrated my Jetson Orin Nano Yocto distro (embedai) from git submodules
-to KAS. One kas.yml pins every upstream repo to a commit — reproducible builds.
+First build: 3 days, mostly downloads. Then: GitHub Actions fetches 20GB in ~40 min,
+packaged as split Release assets, pulled locally and built offline with BB_NO_NETWORK=1.
 
 Repo: https://github.com/zishuowang696/embedai
-Write-up: https://blog-worker.zishuowang696.workers.dev/posts/yocto-tegra-kas-migration
+Write-up: https://blog-worker.zishuowang696.workers.dev/posts/github-download-acceleration
 
 Chapters:
 0:00 Result first
-0:20 The submodule pain
-2:00 One kas.yml
-4:30 kas checkout / build / shell
-6:30 Inside meta-embedai
-8:00 Wrap-up
+0:30 Download vs compile
+2:00 Measure first (speed test)
+3:30 Proxy prefix for small files
+5:00 CI as a download proxy
+8:00 Pull locally, build offline
+10:00 Takeaways
 
-#Yocto #Jetson #KAS #EmbeddedLinux #Tegra
+#Yocto #GitHub #CI #EmbeddedLinux #DevOps
 ```
 
-### 封面文案（Thumbnail）
-- 大标题：`SUBMODULES → KAS`
-- 副标题：`1 file, reproducible Yocto`
-- 背景：`kas.yml` 终端截图，红色叉 vs 绿色勾。
+### 封面
+- 大字：`3 DAYS → 40 MIN`
+- 副标题：`Let GitHub download it`
+- 背景：终端里 `aria2c` / Release 分卷列表
 
 ---
 
 ## 二、抖音（中文，竖屏）
 
-### 片段 1：KAS 是什么（25–35 秒）
-- 钩子（0–3s）："Yocto 还在手动 submodule？你迟早会被版本漂移坑死。"
-- 正文：展示一堆 submodule → 切到 `kas.yml`；讲"一个文件声明所有层，锁死 commit"。
-- 收尾："想看我真实发行版怎么迁的，评论区扣 1。"
-- 标签：`#嵌入式 #Yocto #Jetson #Linux`
+### 片段 1：钩子（20–30 秒）
+- 钩子（0–3s）："首次编译 3 天，你以为是编译慢？其实全耗在下载。"
+- 正文：展示一堆上游源 + 直连超时；"先测速"。
+- 收尾："下一集教你把 GitHub 变成你的下载代理。"
 
-### 片段 2：三条命令（20–30 秒）
-- 钩子："维护 Yocto 发行版，我日常只用三条命令。"
-- 正文：`kas checkout` / `kas build` / `kas shell`，屏幕快速演示。
-- 收尾："第四条是排障用的 kas dump，收藏。"
+### 片段 2：测速（20–30 秒）
+- 钩子："GitHub 加速镜像别乱用，先测速。"
+- 正文：跑 `speedtest-github.sh`，展示 `ghproxy.net 1.19 MB/s` vs 直连超时。
+- 收尾："测速脚本在我仓库，收藏。"
 
-### 片段 3：翻车/对比（30–40 秒）
-- 钩子："以前的构建：每层 submodule 手动对齐，错一次查半天。"
-- 正文：对比表（submodule vs KAS）。
-- 收尾："现在换机器、上 CI，结果一致。"
+### 片段 3：让 CI 下载（30–45 秒）
+- 钩子："20.6GB 源码，我让 GitHub Actions 40 分钟下完。"
+- 正文：Actions cache 只有 10GB，改用 **Release 分卷**（不限总量）；本地拉回离线编译。
+- 收尾："完整脚本和文档，评论区/简介。"
 
 ### 抖音简介
 ```
-维护 Jetson Yocto 发行版：从 submodule 迁到 KAS。
+首次编译 3 天→40 分钟：让 GitHub Actions 当下载代理，Release 分卷缓存，本地离线构建。
 仓库：github.com/zishuowang696/embedai
 ```
 
 ---
 
 ## 三、GitHub 动作
+- Release：`dl-cache` 已就绪（11 分卷）
+- README 顶部加一句 + 视频链接
+- topics 已设：`yocto kas jetson tegra embedded-linux edge-ai`
 
-### Release notes（v0.1.0 示例）
-```
-## v0.1.0 — KAS-based reproducible build
-
-- Migrated from tegra-demo-distro submodule layout to a single kas.yml
-- All upstream repos pinned to commits (bitbake, oe-core, meta-tegra, ...)
-- Own layer meta-embedai: distro `embedai`, image `embedai-image`, TF-A tweaks
-- Daily workflow: kas checkout / kas build / kas shell
-
-Video: <YouTube link>
-Docs: docs/why-kas.md
-```
-
-### README 顶部建议
-- 一句话：`A reproducible Yocto distro for Jetson Orin Nano, built with KAS.`
-- 徽章：CI / latest release / license
-- 快速开始：
-```
-git clone https://github.com/zishuowang696/embedai && cd embedai
-kas checkout
-kas build
-```
-- 架构图 + "Why KAS" 链接 + 视频链接。
-
-### Topics
-`yocto` `kas` `jetson` `tegra` `orin-nano` `embedded-linux` `edge-ai`
-
----
-
-## 四、素材清单（录制前准备）
-- [ ] 终端字体放大；`kas.yml`、目录结构、`kas build` 成功输出
-- [ ] `kas dump` 输出片段
-- [ ] 板子特写：Orin Nano 上电/接线（不露脸）
-- [ ] 截图：`.gitmodules`、对比表
+## 四、素材清单（录制前）
+- [ ] 终端：`speedtest-github.sh` 输出表
+- [ ] 终端：`fetch-cache` workflow 运行页（40 分钟、11 分卷）
+- [ ] 终端：`pull-dl-cache.sh` 拉取 + `sha256sum -c`
+- [ ] 终端：`BB_NO_NETWORK=1 kas build kas.yml` 成功
+- [ ] 板子特写：Orin Nano（可选）
 
 ## 五、发布顺序（同一天）
-1. GitHub：Release + README 更新（先有锚点）
-2. YouTube：长视频 + 1 个 Short
+1. GitHub：README/Release 更新（锚点）
+2. YouTube：长视频 + 1 Short
 3. 抖音：3 条片段
-4. 三处互相挂链接
+4. 三处互链
