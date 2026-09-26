@@ -92,4 +92,6 @@
 
 - `growth/episodes.md`：10 期选题 backlog + 抖音快剪选题
 - `growth/episode-01.md`：第 1 期完整素材包（YouTube 脚本 / 抖音脚本 / GitHub Release / 封面文案）
-- `growth/commercial-plan.md`：商业路线（服务清单 / 客户 / 定价 / 获客 / 1–3 年时间表 / 风险红线）
+- `growth/episode-02.md`：第 2 期素材包（多源分段下载 aria2）
+- `growth/launch-plan.md`：冷启动打法（渠道 / 好评清单 / 30-60-90 天 / 指标）
+- `growth/commercial-plan.md`：商业路线（服务清单 / 客户 / 定价 / 获客）
