@@ -8,6 +8,7 @@
 内容主题：**OpenWrt / Yocto / NVIDIA Tegra（Jetson）嵌入式开发学习**，以及基于以上平台的 **AI 网关**（边缘 AI 网关）实践。
 
 站点尽量轻量：SSR 输出 HTML，htmx 只负责局部片段交互（分页、评论、搜索等），不引入重型前端工具链。
+站点**中英双语**（`lib/locale.ts`：cookie + `CF-IPCountry` 决定语言，`/lang` 可切换）；本地用 bun:sqlite，可选部署到 **Cloudflare Workers + D1**（同一套代码，双存储引擎）。
 
 ## 技术栈
 
@@ -35,6 +36,8 @@ bun run db:import      # 从 content/archive/*.md 灌入/覆盖文章与静态�
 bun run db:promote <用户名>  # 将某用户提升为管理员（写入 users.role）
 bun run db:seed-d1   # 从 content/archive 生成 D1 首灌种子 SQL（db/seed-d1.sql）
 bun run schema:gen     # 结构变更后：db/schema.sql → src/lib/schema.ts（重新内嵌）
+bun run drizzle:generate  # 结构变更后：src/lib/tables.ts → migrations/drizzle/（D1 迁移）
+bun run docs:sync      # 需 EMBEDAI_DIR=<embedai 克隆>；按 content/docs-manifest.json 生成 content/upstream/embedai 快照
 ```
 
 > 环境变量（见 `.env.example`）：`PORT`/`HOST`/`SITE_URL`（https 时 Cookie 加 Secure，sitemap 域名）、`ADMIN_USERNAMES`（逗号分隔，命中即授予 admin 角色）、`BLOG_DB_FILE`（测试指临时库）、`BLOG_ROOT`（单文件二进制部署时指向含 public/ 与 db/ 的工作目录）。Bun 启动时自动加载 `.env`。
@@ -47,15 +50,20 @@ bun run schema:gen     # 结构变更后：db/schema.sql → src/lib/schema.ts�
 
 ```
 blog/
-├── package.json / tsconfig.json / bunfig.toml / .gitignore / wrangler.toml
-├── .github/workflows/    # build-release.yml（二进制）/ cloudflare.yml（Workers，需先 D1 适配）
+├── package.json / tsconfig.json / bunfig.toml / .gitignore / wrangler.toml / drizzle.config.ts
+├── .github/workflows/    # build-release.yml（二进制）/ cloudflare.yml（Workers+D1）/ sync-embedai-docs.yml
 ├── AGENTS.md / .env.example
+├── growth/                 # 增长/运营文档（选题、脚本、视频计划、商业化），不进站点
+│   ├── README.md           # 内容引擎、AI 无脸工作流、每周流程、平台 checklist
+│   ├── episodes.md         # 主系列选题 backlog + 抖音快剪选题
+│   ├── episode-01.md / episode-02.md  # 单期素材包（YouTube 脚本 / 抖音脚本 / GitHub 动作）
+│   └── commercial-plan.md  # 商业服务路线（服务清单/客户/定价/获客）
 ├── src/
 │   ├── index.ts            # Bun 入口：initLocalDb + 静态资源挂载 + 监听端口
 │   ├── app.tsx             # 装配 Hono app（不含静态/引擎，Worker 与本地共用）
-│   ├── routes/             # home / posts / tags / pages / search / sitemap / auth / comments / admin（.tsx，async 取数后渲染视图）
+│   ├── routes/             # home / posts / tags / pages / search / sitemap / auth / comments / admin / lang（.tsx，async 取数后渲染视图）
 │   ├── views/              # 页面视图组件（.tsx）：home / post / tags / search / page / auth / admin
-│   ├── templates/          # layout.tsx（Layout/renderHtml async + 头部账号区）/ components.tsx（htmx 片段原子组件）/ util.ts（fmtDate/tagHref 等）
+│   ├── templates/          # layout.tsx（Layout/renderHtml async + 头部账号/语言切换）/ components.tsx（htmx 片段）/ util.ts
 │   ├── lib/
 │   │   ├── db.ts           # 全部查询与 CRUD（async，唯一 DB 入口）
 │   │   ├── engine.ts       # 存储引擎接口 + useEngine()
@@ -66,11 +74,12 @@ blog/
 │   │   ├── tables.ts       # Drizzle 表定义（与 db/schema.sql 保持一致，D1 迁移源）
 │   │   ├── md.ts           # Markdown + frontmatter 解析渲染
 │   │   ├── auth.ts         # PBKDF2 散列、Cookie 会话、角色工具
+│   │   ├── locale.ts       # 中英双语（resolveLang/t()/setLangCookie），按 cookie + CF-IPCountry
 │   │   ├── env.ts          # envStr/setVars（跨 Bun/Worker 读环境变量）
 │   │   └── slug.ts         # 标题转 slug 等工具
 │   ├── middleware/         # http.ts：访问日志、安全头
 │   ├── worker.ts          # CF Workers 入口（assets + D1 + vars 注入）
-│   └── scripts/            # db-init.ts / db-import.ts / admin-promote.ts / gen-schema.ts / d1-seed.ts
+│   └── scripts/            # db-init.ts / db-import.ts / admin-promote.ts / gen-schema.ts / d1-seed.ts / seed-en.ts / sync-embedai-docs.ts
 ├── content/
 │   ├── archive/            # 种子 md 存档（posts/ 与 pages/），仅作 db:import 源，日常不再读写
 │   ├── en/                 # 英文版文章正文（seed-en 灌入 posts 的 *_en 列）
@@ -79,9 +88,9 @@ blog/
 ├── db/
 │   ├── schema.sql          # 启动/init 时整体 exec（幂等，CREATE IF NOT EXISTS）
 │   └── blog.sqlite         # 运行时生成，勿提交
-├── migrations/             # 增量迁移（可选）
+├── migrations/drizzle/     # Drizzle 生成、wrangler d1 migrations apply 应用（D1 迁移源）
 ├── public/                 # css/style.css、vendor/htmx.min.js（本地化）、favicon.svg、robots.txt
-└── tests/                  # md / slug / db 单测；db 测试用 BLOG_DB_FILE 指向临时库
+└── tests/                  # md / slug / db / auth / jsx 单测；db 测试用 BLOG_DB_FILE 指向临时库
 ```
 
 > **内容以数据库为源**：文章/静态页的正文存 DB（含 `source_md` 原文，供后台编辑器往返）。`content/archive` 仅为一次性导入种子：`bun run db:import`（幂等 upsert）把历史 md 灌库后即可归档；运行时不读这些文件。后台 `/admin` 的新建/编辑/删除全部写 DB。
@@ -149,6 +158,14 @@ blog/
 - 目录（TOC）、代码高亮、图片均依赖 md.ts 的渲染能力，写作时使用标准 Markdown。
 - 代码示例写明上下文：OpenWrt 用 `menuconfig`/`uboot`/`.config`；Yocto 用 BitBake recipe（`.bb`/`.bbappend`）、layer 结构；Tegra/Jetson 给交叉编译与刷机（`jetson-flash`）步骤。
 - 站点以中文为主，专有名词可保留英文（OpenWrt、Yocto、U-Boot、Jetson、AI 网关）。
+
+### 双语内容与运营
+- **中文为源**：文章/页面的中文正文存 DB（`content/archive` 仅作 `db:import` 种子，或后台 `/admin` 直接写）。
+- **英文版**：正文放 `content/en/<slug>.md`（frontmatter 只需 `title`/`summary`），运行 `bun src/scripts/seed-en.ts` 写入 `posts.*_en` 列；前台按语言显示，英文缺失时**自动回退中文**。
+- **语言判定**：`src/lib/locale.ts` 的 `resolveLang(c)`——cookie `lang`（`/lang?lang=zh|en` 切换）优先，否则按 `CF-IPCountry`（CN→zh，其它→en）；UI 文案用 `t(lang, key)`。
+- **embedai docs 同步**：`content/docs-manifest.json` 映射 doc→slug，`bun run docs:sync`（或 `sync-embedai-docs.yml`）拉快照到 `content/upstream/embedai/`，中文/英文文章仍需人工更新。
+- **D1 发布**：结构走 `migrations/drizzle` + `wrangler d1 migrations apply`；内容可用 `db/seed-d1.sql` 首灌。后台写 DB 后线上（D1）需另行同步（新增文章目前用 `INSERT ... ON CONFLICT` 推送，见历史脚本）。
+- **`growth/` 是运营文档**（选题、视频脚本、商业化），**不属于站点内容**，不要出现在前台或 DB。
 
 ### 主题相关背景速查
 - **OpenWrt**：嵌入式 Linux 发行版，重点在固件编译（SDK/ImageBuilder）、`uci` 配置、`opkg` 包、驱动与无线、路由网关。
