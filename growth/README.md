@@ -90,8 +90,14 @@
 
 ## 6. 目录
 
-- `growth/episodes.md`：10 期选题 backlog + 抖音快剪选题
+- `growth/topics.md`：**选题池（按序取用 · 不排期）**——主力工作文件，攒料取用都在这
+- `growth/capture.md`：**素材随手记模板**（攒素材 = 攒选题，发布不用回忆）
+- `growth/mvp.md`：**最小可发版本**（忙到极点怎么"不断更"）
+- `growth/episodes.md`：系列选题 backlog + 抖音快剪选题
 - `growth/episode-01.md`：第 1 期完整素材包（YouTube 脚本 / 抖音脚本 / GitHub Release / 封面文案）
 - `growth/episode-02.md`：第 2 期素材包（多源分段下载 aria2）
+- `growth/episode-release-cache.md`：单期素材包（把 30GB 编译缓存塞进 GitHub Release）
 - `growth/launch-plan.md`：冷启动打法（渠道 / 好评清单 / 30-60-90 天 / 指标）
 - `growth/commercial-plan.md`：商业路线（服务清单 / 客户 / 定价 / 获客）
+
+> **节奏原则**：不排日历，排顺序；不追频率，追不断。能长期执行即可，不必如期。
