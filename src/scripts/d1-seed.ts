@@ -6,6 +6,7 @@ import { renderMarkdown } from '../lib/md.ts'
 const archiveRoot = join(import.meta.dir, '..', '..', 'content', 'archive')
 const postsDir = join(archiveRoot, 'posts')
 const pagesDir = join(archiveRoot, 'pages')
+const enDir = join(import.meta.dir, '..', '..', 'content', 'en')
 const outFile = join(import.meta.dir, '..', '..', 'db', 'seed-d1.sql')
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,60}$/
@@ -19,6 +20,13 @@ function esc(s: string): string {
   return s.replace(/'/g, "''")
 }
 
+function readEn(slug: string): { title: string; summary: string; body: string } {
+  const f = join(enDir, `${slug}.md`)
+  if (!existsSync(f)) return { title: '', summary: '', body: '' }
+  const p = parseMarkdown(readFileSync(f, 'utf8'))
+  return { title: p.title, summary: p.summary, body: p.body }
+}
+
 const lines: string[] = []
 lines.push('-- 由 src/scripts/d1-seed.ts 生成：D1 首灌种子（posts/pages/tags/post_tags）')
 
@@ -28,13 +36,16 @@ for (const file of mdFiles(postsDir)) {
   const p = parseMarkdown(readFileSync(join(postsDir, file), 'utf8'))
   const source = renderPostSource({ ...p, slug })
   const html = renderMarkdown(p.body)
+  const en = readEn(slug)
   const updated = new Date().toISOString()
-  lines.push(`INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at)
-  VALUES ('${esc(slug)}', '${esc(p.title)}', '${esc(p.summary)}', '${esc(html)}', '${esc(source)}', '${esc(p.series)}', ${p.published ? 1 : 0}, '${p.date}', '${updated}')
+  lines.push(`INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('${esc(slug)}', '${esc(p.title)}', '${esc(p.summary)}', '${esc(html)}', '${esc(source)}', '${esc(p.series)}', ${p.published ? 1 : 0}, '${p.date}', '${updated}', '${esc(en.title)}', '${esc(en.summary)}', '${esc(en.body)}', '${esc(en.body ? renderMarkdown(en.body) : '')}')
   ON CONFLICT(slug) DO UPDATE SET
     title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
     source_md = excluded.source_md, series = excluded.series, published = excluded.published,
-    created_at = excluded.created_at, updated_at = excluded.updated_at;`)
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;`)
   for (const tag of p.tags) {
     lines.push(`INSERT INTO tags (name) VALUES ('${esc(tag)}') ON CONFLICT(name) DO NOTHING;`)
     lines.push(`INSERT INTO post_tags (post_id, tag_id)
