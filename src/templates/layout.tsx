@@ -4,6 +4,7 @@ import type { User } from '../lib/db.ts'
 import { getSessionUser, isAdmin } from '../lib/auth.ts'
 import { resolveLang, t, type Lang } from '../lib/locale.ts'
 import { SITE_DESC, SITE_NAME } from './util.ts'
+import { envStr } from '../lib/env.ts'
 
 export type NavKey = 'home' | 'tags' | 'about' | 'console' | ''
 
@@ -38,11 +39,20 @@ interface LayoutProps {
   user: User | null
   lang: Lang
   path: string
+  ogType?: string
+  jsonLd?: Record<string, unknown>[]
   children?: Child
 }
 
-export function Layout({ title, description, active, user, lang, path, children }: LayoutProps) {
+export function Layout({ title, description, active, user, lang, path, ogType, jsonLd, children }: LayoutProps) {
   const docTitle = title === SITE_NAME ? SITE_NAME : `${title} · ${SITE_NAME}`
+  const siteUrl = (envStr('SITE_URL') ?? 'http://localhost:3000').replace(/\/+$/, '')
+  const canonical = siteUrl + path
+  const pageDesc = description ?? SITE_DESC
+  const ld: Record<string, unknown>[] = [
+    { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, description: SITE_DESC, url: siteUrl, inLanguage: lang },
+    ...(jsonLd ?? []),
+  ]
   const nav = (key: NavKey, label: string, href: string) => (
     <a href={href} aria-current={active === key ? 'page' : undefined}>
       {label}
@@ -55,11 +65,19 @@ export function Layout({ title, description, active, user, lang, path, children 
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content={description ?? SITE_DESC} />
+        <meta name="description" content={pageDesc} />
         <title>{docTitle}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="/css/style.css" />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:type" content={ogType ?? 'website'} />
+        <meta property="og:title" content={docTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:url" content={canonical} />
+        <meta name="twitter:card" content="summary" />
         <script src="/vendor/htmx.min.js" defer />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       </head>
       <body>
         <header class="site-header">
@@ -94,6 +112,8 @@ export interface PageOpts {
   title: string
   description?: string
   active?: NavKey
+  ogType?: string
+  jsonLd?: Record<string, unknown>[]
   body: Child
 }
 
@@ -103,7 +123,7 @@ export function renderHtml(c: Context, opts: PageOpts): Promise<string> {
   return getSessionUser(c).then((user) =>
     '<!doctype html>\n' +
     String(
-      <Layout title={opts.title} description={opts.description} active={opts.active} user={user} lang={lang} path={path}>
+      <Layout title={opts.title} description={opts.description} active={opts.active} ogType={opts.ogType} jsonLd={opts.jsonLd} user={user} lang={lang} path={path}>
         {opts.body}
       </Layout>,
     ),
