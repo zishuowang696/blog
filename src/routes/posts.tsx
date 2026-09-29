@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { getAdjacentPosts, getPost, listComments } from '../lib/db.ts'
 import { getSessionUser } from '../lib/auth.ts'
 import { resolveLang } from '../lib/locale.ts'
+import { envStr } from '../lib/env.ts'
 import { NotFoundView, renderHtml } from '../templates/layout.tsx'
 import { PostView } from '../views/post.tsx'
 
@@ -27,5 +28,22 @@ postRoutes.get('/:slug', async (c) => {
       lang={lang}
     />
   )
-  return c.html(await renderHtml(c, { title: post.title, description: post.summary, body }))
+  const siteUrl = (envStr('SITE_URL') ?? 'http://localhost:3000').replace(/\/+$/, '')
+  const postUrl = `${siteUrl}/posts/${post.slug}`
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.summary,
+      datePublished: post.created_at,
+      dateModified: post.updated_at || post.created_at,
+      inLanguage: lang,
+      url: postUrl,
+      mainEntityOfPage: postUrl,
+    },
+  ]
+  return c.html(
+    await renderHtml(c, { title: post.title, description: post.summary, ogType: 'article', jsonLd, body }),
+  )
 })

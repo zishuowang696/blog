@@ -9,7 +9,6 @@ for (const prefix of ['/css', '/js', '/vendor', '/img']) {
   app.use(`${prefix}/*`, serveStatic({ root: publicRoot }))
 }
 app.get('/favicon.svg', serveStatic({ root: publicRoot }))
-app.get('/robots.txt', serveStatic({ root: publicRoot }))
 
 await initLocalDb()
 
