@@ -1,0 +1,22 @@
+name: check-site
+
+# 一次性：从 GitHub runner（可到 Cloudflare）抓取站点，判断"没绑 vs 被墙"
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: '要检查的 URL'
+        default: 'https://enbedai.com/'
+
+jobs:
+  curl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: curl
+        run: |
+          for u in "${{ inputs.url }}" "https://enbedai.com/robots.txt" "https://enbedai.com/sitemap.xml" "https://blog-worker.zishuowang696.workers.dev/"; do
+            echo "==== $u ===="
+            curl -sS -m 25 -o /dev/null -w 'http=%{http_code}  server=%{remote_ip}  time=%{time_total}s\n' "$u" || echo "  >>> 连接失败"
+          done
+          echo "--- 页头（enbedai.com）---"
+          curl -sS -m 25 -D - -o /dev/null https://enbedai.com/ 2>&1 | head -20 || true
