@@ -1,5 +1,393 @@
 -- 由 src/scripts/d1-seed.ts 生成：D1 首灌种子（posts/pages/tags/post_tags）
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('agent-01-loop', 'AI Agent 的核心，其实就是一个循环', '别被框架吓到：一个 Agent 的本质，就是''想→做→看结果→再想''的循环。', '<p>很多人以为 Agent 很复杂。其实核心只有一个<strong>循环</strong>：</p>
+<ol><li>把<strong>问题</strong>和<strong>已有信息</strong>交给模型；</li></ol>
+<ol><li>模型决定：<strong>直接回答</strong>，还是<strong>调用一个工具</strong>；</li></ol>
+<ol><li>若调工具 → 执行 → 把<strong>结果</strong>塞回上下文；</li></ol>
+<ol><li><strong>再来一轮</strong>，直到给出最终答案。</li></ol>
+<p>就这么简单。所谓&quot;框架&quot;，大多只是把这个循环<strong>包装得更顺手</strong>。</p>
+<p>理解它最快的办法，是<strong>自己写一遍</strong>——你会发现核心真的只有几十行。</p>
+<p>下一期：让模型真正&quot;动手&quot;——<strong>工具调用</strong>。</p>', '---
+title: "AI Agent 的核心，其实就是一个循环"
+date: 2026-09-30
+tags: ["ai-agent", "智能体", "教程"]
+summary: "别被框架吓到：一个 Agent 的本质，就是''想→做→看结果→再想''的循环。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+很多人以为 Agent 很复杂。其实核心只有一个**循环**：
+
+1. 把**问题**和**已有信息**交给模型；
+2. 模型决定：**直接回答**，还是**调用一个工具**；
+3. 若调工具 → 执行 → 把**结果**塞回上下文；
+4. **再来一轮**，直到给出最终答案。
+
+就这么简单。所谓"框架"，大多只是把这个循环**包装得更顺手**。
+
+理解它最快的办法，是**自己写一遍**——你会发现核心真的只有几十行。
+
+下一期：让模型真正"动手"——**工具调用**。
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-06T02:20:13.633Z', 'The core of an AI agent is just a loop', 'Don''t be intimidated by frameworks: an agent is a ''think → act → observe → think again'' loop.', 'Many people think agents are complicated. The core is one **loop**:
+
+1. Give the model the **question** and current context;
+2. The model decides: **answer**, or **call a tool**;
+3. If it calls a tool → run it → **feed the result back**;
+4. **Repeat** until it gives a final answer.
+
+That''s it. Most "frameworks" just make this loop more convenient.
+
+The fastest way to understand it is to **write it yourself** — you''ll find the core is a few dozen lines.
+
+Next: giving the model **hands** — tool calling.
+', '<p>Many people think agents are complicated. The core is one <strong>loop</strong>:</p>
+<ol><li>Give the model the <strong>question</strong> and current context;</li></ol>
+<ol><li>The model decides: <strong>answer</strong>, or <strong>call a tool</strong>;</li></ol>
+<ol><li>If it calls a tool → run it → <strong>feed the result back</strong>;</li></ol>
+<ol><li><strong>Repeat</strong> until it gives a final answer.</li></ol>
+<p>That&#39;s it. Most &quot;frameworks&quot; just make this loop more convenient.</p>
+<p>The fastest way to understand it is to <strong>write it yourself</strong> — you&#39;ll find the core is a few dozen lines.</p>
+<p>Next: giving the model <strong>hands</strong> — tool calling.</p>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-01-loop' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('智能体') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-01-loop' AND t.name = '智能体'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('教程') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-01-loop' AND t.name = '教程'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('agent-02-tool', '让模型真正“动手”：工具调用', '模型只会说话、不会做事；工具调用就是给它一双手——但真正干活的永远是你的代码。', '<p>模型本身只会&quot;说话&quot;，不会&quot;做事&quot;。</p>
+<p><strong>工具调用（function calling）</strong> 就是给它一双手：</p>
+<ul><li>你告诉模型：&quot;有哪些函数、参数是什么&quot;；</li><li>模型决定：<strong>调哪个、传什么参数</strong>；</li><li>你的程序<strong>真正执行</strong> → 把结果给它。</li></ul>
+<p>关键：<strong>模型不执行任何东西</strong>，它只输出&quot;我想调 <code>get_temp()</code>&quot;。<strong>真正干活的永远是你的代码</strong>——这也是 Agent 安全的关键（你能拦、能审）。</p>
+<p>所以工具别贪多，<strong>先给 3 个真用得上的</strong>就够。</p>', '---
+title: "让模型真正“动手”：工具调用"
+date: 2026-09-30
+tags: ["ai-agent", "工具调用", "function-calling"]
+summary: "模型只会说话、不会做事；工具调用就是给它一双手——但真正干活的永远是你的代码。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+模型本身只会"说话"，不会"做事"。
+
+**工具调用（function calling）** 就是给它一双手：
+
+- 你告诉模型："有哪些函数、参数是什么"；
+- 模型决定：**调哪个、传什么参数**；
+- 你的程序**真正执行** → 把结果给它。
+
+关键：**模型不执行任何东西**，它只输出"我想调 `get_temp()`"。**真正干活的永远是你的代码**——这也是 Agent 安全的关键（你能拦、能审）。
+
+所以工具别贪多，**先给 3 个真用得上的**就够。
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-06T02:20:13.633Z', 'Giving the model hands: tool calling', 'A model can talk, not act. Tool calling gives it hands — but your code does the work.', 'A model can talk, not act.
+
+**Tool calling (function calling)** gives it hands:
+
+- You describe **which functions exist and their parameters**;
+- The model picks **which one and with what arguments**;
+- Your program **actually executes it** and returns the result.
+
+Key point: **the model runs nothing**. It only emits "call `get_temp()`". **Your code always does the work** — which is exactly where agent safety lives (you can intercept and audit).
+
+So don''t hoard tools. **Start with three you truly need.**
+', '<p>A model can talk, not act.</p>
+<p><strong>Tool calling (function calling)</strong> gives it hands:</p>
+<ul><li>You describe <strong>which functions exist and their parameters</strong>;</li><li>The model picks <strong>which one and with what arguments</strong>;</li><li>Your program <strong>actually executes it</strong> and returns the result.</li></ul>
+<p>Key point: <strong>the model runs nothing</strong>. It only emits &quot;call <code>get_temp()</code>&quot;. <strong>Your code always does the work</strong> — which is exactly where agent safety lives (you can intercept and audit).</p>
+<p>So don&#39;t hoard tools. <strong>Start with three you truly need.</strong></p>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-02-tool' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('工具调用') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-02-tool' AND t.name = '工具调用'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('function-calling') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-02-tool' AND t.name = 'function-calling'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('agent-03-memory', '短期记忆 vs 长期记忆', '模型没有记忆，每次调用都是新人；Agent 的''记忆''全靠你喂上下文。', '<p>模型没有记忆——<strong>每次调用都是&quot;新人&quot;</strong>。Agent 的&quot;记忆&quot;全靠你喂上下文。</p>
+<p>两种：</p>
+<ul><li><strong>短期</strong>：把对话历史拼进 prompt（简单，但越来越长、越贵）；</li><li><strong>长期</strong>：把要点存<strong>向量库</strong>，用时<strong>检索</strong>回来（省 token，可无限扩）。</li></ul>
+<p>经验：<strong>先做短期</strong>（够用），量大或要跨会话再上长期。</p>
+<p>记住一句话：</p>
+<blockquote><p><strong>记忆不是&quot;存下来&quot;，而是&quot;下次能取出来&quot;。</strong></p></blockquote>', '---
+title: "短期记忆 vs 长期记忆"
+date: 2026-09-30
+tags: ["ai-agent", "记忆", "向量"]
+summary: "模型没有记忆，每次调用都是新人；Agent 的''记忆''全靠你喂上下文。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+模型没有记忆——**每次调用都是"新人"**。Agent 的"记忆"全靠你喂上下文。
+
+两种：
+
+- **短期**：把对话历史拼进 prompt（简单，但越来越长、越贵）；
+- **长期**：把要点存**向量库**，用时**检索**回来（省 token，可无限扩）。
+
+经验：**先做短期**（够用），量大或要跨会话再上长期。
+
+记住一句话：
+> **记忆不是"存下来"，而是"下次能取出来"。**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-06T02:20:13.634Z', 'Short-term vs long-term memory', 'Models have no memory — every call is a stranger; an agent''s memory is whatever you feed back.', 'Models have no memory — **every call is a stranger**. An agent''s memory is whatever you put back into the context.
+
+Two kinds:
+
+- **Short-term**: append the conversation history (simple; grows and costs more);
+- **Long-term**: store key facts in a **vector store** and **retrieve** them when needed (cheaper, scales).
+
+Rule of thumb: **start short-term**, add long-term when volume or cross-session recall demands it.
+
+One line to remember:
+> **Memory isn''t "storing" — it''s "retrieving next time".**
+', '<p>Models have no memory — <strong>every call is a stranger</strong>. An agent&#39;s memory is whatever you put back into the context.</p>
+<p>Two kinds:</p>
+<ul><li><strong>Short-term</strong>: append the conversation history (simple; grows and costs more);</li><li><strong>Long-term</strong>: store key facts in a <strong>vector store</strong> and <strong>retrieve</strong> them when needed (cheaper, scales).</li></ul>
+<p>Rule of thumb: <strong>start short-term</strong>, add long-term when volume or cross-session recall demands it.</p>
+<p>One line to remember:</p>
+<blockquote><p><strong>Memory isn&#39;t &quot;storing&quot; — it&#39;s &quot;retrieving next time&quot;.</strong></p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-03-memory' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('记忆') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-03-memory' AND t.name = '记忆'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('向量') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-03-memory' AND t.name = '向量'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('agent-04-observe', '为什么 Agent 必须“可观测”', 'Agent 是不确定的，看不到它每一步在干嘛，就没法调。', '<p>Agent 是<strong>不确定</strong>的：同样输入，它可能走不同路径。</p>
+<p>所以——<strong>看不到它每一步在干嘛 = 没法调</strong>。可观测至少要能看到：</p>
+<ul><li>每轮<strong>模型输出</strong>（它想调哪个工具、想说什么）；</li><li>每次<strong>工具调用</strong>的参数与结果；</li><li><strong>耗时与失败</strong>卡在哪。</li></ul>
+<p>没有可观测，你只能&quot;猜&quot;，改不动。</p>
+<p>一句话：</p>
+<blockquote><p><strong>Agent 的调试，本质是&quot;看轨迹&quot;。</strong></p></blockquote>', '---
+title: "为什么 Agent 必须“可观测”"
+date: 2026-09-30
+tags: ["ai-agent", "可观测", "调试"]
+summary: "Agent 是不确定的，看不到它每一步在干嘛，就没法调。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+Agent 是**不确定**的：同样输入，它可能走不同路径。
+
+所以——**看不到它每一步在干嘛 = 没法调**。可观测至少要能看到：
+
+- 每轮**模型输出**（它想调哪个工具、想说什么）；
+- 每次**工具调用**的参数与结果；
+- **耗时与失败**卡在哪。
+
+没有可观测，你只能"猜"，改不动。
+
+一句话：
+> **Agent 的调试，本质是"看轨迹"。**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-06T02:20:13.634Z', 'Why an agent must be observable', 'Agents are non-deterministic; if you can''t see each step, you can''t debug.', 'Agents are **non-deterministic**: same input, different paths.
+
+So — **if you can''t see each step, you can''t debug**. Observability should show at least:
+
+- each **model decision** (which tool it wants, what it says);
+- each **tool call** — arguments and result;
+- where **time is spent or failures** happen.
+
+Without it, you''re guessing.
+
+One line:
+> **Debugging an agent is really about reading its trace.**
+', '<p>Agents are <strong>non-deterministic</strong>: same input, different paths.</p>
+<p>So — <strong>if you can&#39;t see each step, you can&#39;t debug</strong>. Observability should show at least:</p>
+<ul><li>each <strong>model decision</strong> (which tool it wants, what it says);</li><li>each <strong>tool call</strong> — arguments and result;</li><li>where <strong>time is spent or failures</strong> happen.</li></ul>
+<p>Without it, you&#39;re guessing.</p>
+<p>One line:</p>
+<blockquote><p><strong>Debugging an agent is really about reading its trace.</strong></p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-04-observe' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('可观测') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-04-observe' AND t.name = '可观测'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('调试') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-04-observe' AND t.name = '调试'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('agent-05-local', '用本地模型跑 Agent（Ollama）', 'Agent 不一定要云模型：本地跑，免费、离线、数据不出场，还能接边缘设备。', '<p>Agent 不一定要用云模型。</p>
+<p>用 <strong>Ollama</strong> 在本地跑，好处：</p>
+<ul><li><strong>免费、离线、数据不出场</strong>（隐私）；</li><li>可以接你的<strong>边缘设备</strong>（Jetson 上也能跑小模型）。</li></ul>
+<p>做法：主流 Agent 框架都支持 <strong>Ollama 统一接口</strong>，把 base_url 指到本地即可。</p>
+<p><strong>注意</strong>：小模型的<strong>工具调用能力弱</strong>。 → 先用能力强的模型把循环跑通，<strong>再换小模型做优化</strong>。</p>
+<p>一句话：</p>
+<blockquote><p><strong>先跑通，再跑小。</strong></p></blockquote>', '---
+title: "用本地模型跑 Agent（Ollama）"
+date: 2026-09-30
+tags: ["ai-agent", "ollama", "边缘"]
+summary: "Agent 不一定要云模型：本地跑，免费、离线、数据不出场，还能接边缘设备。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+Agent 不一定要用云模型。
+
+用 **Ollama** 在本地跑，好处：
+
+- **免费、离线、数据不出场**（隐私）；
+- 可以接你的**边缘设备**（Jetson 上也能跑小模型）。
+
+做法：主流 Agent 框架都支持 **Ollama 统一接口**，把 base_url 指到本地即可。
+
+**注意**：小模型的**工具调用能力弱**。
+→ 先用能力强的模型把循环跑通，**再换小模型做优化**。
+
+一句话：
+> **先跑通，再跑小。**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-06T02:20:13.635Z', 'Running agents on a local model (Ollama)', 'Agents don''t need the cloud: run locally for free, offline, private — and on edge devices.', 'Agents don''t need cloud models.
+
+Run them locally with **Ollama**:
+
+- **free, offline, private** (data never leaves);
+- can run on your **edge devices** (small models fit a Jetson).
+
+How: most agent frameworks speak **Ollama''s unified API** — just point the base URL at localhost.
+
+**Caveat**: small models are **weak at tool calling**.
+→ Get the loop working on a strong model first, **then size down to optimize**.
+
+One line:
+> **First make it work, then make it small.**
+', '<p>Agents don&#39;t need cloud models.</p>
+<p>Run them locally with <strong>Ollama</strong>:</p>
+<ul><li><strong>free, offline, private</strong> (data never leaves);</li><li>can run on your <strong>edge devices</strong> (small models fit a Jetson).</li></ul>
+<p>How: most agent frameworks speak <strong>Ollama&#39;s unified API</strong> — just point the base URL at localhost.</p>
+<p><strong>Caveat</strong>: small models are <strong>weak at tool calling</strong>. → Get the loop working on a strong model first, <strong>then size down to optimize</strong>.</p>
+<p>One line:</p>
+<blockquote><p><strong>First make it work, then make it small.</strong></p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-05-local' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('ollama') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-05-local' AND t.name = 'ollama'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('边缘') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-05-local' AND t.name = '边缘'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('agent-06-scratch', '从 0 复刻：几十行写个 Agent', '读完框架，最好的验证是自己写一遍——最小 Agent 只要三件东西。', '<p>读完框架，最好的验证是<strong>自己写一个</strong>。</p>
+<p>最小 Agent 只需三件：</p>
+<ol><li><strong>循环</strong>：<code>while</code>，直到拿到答案；</li></ol>
+<ol><li><strong>工具</strong>：几个普通函数 + 名字和参数说明；</li></ol>
+<ol><li><strong>调用</strong>：把模型要的函数<strong>真的执行</strong>，结果塞回上下文。</li></ol>
+<p><strong>几十行</strong>就能跑。</p>
+<p>写完之后你会发现：<strong>框架不神秘，核心你已经掌握了</strong>。</p>
+<p>下一步：给它加你自己的工具——比如<strong>读设备温度</strong>，就迈出了&quot;设备自运维 Agent&quot;的第一步。</p>', '---
+title: "从 0 复刻：几十行写个 Agent"
+date: 2026-09-30
+tags: ["ai-agent", "从0", "实现"]
+summary: "读完框架，最好的验证是自己写一遍——最小 Agent 只要三件东西。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+读完框架，最好的验证是**自己写一个**。
+
+最小 Agent 只需三件：
+
+1. **循环**：`while`，直到拿到答案；
+2. **工具**：几个普通函数 + 名字和参数说明；
+3. **调用**：把模型要的函数**真的执行**，结果塞回上下文。
+
+**几十行**就能跑。
+
+写完之后你会发现：**框架不神秘，核心你已经掌握了**。
+
+下一步：给它加你自己的工具——比如**读设备温度**，就迈出了"设备自运维 Agent"的第一步。
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-06T02:20:13.635Z', 'Rebuild it from scratch: an agent in a few dozen lines', 'The best validation after reading a framework is writing your own — a minimal agent needs only three things.', 'After reading a framework, the best validation is to **write one yourself**.
+
+A minimal agent needs only three things:
+
+1. A **loop** — `while`, until you get an answer;
+2. **Tools** — a few plain functions with names and parameter docs;
+3. **Execution** — actually run the requested function and feed the result back.
+
+**A few dozen lines** is enough.
+
+Then you''ll see: **frameworks aren''t magic — you own the core.**
+
+Next: give it your own tool — like **reading a device''s temperature**, and you''ve taken the first step toward a self-maintaining device agent.
+', '<p>After reading a framework, the best validation is to <strong>write one yourself</strong>.</p>
+<p>A minimal agent needs only three things:</p>
+<ol><li>A <strong>loop</strong> — <code>while</code>, until you get an answer;</li></ol>
+<ol><li><strong>Tools</strong> — a few plain functions with names and parameter docs;</li></ol>
+<ol><li><strong>Execution</strong> — actually run the requested function and feed the result back.</li></ol>
+<p><strong>A few dozen lines</strong> is enough.</p>
+<p>Then you&#39;ll see: <strong>frameworks aren&#39;t magic — you own the core.</strong></p>
+<p>Next: give it your own tool — like <strong>reading a device&#39;s temperature</strong>, and you&#39;ve taken the first step toward a self-maintaining device agent.</p>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-06-scratch' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('从0') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-06-scratch' AND t.name = '从0'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('实现') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-06-scratch' AND t.name = '实现'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('ai-gateway-architecture', '边缘 AI 网关架构拆解：OpenWrt + Jetson 各司其职', '为什么一台路由器 + 一块 Jetson 就是最务实的边缘 AI 网关：转发平面放 OpenWrt，推理平面放 Tegra，用 vlan 与容器串起来。', '<p>很多人把“边缘 AI 网关”想成一个巨大的盒子。实际落地，<strong>一台 OpenWrt 路由器负责转发/策略，一块 Jetson 负责推理</strong>，两者用 VLAN 连起来，往往比单机大盒子更便宜、更易维护。</p>
 <h2>1. 分工：转发平面与推理平面分离</h2>
 <table><thead><tr><th>设备</th><th>角色</th><th>关键能力</th></tr></thead><tbody><tr><td>OpenWrt 路由器</td><td>转发平面</td><td>NAT、防火墙、QoS、pppoe/4G 拨号</td></tr><tr><td>Jetson Orin</td><td>推理平面</td><td>TensorRT、多路解码、模型常驻</td></tr><tr><td>可选 NUC/小主机</td><td>编排平面</td><td>K8s/K3s 或 docker compose</td></tr></tbody></table>
@@ -116,7 +504,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-09-29T12:09:08.533Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-06T02:20:13.638Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -367,7 +755,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-09-29T12:09:08.541Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-06T02:20:13.639Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -650,7 +1038,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-09-29T12:09:08.543Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-06T02:20:13.641Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -891,7 +1279,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-09-29T12:09:08.545Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-06T02:20:13.642Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1143,7 +1531,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-09-29T12:09:08.548Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-06T02:20:13.642Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -1402,7 +1790,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-09-29T12:09:08.549Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-06T02:20:13.643Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -1572,7 +1960,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-09-29T12:09:08.550Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-06T02:20:13.644Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -1776,7 +2164,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-09-29T12:09:08.550Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-06T02:20:13.645Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -2063,7 +2451,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-09-29T12:09:08.551Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-06T02:20:13.649Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -2411,7 +2799,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-09-29T12:09:08.551Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-06T02:20:13.651Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -2647,5 +3035,5 @@ date: 2026-09-01
 - Markdown 写内容，启动时渲染入库
 
 > 注册账号即可在文章下评论；想协作/指正也欢迎留言。
-', '2026-09-01', '2026-09-29T12:09:08.552Z')
+', '2026-09-01', '2026-10-06T02:20:13.654Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
