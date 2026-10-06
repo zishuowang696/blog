@@ -10,16 +10,16 @@ not_found_handling = "none"
 # Worker 端可读的环境变量（对应 src/lib/env.ts 的 envStr/setVars）
 [vars]
 ADMIN_USERNAMES = "wangzishuo"
-SITE_URL = "https://embedai.com"
+SITE_URL = "https://enbedai.com"
 
-# 自定义域（绑定 embedai.com → 本 Worker）
-# 前提：embedai.com 已「接入同一个 Cloudflare 账户」且 zone 已激活（NS 生效）。
+# 自定义域（绑定 enbedai.com → 本 Worker）
+# 前提：enbedai.com 已「接入同一个 Cloudflare 账户」且 zone 已激活（NS 生效）。
 # 满足后，二选一：
 #   a) 解除下面注释，然后重新 deploy（wrangler deploy）；
 #   b) 或在 Dashboard → Workers & Pages → blog-worker → Settings → Domains & Routes → Add custom domain。
 # routes = [
-#   { pattern = "embedai.com", custom_domain = true },
-#   { pattern = "www.embedai.com", custom_domain = true },
+#   { pattern = "enbedai.com", custom_domain = true },
+#   { pattern = "www.enbedai.com", custom_domain = true },
 # ]
 
 # D1：先在 Cloudflare 控制台创建数据库，把 database_id 填进来
