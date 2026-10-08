@@ -1,6 +1,6 @@
 import type { Post, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
-import { t } from '../lib/locale.ts'
+import { langHref, t } from '../lib/locale.ts'
 import { SearchResults, TagCloud } from '../templates/components.tsx'
 
 export function SearchView({
@@ -23,10 +23,10 @@ export function SearchView({
   const form = (
     <form
       class="searchbar"
-      action="/search"
+      action={langHref(lang, '/search')}
       method="get"
       role="search"
-      {...{ 'hx-get': '/search', 'hx-target': '#search-results', 'hx-swap': 'outerHTML', 'hx-trigger': 'input changed delay:350ms, search, submit' }}
+      {...{ 'hx-get': langHref(lang, '/search'), 'hx-target': '#search-results', 'hx-swap': 'outerHTML', 'hx-trigger': 'input changed delay:350ms, search, submit' }}
     >
       <input type="search" name="q" value={q} placeholder={t(lang, 'search.placeholder')} aria-label={t(lang, 'search.title')} autofocus />
       <button class="btn" type="submit">

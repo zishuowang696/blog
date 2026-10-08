@@ -17,15 +17,25 @@ export const app = new Hono()
 
 app.use('*', accessLogger, securityHeaders)
 
+// 中文：根路径；英文：/en 前缀（URL 决定语言，便于中英各自被收录）
 app.route('/', homeRoutes)
-app.route('/lang', langRoutes)
 app.route('/posts', postRoutes)
 app.route('/tags', tagRoutes)
 app.route('/', pageRoutes)
 app.route('/search', searchRoutes)
-app.route('/', sitemapRoutes)
 app.route('/', authRoutes)
 app.route('/', commentRoutes)
+
+app.route('/en', homeRoutes)
+app.route('/en/posts', postRoutes)
+app.route('/en/tags', tagRoutes)
+app.route('/en', pageRoutes)
+app.route('/en/search', searchRoutes)
+app.route('/en', authRoutes)
+app.route('/en', commentRoutes)
+
+app.route('/lang', langRoutes)
+app.route('/', sitemapRoutes)
 app.route('/admin', adminRoutes)
 
 app.notFound(async (c) => c.html(await renderHtml(c, { title: '404', body: <NotFoundView lang={resolveLang(c)} /> }), 404))

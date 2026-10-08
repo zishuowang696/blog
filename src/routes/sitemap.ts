@@ -22,23 +22,30 @@ sitemapRoutes.get('/sitemap.xml', async (c) => {
   const posts = await listAllPostsMeta()
   const today = new Date().toISOString().slice(0, 10)
 
-  const staticUrls = ['', '/tags', '/about'].map(
-    (p) =>
-      `<url><loc>${base}${p}</loc><lastmod>${today}</lastmod><changefreq>${p === '' ? 'daily' : 'weekly'}</changefreq></url>`,
+  // 每个语言无关路径产出 zh + en 两个入口，并互相声明 hreflang
+  const pair = (path: string, lastmod: string, changefreq: string): string => {
+    const zh = `${base}${path}`
+    const en = `${base}/en${path}`
+    const alts =
+      `<xhtml:link rel="alternate" hreflang="zh-CN" href="${zh}"/>` +
+      `<xhtml:link rel="alternate" hreflang="en" href="${en}"/>` +
+      `<xhtml:link rel="alternate" hreflang="x-default" href="${zh}"/>`
+    return [
+      `<url><loc>${zh}</loc><lastmod>${lastmod}</lastmod><changefreq>${changefreq}</changefreq>${alts}</url>`,
+      `<url><loc>${en}</loc><lastmod>${lastmod}</lastmod><changefreq>${changefreq}</changefreq>${alts}</url>`,
+    ].join('\n')
+  }
+
+  const staticUrls = ['', '/tags', '/about'].map((p) => pair(p, today, p === '' ? 'daily' : 'weekly'))
+
+  const tagUrls = (await listTags()).map((t) =>
+    pair(`/tags/${xmlEscape(encodeURIComponent(t.name))}`, today, 'weekly'),
   )
 
-  const tagUrls = (await listTags()).map(
-    (t) =>
-      `<url><loc>${base}/tags/${xmlEscape(encodeURIComponent(t.name))}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq></url>`,
-  )
-
-  const postUrls = posts.map(
-    (p) =>
-      `<url><loc>${base}/posts/${xmlEscape(p.slug)}</loc><lastmod>${xmlEscape(day(p.date) || today)}</lastmod><changefreq>monthly</changefreq></url>`,
-  )
+  const postUrls = posts.map((p) => pair(`/posts/${xmlEscape(p.slug)}`, xmlEscape(day(p.date) || today), 'monthly'))
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${staticUrls.join('\n')}
 ${tagUrls.join('\n')}
 ${postUrls.join('\n')}

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { getAdjacentPosts, getPost, listComments } from '../lib/db.ts'
 import { getSessionUser } from '../lib/auth.ts'
-import { resolveLang } from '../lib/locale.ts'
+import { langHref, resolveLang } from '../lib/locale.ts'
 import { envStr } from '../lib/env.ts'
 import { NotFoundView, renderHtml } from '../templates/layout.tsx'
 import { PostView } from '../views/post.tsx'
@@ -29,7 +29,7 @@ postRoutes.get('/:slug', async (c) => {
     />
   )
   const siteUrl = (envStr('SITE_URL') ?? 'http://localhost:3000').replace(/\/+$/, '')
-  const postUrl = `${siteUrl}/posts/${post.slug}`
+  const postUrl = `${siteUrl}${langHref(lang, `/posts/${post.slug}`)}`
   const jsonLd = [
     {
       '@context': 'https://schema.org',

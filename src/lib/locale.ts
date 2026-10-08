@@ -1,53 +1,30 @@
 import type { Context } from 'hono'
-import { envStr } from './env.ts'
 
 export type Lang = 'zh' | 'en'
-export const LANG_COOKIE = 'lang'
+export const EN_PREFIX = '/en'
 
-function parseCookies(header: string | undefined): Map<string, string> {
-  const out = new Map<string, string>()
-  if (!header) return out
-  for (const part of header.split(';')) {
-    const idx = part.indexOf('=')
-    if (idx < 0) continue
-    out.set(part.slice(0, idx).trim(), decodeURIComponent(part.slice(idx + 1).trim()))
-  }
-  return out
+export function langBase(lang: Lang): string {
+  return lang === 'en' ? EN_PREFIX : ''
 }
 
-function fromAcceptLanguage(header: string | undefined): Lang | null {
-  if (!header) return null
-  const first = header.split(',')[0]?.trim().toLowerCase() ?? ''
-  if (first.startsWith('zh')) return 'zh'
-  if (first.startsWith('en')) return 'en'
-  const lower = header.toLowerCase()
-  if (/(^|[,;\s])zh\b/.test(lower)) return 'zh'
-  if (/(^|[,;\s])en\b/.test(lower)) return 'en'
-  return null
+// 给站内绝对路径加语言前缀：zh 无前缀（根），en 加 /en
+export function langHref(lang: Lang, path: string): string {
+  const base = langBase(lang)
+  if (path === '/') return base || '/'
+  return base + path
 }
 
+// 去掉 /en 前缀，得到语言无关的路径（用于互相跳转 / hreflang）
+export function stripLang(path: string): string {
+  if (path === EN_PREFIX) return '/'
+  if (path.startsWith(EN_PREFIX + '/')) return path.slice(EN_PREFIX.length)
+  return path
+}
+
+// 语言由 URL 决定：/en/* 为英文，其余为中文（对搜索引擎确定、可收录）
 export function resolveLang(c: Context): Lang {
-  const cookies = parseCookies(c.req.header('cookie'))
-  const cookie = cookies.get(LANG_COOKIE)
-  if (cookie === 'zh' || cookie === 'en') return cookie
-  // 浏览器语言优先（自建站无 CF-IPCountry 时的主判据）
-  const byBrowser = fromAcceptLanguage(c.req.header('accept-language'))
-  if (byBrowser) return byBrowser
-  // 若仍经 Cloudflare（有该头）再按国家
-  const country = c.req.header('cf-ip-country')
-  if (country === 'CN') return 'zh'
-  if (country) return 'en'
-  // 兜底：本站以中文为主
-  return 'zh'
-}
-
-export function setLangCookie(c: Context, lang: Lang): void {
-  const secure = envStr('SITE_URL')?.startsWith('https://') ? '; Secure' : ''
-  c.header('Set-Cookie', `${LANG_COOKIE}=${lang}; Max-Age=${60 * 60 * 24 * 365}; Path=/; SameSite=Lax${secure}`)
-}
-
-export function langOf(v: string | null | undefined): Lang {
-  return v === 'zh' ? 'zh' : 'en'
+  const p = c.req.path
+  return p === EN_PREFIX || p.startsWith(EN_PREFIX + '/') ? 'en' : 'zh'
 }
 
 export const zh: Record<string, string> = {

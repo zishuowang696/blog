@@ -1,6 +1,6 @@
 import type { Child } from 'hono/jsx'
 import type { Lang } from '../lib/locale.ts'
-import { t } from '../lib/locale.ts'
+import { langHref, t } from '../lib/locale.ts'
 
 interface AuthFormProps {
   mode: 'login' | 'register'
@@ -19,7 +19,7 @@ export function AuthView({ mode, lang, error, next }: AuthFormProps) {
     <section class="auth-card">
       <h1>{isRegister ? t(lang, 'auth.signup_title') : t(lang, 'auth.login_title')}</h1>
       {error ? <p class="flash error">{error}</p> : null}
-      <form class="auth-form" action={isRegister ? '/register' : '/login'} method="post">
+      <form class="auth-form" action={langHref(lang, isRegister ? '/register' : '/login')} method="post">
         {next ? <input type="hidden" name="next" value={next} /> : null}
         {field(
           t(lang, 'auth.username'),
@@ -45,12 +45,12 @@ export function AuthView({ mode, lang, error, next }: AuthFormProps) {
       {isRegister ? (
         <p class="muted">
           {t(lang, 'auth.to_login')}{' '}
-          <a href="/login">{t(lang, 'acct.login')}</a>
+          <a href={langHref(lang, '/login')}>{t(lang, 'acct.login')}</a>
         </p>
       ) : (
         <p class="muted">
           {t(lang, 'auth.to_signup')}{' '}
-          <a href="/register">{t(lang, 'acct.signup')}</a>
+          <a href={langHref(lang, '/register')}>{t(lang, 'acct.signup')}</a>
         </p>
       )}
     </section>

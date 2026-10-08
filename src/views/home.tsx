@@ -1,6 +1,6 @@
 import type { Post, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
-import { t } from '../lib/locale.ts'
+import { langHref, t } from '../lib/locale.ts'
 import { PostList, TagCloud } from '../templates/components.tsx'
 import { SITE_DESC } from '../templates/util.ts'
 
@@ -25,7 +25,7 @@ export function HomeView({
         <h1>{t(lang, 'home.hero')}</h1>
         <p class="muted">{SITE_DESC}</p>
       </section>
-      <form class="searchbar" action="/search" method="get" role="search">
+      <form class="searchbar" action={langHref(lang, '/search')} method="get" role="search">
         <input type="search" name="q" placeholder={t(lang, 'search.placeholder')} aria-label={t(lang, 'search.title')} />
         <button class="btn" type="submit">
           {t(lang, 'search.submit')}

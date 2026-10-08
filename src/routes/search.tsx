@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
 import { listPosts, listTags } from '../lib/db.ts'
-import { resolveLang, t } from '../lib/locale.ts'
+import { langHref, resolveLang, t } from '../lib/locale.ts'
 import { SearchResults } from '../templates/components.tsx'
 import { renderHtml } from '../templates/layout.tsx'
 import { SearchView } from '../views/search.tsx'
@@ -27,7 +27,9 @@ searchRoutes.get('/', async (c) => {
   const page = pageNum(c)
   const list = await listPosts({ q, page, lang })
   const moreHref =
-    list.hasMore && list.items.length > 0 ? `/search?q=${encodeURIComponent(q)}&page=${page + 1}` : undefined
+    list.hasMore && list.items.length > 0
+      ? langHref(lang, `/search?q=${encodeURIComponent(q)}&page=${page + 1}`)
+      : undefined
 
   if (isHx(c)) {
     if (!q) {

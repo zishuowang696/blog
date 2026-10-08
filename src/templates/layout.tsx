@@ -2,7 +2,7 @@ import type { Context } from 'hono'
 import type { Child } from 'hono/jsx'
 import type { User } from '../lib/db.ts'
 import { getSessionUser, isAdmin } from '../lib/auth.ts'
-import { resolveLang, t, type Lang } from '../lib/locale.ts'
+import { resolveLang, stripLang, t, EN_PREFIX, langHref, type Lang } from '../lib/locale.ts'
 import { SITE_DESC, SITE_NAME } from './util.ts'
 import { envStr } from '../lib/env.ts'
 
@@ -59,7 +59,11 @@ export function Layout({ title, description, active, user, lang, path, ogType, j
     </a>
   )
   const switchLabel = t(lang, lang === 'zh' ? 'acct.to_en' : 'acct.to_zh')
-  const switchHref = `/lang?lang=${lang === 'zh' ? 'en' : 'zh'}&next=${encodeURIComponent(path)}`
+  const otherLang: Lang = lang === 'zh' ? 'en' : 'zh'
+  const switchHref = langHref(otherLang, stripLang(path))
+  const basePath = stripLang(path)
+  const zhUrl = siteUrl + basePath
+  const enUrl = siteUrl + (basePath === '/' ? EN_PREFIX : EN_PREFIX + basePath)
   return (
     <html lang={lang}>
       <head>
@@ -70,6 +74,9 @@ export function Layout({ title, description, active, user, lang, path, ogType, j
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="/css/style.css" />
         <link rel="canonical" href={canonical} />
+        <link rel="alternate" hreflang="zh-CN" href={zhUrl} />
+        <link rel="alternate" hreflang="en" href={enUrl} />
+        <link rel="alternate" hreflang="x-default" href={zhUrl} />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:type" content={ogType ?? 'website'} />
         <meta property="og:title" content={docTitle} />
@@ -82,13 +89,13 @@ export function Layout({ title, description, active, user, lang, path, ogType, j
       <body>
         <header class="site-header">
           <div class="container nav">
-            <a class="logo" href="/">
+            <a class="logo" href={langHref(lang, '/')}>
               {SITE_NAME}
             </a>
             <nav class="nav-links">
-              {nav('home', t(lang, 'nav.posts'), '/')}
-              {nav('tags', t(lang, 'nav.tags'), '/tags')}
-              {nav('about', t(lang, 'nav.about'), '/about')}
+              {nav('home', t(lang, 'nav.posts'), langHref(lang, '/'))}
+              {nav('tags', t(lang, 'nav.tags'), langHref(lang, '/tags'))}
+              {nav('about', t(lang, 'nav.about'), langHref(lang, '/about'))}
               <span class="lang-switch">
                 <a href={switchHref}>{switchLabel}</a>
               </span>
@@ -135,7 +142,7 @@ export function NotFoundView({ lang }: { lang: Lang }) {
     <section class="nf">
       <h1>404</h1>
       <p>{t(lang, 'nf.msg')}</p>
-      <a class="btn" href="/">
+      <a class="btn" href={langHref(lang, '/')}>
         {t(lang, 'ui.back_home')}
       </a>
     </section>
@@ -147,7 +154,7 @@ export function ForbiddenView({ lang }: { lang: Lang }) {
     <section class="nf">
       <h1>403</h1>
       <p>{t(lang, 'nf.forbidden')}</p>
-      <a class="btn" href="/">
+      <a class="btn" href={langHref(lang, '/')}>
         {t(lang, 'ui.back_home')}
       </a>
     </section>

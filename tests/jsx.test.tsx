@@ -26,7 +26,7 @@ describe('components JSX 渲染', () => {
   })
 
   test('标签链接做 URL 编码', () => {
-    const html = String(<TagLinks tags={['编译 笔记', 'x&y']} />)
+    const html = String(<TagLinks tags={['编译 笔记', 'x&y']} lang="zh" />)
     expect(html).toContain('/tags/%E7%BC%96%E8%AF%91%20%E7%AC%94%E8%AE%B0')
     expect(html).toContain('/tags/x%26y')
   })
