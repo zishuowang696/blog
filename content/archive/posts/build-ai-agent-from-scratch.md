@@ -1,15 +1,19 @@
 ---
-title: "从 0 构建一个 AI Agent：核心其实只有 20 行"
+title: "从 0 构建一个 AI Agent：本质就是一个循环"
 date: 2026-09-30
 tags: [ai-agent, 智能体, 教程, function-calling, deepseek]
-summary: "抛开所有框架，Agent 的本质是一个循环 + 一组工具。用 DeepSeek 和一段完整可跑的代码，讲清所有 Agent 框架的内核。"
+summary: "抛开所有框架，Agent 的本质就是一个循环：调用 API 问模型 → 执行工具 → 回喂结果。用 DeepSeek 和一段完整可跑的代码讲清它。"
 series: "从 0 构建 AI Agent"
 published: true
 ---
 
-市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。**其实没有**：剥掉包装，Agent 的本质就是一个循环 + 一组工具。
+市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。**其实没有**。
 
-下面是一段**完整、可跑**的最小 Agent——模型用 **DeepSeek**，示例工具就用最朴素的 `cat`（读文件）。
+**Agent 的本质，就是一个循环**：
+
+> **调用 API 问模型 → 执行工具 → 回喂结果**，如此往复，直到拿到答案。
+
+下面是一段**完整、可跑**的最小 Agent——模型用 **DeepSeek**，示例工具用最朴素的 `cat`（读文件）。看完你就会发现：所有框架，都只是把这个循环包得更顺手。
 
 ## 完整代码
 
@@ -47,10 +51,11 @@ def run_tool(name, args):
         ).stdout
     return f"unknown tool: {name}"
 
-# 3) Agent 主循环：问模型 -> 执行工具 -> 回喂结果 -> 再来一轮
+# 3) Agent 主循环
 def agent(user_input):
     messages = [{"role": "user", "content": user_input}]
     while True:
+        # ① 调用 API 问模型
         reply = client.chat.completions.create(
             model="deepseek-chat", messages=messages, tools=TOOLS
         )
@@ -58,7 +63,8 @@ def agent(user_input):
         messages.append(msg)
         if not msg.tool_calls:                 # 模型不再要工具 -> 给出答案
             return msg.content
-        for call in msg.tool_calls:            # 真正执行它要的工具
+        # ② 执行工具  ③ 回喂结果
+        for call in msg.tool_calls:
             args = json.loads(call.function.arguments)
             result = run_tool(call.function.name, args)
             messages.append({
@@ -70,11 +76,13 @@ def agent(user_input):
 print(agent("读一下 /etc/hostname 里的内容"))
 ```
 
-每一次循环只做三件事：**问模型 → 执行它要的工具 → 把结果塞回去**，直到模型给出最终答案。
+每一轮循环只做三件事：
 
-所有"框架"——LangChain、AutoGen、你见过的任何一个——**都只是把这几十行包得更顺手**：加日志、加记忆、加并发、加 UI。内核没变。
+> **① 调用 API 问模型 → ② 执行工具 → ③ 回喂结果**，然后回到 ①，直到模型给出最终答案。
 
-理解了这一点，剩下的四个概念就都好懂了。
+所有"框架"——LangChain、AutoGen、你见过的任何一个——**都只是把这几十行包得更顺手**：加日志、加记忆、加并发、加 UI。循环没变。
+
+理解了这一点，下面几个概念就都好懂了。
 
 ## 一、工具调用：模型决定，你的代码执行
 
@@ -90,7 +98,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 ## 二、记忆：短期靠拼，长期靠检索
 
-模型**没有记忆**——每次调用都是"新人"。上面代码里，Agent 的"记忆"其实就是那个不断增长的 `messages` 列表，这是我们**主动喂回**的上下文：
+模型**没有记忆**——每次调用都是"新人"。上面代码里，Agent 的"记忆"其实就是那个不断增长的 `messages` 列表，是我们在**回喂结果**时一并带回去的上下文：
 
 - **短期**：把对话历史拼进 `messages`。简单，但越拼越长、越贵。
 - **长期**：把要点存进**向量库**，需要时**检索**回来。省 token，且能无限扩展。
@@ -103,7 +111,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 模型是**不确定**的：同样的输入，可能走完全不同的路径。所以你**看不到它每一步在干嘛，就根本没法调**。
 
-至少要能看见：每一轮**模型的决定**、每一次**工具调用**的参数与结果（上面 `run_tool` 那里就是最好的埋点位置）、以及**时间和失败**卡在哪里。
+至少要能看见：每一轮**模型的决定**、每一次**工具调用**的参数与结果（`run_tool` 那里就是最好的埋点位置）、以及**时间和失败**卡在哪里。
 
 > **Agent 调试的本质，是读它的执行轨迹。**
 
@@ -111,7 +119,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 上面代码用的是 **DeepSeek**（OpenAI 兼容接口）。想换别的模型——GPT、Claude、任意推理服务——**只要改 `base_url`、`api_key` 和 `model` 这几处**，`agent()` 的循环一个字都不用动。
 
-> 这就是**接口标准化**的好处：模型是可替换的零件，你的 Agent 逻辑才是资产。
+> 这就是**接口标准化**的好处：模型是可替换的零件，你这个循环才是资产。
 
 ## 下一步：把 `cat` 用出花来
 
@@ -125,4 +133,4 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 ---
 
-**一句话收尾**：Agent = **一个循环 + 一组工具**；记忆让它记得住，可观测让它调得动，模型换个名字就能接着用。**框架会变，这个内核不会。**
+**一句话收尾**：**Agent 的本质，就是一个循环——调用 API 问模型 → 执行工具 → 回喂结果。** 框架会变，这个循环不会。

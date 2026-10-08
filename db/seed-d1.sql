@@ -116,7 +116,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-08T22:45:05.007Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-08T23:04:51.569Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -243,8 +243,10 @@ INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'ai-gateway-architecture' AND t.name = 'jetson'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
-  VALUES ('build-ai-agent-from-scratch', '从 0 构建一个 AI Agent：核心其实只有 20 行', '抛开所有框架，Agent 的本质是一个循环 + 一组工具。用 DeepSeek 和一段完整可跑的代码，讲清所有 Agent 框架的内核。', '<p>市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。<strong>其实没有</strong>：剥掉包装，Agent 的本质就是一个循环 + 一组工具。</p>
-<p>下面是一段<strong>完整、可跑</strong>的最小 Agent——模型用 <strong>DeepSeek</strong>，示例工具就用最朴素的 <code>cat</code>（读文件）。</p>
+  VALUES ('build-ai-agent-from-scratch', '从 0 构建一个 AI Agent：本质就是一个循环', '抛开所有框架，Agent 的本质就是一个循环：调用 API 问模型 → 执行工具 → 回喂结果。用 DeepSeek 和一段完整可跑的代码讲清它。', '<p>市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。<strong>其实没有</strong>。</p>
+<p><strong>Agent 的本质，就是一个循环</strong>：</p>
+<blockquote><p><strong>调用 API 问模型 → 执行工具 → 回喂结果</strong>，如此往复，直到拿到答案。</p></blockquote>
+<p>下面是一段<strong>完整、可跑</strong>的最小 Agent——模型用 <strong>DeepSeek</strong>，示例工具用最朴素的 <code>cat</code>（读文件）。看完你就会发现：所有框架，都只是把这个循环包得更顺手。</p>
 <h2>完整代码</h2>
 <pre><code class="language-python">import json, subprocess
 from openai import OpenAI
@@ -279,10 +281,11 @@ def run_tool(name, args):
         ).stdout
     return f&quot;unknown tool: {name}&quot;
 
-# 3) Agent 主循环：问模型 -&gt; 执行工具 -&gt; 回喂结果 -&gt; 再来一轮
+# 3) Agent 主循环
 def agent(user_input):
     messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input}]
     while True:
+        # ① 调用 API 问模型
         reply = client.chat.completions.create(
             model=&quot;deepseek-chat&quot;, messages=messages, tools=TOOLS
         )
@@ -290,7 +293,8 @@ def agent(user_input):
         messages.append(msg)
         if not msg.tool_calls:                 # 模型不再要工具 -&gt; 给出答案
             return msg.content
-        for call in msg.tool_calls:            # 真正执行它要的工具
+        # ② 执行工具  ③ 回喂结果
+        for call in msg.tool_calls:
             args = json.loads(call.function.arguments)
             result = run_tool(call.function.name, args)
             messages.append({
@@ -300,43 +304,48 @@ def agent(user_input):
             })
 
 print(agent(&quot;读一下 /etc/hostname 里的内容&quot;))</code></pre>
-<p>每一次循环只做三件事：<strong>问模型 → 执行它要的工具 → 把结果塞回去</strong>，直到模型给出最终答案。</p>
-<p>所有&quot;框架&quot;——LangChain、AutoGen、你见过的任何一个——<strong>都只是把这几十行包得更顺手</strong>：加日志、加记忆、加并发、加 UI。内核没变。</p>
-<p>理解了这一点，剩下的四个概念就都好懂了。</p>
+<p>每一轮循环只做三件事：</p>
+<blockquote><p><strong>① 调用 API 问模型 → ② 执行工具 → ③ 回喂结果</strong>，然后回到 ①，直到模型给出最终答案。</p></blockquote>
+<p>所有&quot;框架&quot;——LangChain、AutoGen、你见过的任何一个——<strong>都只是把这几十行包得更顺手</strong>：加日志、加记忆、加并发、加 UI。循环没变。</p>
+<p>理解了这一点，下面几个概念就都好懂了。</p>
 <h2>一、工具调用：模型决定，你的代码执行</h2>
 <p>看上面的 <code>cat</code>：模型本身只会&quot;说话&quot;，不会&quot;做事&quot;。我们做的是——</p>
 <ul><li>把 <code>cat</code> 的<strong>名字和参数</strong>告诉模型（那段 <code>TOOLS</code> schema）；</li><li>模型决定<strong>要不要调、传什么路径</strong>；</li><li><strong><code>run_tool</code> 去真正执行</strong>，把结果回喂给下一轮。</li></ul>
 <p>关键在这句：<strong>模型不执行任何东西</strong>，它只输出&quot;我想 <code>cat</code> 一下 <code>/etc/hostname</code>&quot;。<strong>真正动手的永远是你的代码</strong>——这既是安全边界（你能拦、能审），也是为什么&quot;给模型一双干净的手&quot;比&quot;给它一百个工具&quot;更重要。</p>
 <blockquote><p>别贪多。<strong>先给 3 个真用得上的工具</strong>，就够它干很多事。</p></blockquote>
 <h2>二、记忆：短期靠拼，长期靠检索</h2>
-<p>模型<strong>没有记忆</strong>——每次调用都是&quot;新人&quot;。上面代码里，Agent 的&quot;记忆&quot;其实就是那个不断增长的 <code>messages</code> 列表，这是我们<strong>主动喂回</strong>的上下文：</p>
+<p>模型<strong>没有记忆</strong>——每次调用都是&quot;新人&quot;。上面代码里，Agent 的&quot;记忆&quot;其实就是那个不断增长的 <code>messages</code> 列表，是我们在<strong>回喂结果</strong>时一并带回去的上下文：</p>
 <ul><li><strong>短期</strong>：把对话历史拼进 <code>messages</code>。简单，但越拼越长、越贵。</li><li><strong>长期</strong>：把要点存进<strong>向量库</strong>，需要时<strong>检索</strong>回来。省 token，且能无限扩展。</li></ul>
 <p><strong>先做短期</strong>，等到量大或要跨会话回忆，再上长期。</p>
 <p>记住一句话：<strong>记忆不是&quot;存下来&quot;，而是&quot;下次能取出来&quot;。</strong></p>
 <h2>三、可观测：Agent 的调试就是&quot;看轨迹&quot;</h2>
 <p>模型是<strong>不确定</strong>的：同样的输入，可能走完全不同的路径。所以你<strong>看不到它每一步在干嘛，就根本没法调</strong>。</p>
-<p>至少要能看见：每一轮<strong>模型的决定</strong>、每一次<strong>工具调用</strong>的参数与结果（上面 <code>run_tool</code> 那里就是最好的埋点位置）、以及<strong>时间和失败</strong>卡在哪里。</p>
+<p>至少要能看见：每一轮<strong>模型的决定</strong>、每一次<strong>工具调用</strong>的参数与结果（<code>run_tool</code> 那里就是最好的埋点位置）、以及<strong>时间和失败</strong>卡在哪里。</p>
 <blockquote><p><strong>Agent 调试的本质，是读它的执行轨迹。</strong></p></blockquote>
 <h2>四、换模型只要一行</h2>
 <p>上面代码用的是 <strong>DeepSeek</strong>（OpenAI 兼容接口）。想换别的模型——GPT、Claude、任意推理服务——<strong>只要改 <code>base_url</code>、<code>api_key</code> 和 <code>model</code> 这几处</strong>，<code>agent()</code> 的循环一个字都不用动。</p>
-<blockquote><p>这就是<strong>接口标准化</strong>的好处：模型是可替换的零件，你的 Agent 逻辑才是资产。</p></blockquote>
+<blockquote><p>这就是<strong>接口标准化</strong>的好处：模型是可替换的零件，你这个循环才是资产。</p></blockquote>
 <h2>下一步：把 <code>cat</code> 用出花来</h2>
 <p>有意思的是，<code>cat</code> 这个最普通的工具，就足以做出一个<strong>设备自运维 Agent</strong>：</p>
 <ul><li>读温度：<code>cat /sys/class/thermal/thermal_zone0/temp</code></li><li>读内存：<code>cat /proc/meminfo</code></li><li>读负载：<code>cat /proc/loadavg</code></li></ul>
 <p>当模型学会&quot;<strong>先 <code>cat</code> 一下温度，再决定要不要降频</strong>&quot;时，你就已经迈出了边缘设备自运维的第一步。<strong>工具不必花哨，能读、能看，它就能判断。</strong></p>
 <hr>
-<p><strong>一句话收尾</strong>：Agent = <strong>一个循环 + 一组工具</strong>；记忆让它记得住，可观测让它调得动，模型换个名字就能接着用。<strong>框架会变，这个内核不会。</strong></p>', '---
-title: "从 0 构建一个 AI Agent：核心其实只有 20 行"
+<p><strong>一句话收尾</strong>：<strong>Agent 的本质，就是一个循环——调用 API 问模型 → 执行工具 → 回喂结果。</strong> 框架会变，这个循环不会。</p>', '---
+title: "从 0 构建一个 AI Agent：本质就是一个循环"
 date: 2026-09-30
 tags: ["ai-agent", "智能体", "教程", "function-calling", "deepseek"]
-summary: "抛开所有框架，Agent 的本质是一个循环 + 一组工具。用 DeepSeek 和一段完整可跑的代码，讲清所有 Agent 框架的内核。"
+summary: "抛开所有框架，Agent 的本质就是一个循环：调用 API 问模型 → 执行工具 → 回喂结果。用 DeepSeek 和一段完整可跑的代码讲清它。"
 series: "从 0 构建 AI Agent"
 published: true
 ---
 
-市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。**其实没有**：剥掉包装，Agent 的本质就是一个循环 + 一组工具。
+市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。**其实没有**。
 
-下面是一段**完整、可跑**的最小 Agent——模型用 **DeepSeek**，示例工具就用最朴素的 `cat`（读文件）。
+**Agent 的本质，就是一个循环**：
+
+> **调用 API 问模型 → 执行工具 → 回喂结果**，如此往复，直到拿到答案。
+
+下面是一段**完整、可跑**的最小 Agent——模型用 **DeepSeek**，示例工具用最朴素的 `cat`（读文件）。看完你就会发现：所有框架，都只是把这个循环包得更顺手。
 
 ## 完整代码
 
@@ -374,10 +383,11 @@ def run_tool(name, args):
         ).stdout
     return f"unknown tool: {name}"
 
-# 3) Agent 主循环：问模型 -> 执行工具 -> 回喂结果 -> 再来一轮
+# 3) Agent 主循环
 def agent(user_input):
     messages = [{"role": "user", "content": user_input}]
     while True:
+        # ① 调用 API 问模型
         reply = client.chat.completions.create(
             model="deepseek-chat", messages=messages, tools=TOOLS
         )
@@ -385,7 +395,8 @@ def agent(user_input):
         messages.append(msg)
         if not msg.tool_calls:                 # 模型不再要工具 -> 给出答案
             return msg.content
-        for call in msg.tool_calls:            # 真正执行它要的工具
+        # ② 执行工具  ③ 回喂结果
+        for call in msg.tool_calls:
             args = json.loads(call.function.arguments)
             result = run_tool(call.function.name, args)
             messages.append({
@@ -397,11 +408,13 @@ def agent(user_input):
 print(agent("读一下 /etc/hostname 里的内容"))
 ```
 
-每一次循环只做三件事：**问模型 → 执行它要的工具 → 把结果塞回去**，直到模型给出最终答案。
+每一轮循环只做三件事：
 
-所有"框架"——LangChain、AutoGen、你见过的任何一个——**都只是把这几十行包得更顺手**：加日志、加记忆、加并发、加 UI。内核没变。
+> **① 调用 API 问模型 → ② 执行工具 → ③ 回喂结果**，然后回到 ①，直到模型给出最终答案。
 
-理解了这一点，剩下的四个概念就都好懂了。
+所有"框架"——LangChain、AutoGen、你见过的任何一个——**都只是把这几十行包得更顺手**：加日志、加记忆、加并发、加 UI。循环没变。
+
+理解了这一点，下面几个概念就都好懂了。
 
 ## 一、工具调用：模型决定，你的代码执行
 
@@ -417,7 +430,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 ## 二、记忆：短期靠拼，长期靠检索
 
-模型**没有记忆**——每次调用都是"新人"。上面代码里，Agent 的"记忆"其实就是那个不断增长的 `messages` 列表，这是我们**主动喂回**的上下文：
+模型**没有记忆**——每次调用都是"新人"。上面代码里，Agent 的"记忆"其实就是那个不断增长的 `messages` 列表，是我们在**回喂结果**时一并带回去的上下文：
 
 - **短期**：把对话历史拼进 `messages`。简单，但越拼越长、越贵。
 - **长期**：把要点存进**向量库**，需要时**检索**回来。省 token，且能无限扩展。
@@ -430,7 +443,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 模型是**不确定**的：同样的输入，可能走完全不同的路径。所以你**看不到它每一步在干嘛，就根本没法调**。
 
-至少要能看见：每一轮**模型的决定**、每一次**工具调用**的参数与结果（上面 `run_tool` 那里就是最好的埋点位置）、以及**时间和失败**卡在哪里。
+至少要能看见：每一轮**模型的决定**、每一次**工具调用**的参数与结果（`run_tool` 那里就是最好的埋点位置）、以及**时间和失败**卡在哪里。
 
 > **Agent 调试的本质，是读它的执行轨迹。**
 
@@ -438,7 +451,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 上面代码用的是 **DeepSeek**（OpenAI 兼容接口）。想换别的模型——GPT、Claude、任意推理服务——**只要改 `base_url`、`api_key` 和 `model` 这几处**，`agent()` 的循环一个字都不用动。
 
-> 这就是**接口标准化**的好处：模型是可替换的零件，你的 Agent 逻辑才是资产。
+> 这就是**接口标准化**的好处：模型是可替换的零件，你这个循环才是资产。
 
 ## 下一步：把 `cat` 用出花来
 
@@ -452,10 +465,14 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 ---
 
-**一句话收尾**：Agent = **一个循环 + 一组工具**；记忆让它记得住，可观测让它调得动，模型换个名字就能接着用。**框架会变，这个内核不会。**
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-08T22:45:05.010Z', 'Building an AI agent from scratch: the core is ~20 lines', 'Strip away the frameworks and an agent is a loop plus a set of tools. One ''cat'' tool and one complete runnable example using DeepSeek explain the kernel of every agent framework.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.** Strip away the packaging and an agent is a loop plus a set of tools.
+**一句话收尾**：**Agent 的本质，就是一个循环——调用 API 问模型 → 执行工具 → 回喂结果。** 框架会变，这个循环不会。
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-08T23:04:51.571Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
-Here is a **complete, runnable** minimal agent — powered by **DeepSeek**, with the most ordinary tool of all: `cat`.
+**The essence of an agent is a single loop:**
+
+> **Call the API to ask the model → run the tool → feed the result back** — repeat until you get an answer.
+
+Below is a **complete, runnable** minimal agent — powered by **DeepSeek**, with the most ordinary tool of all: `cat`. Once you see it, you''ll realize every framework is just this loop wrapped more conveniently.
 
 ## The complete code
 
@@ -494,10 +511,11 @@ def run_tool(name, args):
         ).stdout
     return f"unknown tool: {name}"
 
-# 3) The agent loop: ask -> run tools -> feed results back -> repeat
+# 3) The agent loop
 def agent(user_input):
     messages = [{"role": "user", "content": user_input}]
     while True:
+        # (1) call the API to ask the model
         reply = client.chat.completions.create(
             model="deepseek-chat", messages=messages, tools=TOOLS
         )
@@ -505,7 +523,8 @@ def agent(user_input):
         messages.append(msg)
         if not msg.tool_calls:                 # no more tools -> final answer
             return msg.content
-        for call in msg.tool_calls:            # actually run the requested tool
+        # (2) run the tool   (3) feed the result back
+        for call in msg.tool_calls:
             args = json.loads(call.function.arguments)
             result = run_tool(call.function.name, args)
             messages.append({
@@ -517,11 +536,13 @@ def agent(user_input):
 print(agent("Read what''s in /etc/hostname"))
 ```
 
-Every iteration does three things: **ask the model → run the tool it asked for → feed the result back**, until the model gives a final answer.
+Every iteration of the loop does three things:
 
-Every "framework" — LangChain, AutoGen, all of them — **is just these few dozen lines wrapped more conveniently**: logging, memory, concurrency, a UI. The kernel never changes.
+> **(1) call the API to ask the model → (2) run the tool → (3) feed the result back** — then back to (1), until the model gives a final answer.
 
-Once that clicks, the other four ideas are easy.
+Every "framework" — LangChain, AutoGen, all of them — **is just these few dozen lines wrapped more conveniently**: logging, memory, concurrency, a UI. The loop never changes.
+
+Once that clicks, the rest is easy.
 
 ## 1. Tool calling: the model decides, your code executes
 
@@ -537,7 +558,7 @@ The key line: **the model executes nothing**. It only emits "I''d like to `cat` 
 
 ## 2. Memory: paste it short, retrieve it long
 
-Models **have no memory** — every call is a stranger. In the code, the agent''s "memory" is simply that ever-growing `messages` list — context we **choose to feed back**:
+Models **have no memory** — every call is a stranger. In the code, the agent''s "memory" is simply that ever-growing `messages` list — context we carry along when we **feed results back**:
 
 - **Short-term**: append the conversation. Simple, but it grows and costs more.
 - **Long-term**: store key facts in a **vector store** and **retrieve** them when needed. Cheaper, and it scales.
@@ -558,7 +579,7 @@ You need, at minimum: each **model decision**, each **tool call** with its argum
 
 The code above uses **DeepSeek** (an OpenAI-compatible API). Want a different model — GPT, Claude, any inference service? **Just change `base_url`, `api_key`, and `model`** — the `agent()` loop doesn''t change at all.
 
-> That''s the value of a standardized interface: the model is a replaceable part; your agent logic is the asset.
+> That''s the value of a standardized interface: the model is a replaceable part; your loop is the asset.
 
 ## Next: get creative with `cat`
 
@@ -572,9 +593,11 @@ The moment the model learns to "**`cat` the temperature first, then decide wheth
 
 ---
 
-**In one line**: an agent = **a loop plus tools**; memory makes it remember, observability makes it debuggable, and the model is a swappable part. **Frameworks change — the kernel doesn''t.**
-', '<p>New agent frameworks appear every month, which makes it easy to assume there&#39;s something deep inside. <strong>There isn&#39;t.</strong> Strip away the packaging and an agent is a loop plus a set of tools.</p>
-<p>Here is a <strong>complete, runnable</strong> minimal agent — powered by <strong>DeepSeek</strong>, with the most ordinary tool of all: <code>cat</code>.</p>
+**In one line**: **the essence of an agent is a single loop — call the API to ask the model → run the tool → feed the result back.** Frameworks change; the loop doesn''t.
+', '<p>New agent frameworks appear every month, which makes it easy to assume there&#39;s something deep inside. <strong>There isn&#39;t.</strong></p>
+<p><strong>The essence of an agent is a single loop:</strong></p>
+<blockquote><p><strong>Call the API to ask the model → run the tool → feed the result back</strong> — repeat until you get an answer.</p></blockquote>
+<p>Below is a <strong>complete, runnable</strong> minimal agent — powered by <strong>DeepSeek</strong>, with the most ordinary tool of all: <code>cat</code>. Once you see it, you&#39;ll realize every framework is just this loop wrapped more conveniently.</p>
 <h2>The complete code</h2>
 <pre><code class="language-python">import json, subprocess
 from openai import OpenAI
@@ -610,10 +633,11 @@ def run_tool(name, args):
         ).stdout
     return f&quot;unknown tool: {name}&quot;
 
-# 3) The agent loop: ask -&gt; run tools -&gt; feed results back -&gt; repeat
+# 3) The agent loop
 def agent(user_input):
     messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input}]
     while True:
+        # (1) call the API to ask the model
         reply = client.chat.completions.create(
             model=&quot;deepseek-chat&quot;, messages=messages, tools=TOOLS
         )
@@ -621,7 +645,8 @@ def agent(user_input):
         messages.append(msg)
         if not msg.tool_calls:                 # no more tools -&gt; final answer
             return msg.content
-        for call in msg.tool_calls:            # actually run the requested tool
+        # (2) run the tool   (3) feed the result back
+        for call in msg.tool_calls:
             args = json.loads(call.function.arguments)
             result = run_tool(call.function.name, args)
             messages.append({
@@ -631,16 +656,17 @@ def agent(user_input):
             })
 
 print(agent(&quot;Read what&#39;s in /etc/hostname&quot;))</code></pre>
-<p>Every iteration does three things: <strong>ask the model → run the tool it asked for → feed the result back</strong>, until the model gives a final answer.</p>
-<p>Every &quot;framework&quot; — LangChain, AutoGen, all of them — <strong>is just these few dozen lines wrapped more conveniently</strong>: logging, memory, concurrency, a UI. The kernel never changes.</p>
-<p>Once that clicks, the other four ideas are easy.</p>
+<p>Every iteration of the loop does three things:</p>
+<blockquote><p><strong>(1) call the API to ask the model → (2) run the tool → (3) feed the result back</strong> — then back to (1), until the model gives a final answer.</p></blockquote>
+<p>Every &quot;framework&quot; — LangChain, AutoGen, all of them — <strong>is just these few dozen lines wrapped more conveniently</strong>: logging, memory, concurrency, a UI. The loop never changes.</p>
+<p>Once that clicks, the rest is easy.</p>
 <h2>1. Tool calling: the model decides, your code executes</h2>
 <p>Look at <code>cat</code> above. A model can talk, not act. What we did was:</p>
 <ul><li>Tell it <code>cat</code>&#39;s <strong>name and parameters</strong> (that <code>TOOLS</code> schema);</li><li>Let it decide <strong>whether to call it and with what path</strong>;</li><li>Let <strong><code>run_tool</code> actually execute it</strong> and feed the result back.</li></ul>
 <p>The key line: <strong>the model executes nothing</strong>. It only emits &quot;I&#39;d like to <code>cat</code> <code>/etc/hostname</code>.&quot; <strong>Your code always does the work</strong> — that&#39;s your safety boundary, and the reason &quot;give the model a clean pair of hands&quot; beats &quot;give it a hundred tools.&quot;</p>
 <blockquote><p>Don&#39;t hoard tools. <strong>Start with three you truly need</strong> — that&#39;s enough to do a lot.</p></blockquote>
 <h2>2. Memory: paste it short, retrieve it long</h2>
-<p>Models <strong>have no memory</strong> — every call is a stranger. In the code, the agent&#39;s &quot;memory&quot; is simply that ever-growing <code>messages</code> list — context we <strong>choose to feed back</strong>:</p>
+<p>Models <strong>have no memory</strong> — every call is a stranger. In the code, the agent&#39;s &quot;memory&quot; is simply that ever-growing <code>messages</code> list — context we carry along when we <strong>feed results back</strong>:</p>
 <ul><li><strong>Short-term</strong>: append the conversation. Simple, but it grows and costs more.</li><li><strong>Long-term</strong>: store key facts in a <strong>vector store</strong> and <strong>retrieve</strong> them when needed. Cheaper, and it scales.</li></ul>
 <p><strong>Start short-term</strong>; add long-term when volume or cross-session recall demands it.</p>
 <p>One line to keep: <strong>memory isn&#39;t &quot;storing&quot; — it&#39;s &quot;retrieving next time.&quot;</strong></p>
@@ -650,13 +676,13 @@ print(agent(&quot;Read what&#39;s in /etc/hostname&quot;))</code></pre>
 <blockquote><p><strong>Debugging an agent is reading its execution trace.</strong></p></blockquote>
 <h2>4. Switching models is one line</h2>
 <p>The code above uses <strong>DeepSeek</strong> (an OpenAI-compatible API). Want a different model — GPT, Claude, any inference service? <strong>Just change <code>base_url</code>, <code>api_key</code>, and <code>model</code></strong> — the <code>agent()</code> loop doesn&#39;t change at all.</p>
-<blockquote><p>That&#39;s the value of a standardized interface: the model is a replaceable part; your agent logic is the asset.</p></blockquote>
+<blockquote><p>That&#39;s the value of a standardized interface: the model is a replaceable part; your loop is the asset.</p></blockquote>
 <h2>Next: get creative with <code>cat</code></h2>
 <p>The nice part: this most ordinary tool is already enough for a <strong>self-maintaining device agent</strong>:</p>
 <ul><li>Temperature: <code>cat /sys/class/thermal/thermal_zone0/temp</code></li><li>Memory: <code>cat /proc/meminfo</code></li><li>Load: <code>cat /proc/loadavg</code></li></ul>
 <p>The moment the model learns to &quot;<strong><code>cat</code> the temperature first, then decide whether to throttle</strong>,&quot; you&#39;ve taken the first step toward edge-device self-maintenance. <strong>A tool doesn&#39;t have to be fancy — if it can read and see, the model can judge.</strong></p>
 <hr>
-<p><strong>In one line</strong>: an agent = <strong>a loop plus tools</strong>; memory makes it remember, observability makes it debuggable, and the model is a swappable part. <strong>Frameworks change — the kernel doesn&#39;t.</strong></p>')
+<p><strong>In one line</strong>: <strong>the essence of an agent is a single loop — call the API to ask the model → run the tool → feed the result back.</strong> Frameworks change; the loop doesn&#39;t.</p>')
   ON CONFLICT(slug) DO UPDATE SET
     title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
     source_md = excluded.source_md, series = excluded.series, published = excluded.published,
@@ -808,7 +834,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-08T22:45:05.011Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-08T23:04:51.575Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1091,7 +1117,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T22:45:05.016Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:04:51.578Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1332,7 +1358,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-08T22:45:05.016Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-08T23:04:51.582Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1584,7 +1610,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-08T22:45:05.020Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-08T23:04:51.584Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -1843,7 +1869,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-08T22:45:05.023Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-08T23:04:51.585Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -2013,7 +2039,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T22:45:05.024Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:04:51.586Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -2217,7 +2243,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-08T22:45:05.025Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-08T23:04:51.588Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -2504,7 +2530,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-08T22:45:05.025Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-08T23:04:51.589Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -2852,7 +2878,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-08T22:45:05.026Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-08T23:04:51.589Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -3088,5 +3114,5 @@ date: 2026-09-01
 - Markdown 写内容，启动时渲染入库
 
 > 注册账号即可在文章下评论；想协作/指正也欢迎留言。
-', '2026-09-01', '2026-10-08T22:45:05.027Z')
+', '2026-09-01', '2026-10-08T23:04:51.593Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;

@@ -1,11 +1,15 @@
 ---
-title: "Building an AI agent from scratch: the core is ~20 lines"
-summary: "Strip away the frameworks and an agent is a loop plus a set of tools. One 'cat' tool and one complete runnable example using DeepSeek explain the kernel of every agent framework."
+title: "Building an AI agent from scratch: it's just a loop"
+summary: "Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek."
 ---
 
-New agent frameworks appear every month, which makes it easy to assume there's something deep inside. **There isn't.** Strip away the packaging and an agent is a loop plus a set of tools.
+New agent frameworks appear every month, which makes it easy to assume there's something deep inside. **There isn't.**
 
-Here is a **complete, runnable** minimal agent — powered by **DeepSeek**, with the most ordinary tool of all: `cat`.
+**The essence of an agent is a single loop:**
+
+> **Call the API to ask the model → run the tool → feed the result back** — repeat until you get an answer.
+
+Below is a **complete, runnable** minimal agent — powered by **DeepSeek**, with the most ordinary tool of all: `cat`. Once you see it, you'll realize every framework is just this loop wrapped more conveniently.
 
 ## The complete code
 
@@ -44,10 +48,11 @@ def run_tool(name, args):
         ).stdout
     return f"unknown tool: {name}"
 
-# 3) The agent loop: ask -> run tools -> feed results back -> repeat
+# 3) The agent loop
 def agent(user_input):
     messages = [{"role": "user", "content": user_input}]
     while True:
+        # (1) call the API to ask the model
         reply = client.chat.completions.create(
             model="deepseek-chat", messages=messages, tools=TOOLS
         )
@@ -55,7 +60,8 @@ def agent(user_input):
         messages.append(msg)
         if not msg.tool_calls:                 # no more tools -> final answer
             return msg.content
-        for call in msg.tool_calls:            # actually run the requested tool
+        # (2) run the tool   (3) feed the result back
+        for call in msg.tool_calls:
             args = json.loads(call.function.arguments)
             result = run_tool(call.function.name, args)
             messages.append({
@@ -67,11 +73,13 @@ def agent(user_input):
 print(agent("Read what's in /etc/hostname"))
 ```
 
-Every iteration does three things: **ask the model → run the tool it asked for → feed the result back**, until the model gives a final answer.
+Every iteration of the loop does three things:
 
-Every "framework" — LangChain, AutoGen, all of them — **is just these few dozen lines wrapped more conveniently**: logging, memory, concurrency, a UI. The kernel never changes.
+> **(1) call the API to ask the model → (2) run the tool → (3) feed the result back** — then back to (1), until the model gives a final answer.
 
-Once that clicks, the other four ideas are easy.
+Every "framework" — LangChain, AutoGen, all of them — **is just these few dozen lines wrapped more conveniently**: logging, memory, concurrency, a UI. The loop never changes.
+
+Once that clicks, the rest is easy.
 
 ## 1. Tool calling: the model decides, your code executes
 
@@ -87,7 +95,7 @@ The key line: **the model executes nothing**. It only emits "I'd like to `cat` `
 
 ## 2. Memory: paste it short, retrieve it long
 
-Models **have no memory** — every call is a stranger. In the code, the agent's "memory" is simply that ever-growing `messages` list — context we **choose to feed back**:
+Models **have no memory** — every call is a stranger. In the code, the agent's "memory" is simply that ever-growing `messages` list — context we carry along when we **feed results back**:
 
 - **Short-term**: append the conversation. Simple, but it grows and costs more.
 - **Long-term**: store key facts in a **vector store** and **retrieve** them when needed. Cheaper, and it scales.
@@ -108,7 +116,7 @@ You need, at minimum: each **model decision**, each **tool call** with its argum
 
 The code above uses **DeepSeek** (an OpenAI-compatible API). Want a different model — GPT, Claude, any inference service? **Just change `base_url`, `api_key`, and `model`** — the `agent()` loop doesn't change at all.
 
-> That's the value of a standardized interface: the model is a replaceable part; your agent logic is the asset.
+> That's the value of a standardized interface: the model is a replaceable part; your loop is the asset.
 
 ## Next: get creative with `cat`
 
@@ -122,4 +130,4 @@ The moment the model learns to "**`cat` the temperature first, then decide wheth
 
 ---
 
-**In one line**: an agent = **a loop plus tools**; memory makes it remember, observability makes it debuggable, and the model is a swappable part. **Frameworks change — the kernel doesn't.**
+**In one line**: **the essence of an agent is a single loop — call the API to ask the model → run the tool → feed the result back.** Frameworks change; the loop doesn't.
