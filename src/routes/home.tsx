@@ -4,6 +4,7 @@ import { listPosts, listTags, POSTS_PER_PAGE } from '../lib/db.ts'
 import { resolveLang, t } from '../lib/locale.ts'
 import { ListChunk } from '../templates/components.tsx'
 import { renderHtml } from '../templates/layout.tsx'
+import { SITE_NAME } from '../templates/util.ts'
 import { HomeView } from '../views/home.tsx'
 
 function pageParam(c: Context): number {
@@ -28,5 +29,6 @@ homeRoutes.get('/', async (c) => {
   }
 
   const body = <HomeView posts={list.items} moreUrl={moreUrl} page={page} tags={await listTags()} postsPerPage={POSTS_PER_PAGE} lang={lang} />
-  return c.html(await renderHtml(c, { title: t(lang, 'nav.posts'), active: 'home', body }))
+  const title = `${SITE_NAME} — ${t(lang, 'home.hero')}`
+  return c.html(await renderHtml(c, { title, active: 'home', body }))
 })

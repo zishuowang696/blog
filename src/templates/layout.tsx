@@ -45,7 +45,7 @@ interface LayoutProps {
 }
 
 export function Layout({ title, description, active, user, lang, path, ogType, jsonLd, children }: LayoutProps) {
-  const docTitle = title === SITE_NAME ? SITE_NAME : `${title} · ${SITE_NAME}`
+  const docTitle = title.startsWith(SITE_NAME) ? title : `${title} · ${SITE_NAME}`
   const siteUrl = (envStr('SITE_URL') ?? 'http://localhost:3000').replace(/\/+$/, '')
   const canonical = siteUrl + path
   const pageDesc = description ?? SITE_DESC
