@@ -123,3 +123,5 @@ The code above uses **DeepSeek** (an OpenAI-compatible API). Want a different mo
 **In one line**: **the essence of an agent is a single loop — call the API to ask the model → run the tool → feed the result back.** Frameworks change; the loop doesn't.
 
 > 📦 Complete runnable code: **[github.com/zishuowang696/agent-from-scratch](https://github.com/zishuowang696/agent-from-scratch)**
+>
+> 💬 Questions or feedback? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696/agent-from-scratch/issues) on GitHub.
