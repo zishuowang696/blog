@@ -116,7 +116,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-08T23:16:56.724Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-08T23:30:40.386Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -460,7 +460,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-from-scratch/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-08T23:16:56.735Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-08T23:30:40.387Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
 **The essence of an agent is a single loop:**
 
@@ -819,7 +819,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-08T23:16:56.737Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-08T23:30:40.389Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1102,7 +1102,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:16:56.740Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:30:40.390Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1343,7 +1343,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-08T23:16:56.741Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-08T23:30:40.393Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1444,6 +1444,450 @@ INSERT INTO post_tags (post_id, tag_id)
 INSERT INTO tags (name) VALUES ('ai网关') ON CONFLICT(name) DO NOTHING;
 INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'jetson-orin-tensorrt-gateway' AND t.name = 'ai网关'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('mcp-in-30-lines', '用 30 行看懂 MCP：它其实就是标准化的 Function Calling', 'MCP 不神秘：它就是一套基于 JSON-RPC 的协议，把上一篇硬编码的 cat 工具变成一个独立进程，让任何 LLM 应用都能接。附 30 行可跑的服务端和客户端。', '<p>上一篇文章里，我们的 <code>cat</code> 工具是<strong>硬编码</strong>在 Agent 代码里的：</p>
+<pre><code class="language-python"># 工具写死在你的程序里
+TOOLS = [{&quot;function&quot;: {&quot;name&quot;: &quot;cat&quot;, &quot;...&quot;: &quot;...&quot;}}]
+
+def run_tool(name, args):
+    ...</code></pre>
+<p>问题很明显：<strong>换个应用就得重写一遍</strong>。你写的工具，只能给你自己用。</p>
+<p><strong>MCP（Model Context Protocol）解决的就是这件事——把工具变成一个独立进程，用一套标准协议对外暴露，任何 LLM 应用都能接。</strong></p>
+<p>一句话：<strong>MCP = 标准化的 Function Calling。</strong> 它不改变上一篇那个循环，只是把&quot;工具从哪来、怎么调&quot;这件事标准化了。</p>
+<h2>MCP 的三个角色</h2>
+<ul><li><strong>Host（宿主）</strong>：你用的 LLM 应用，比如 Claude Desktop、Cursor，或你自己的 Agent。</li><li><strong>Client（客户端）</strong>：Host 内部的一小块，负责和 Server 通信（通常 Host 已经帮你建好）。</li><li><strong>Server（服务端）</strong>：<strong>你要写的东西</strong>——一个进程，对外暴露工具（Tools）、资源（Resources）、提示（Prompts）。</li></ul>
+<p>最常见的传输方式是 <strong>stdio</strong>：客户端启动服务端进程，用<strong>每行一个 JSON</strong>（JSON-RPC）在标准输入输出上：一问一答。</p>
+<p>有人叫它&quot;AI 界的 USB-C&quot;——一个标准口，插什么设备都能通。</p>
+<h2>30 行写一个 MCP 服务端</h2>
+<p>把上一篇的 <code>cat</code> 变成一个 MCP Server（<code>server.py</code>）：</p>
+<pre><code class="language-python">import json, subprocess, sys
+
+TOOLS = [{
+    &quot;name&quot;: &quot;cat&quot;,
+    &quot;description&quot;: &quot;读取一个文件的全部内容&quot;,
+    &quot;inputSchema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {&quot;path&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;文件路径&quot;}},
+        &quot;required&quot;: [&quot;path&quot;],
+    },
+}]
+
+def handle(msg):
+    m = msg[&quot;method&quot;]
+    if m == &quot;initialize&quot;:
+        return {&quot;protocolVersion&quot;: msg[&quot;params&quot;][&quot;protocolVersion&quot;],
+                &quot;capabilities&quot;: {&quot;tools&quot;: {}},
+                &quot;serverInfo&quot;: {&quot;name&quot;: &quot;cat-mcp&quot;, &quot;version&quot;: &quot;0.1&quot;}}
+    if m == &quot;tools/list&quot;:
+        return {&quot;tools&quot;: TOOLS}
+    if m == &quot;tools/call&quot;:
+        path = msg[&quot;params&quot;][&quot;arguments&quot;][&quot;path&quot;]
+        out = subprocess.run([&quot;cat&quot;, path], capture_output=True, text=True)
+        return {&quot;content&quot;: [{&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: out.stdout or out.stderr}]}
+    return {}
+
+for line in sys.stdin:
+    req = json.loads(line)
+    if &quot;id&quot; not in req:      # 通知（notification），不需要回
+        continue
+    res = handle(req)
+    sys.stdout.write(json.dumps({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;id&quot;: req[&quot;id&quot;], &quot;result&quot;: res}) + &quot;\n&quot;)
+    sys.stdout.flush()</code></pre>
+<p>就这些。<strong>MCP 服务端就是&quot;读一行 JSON → 分发方法 → 写一行 JSON&quot;。</strong></p>
+<h2>30 行写一个客户端</h2>
+<p>客户端只做三件事：<strong>握手 → 列工具 → 调用</strong>（<code>client.py</code>）：</p>
+<pre><code class="language-python">import json, subprocess, sys
+
+proc = subprocess.Popen([sys.executable, &quot;server.py&quot;],
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+_id = 0
+
+def rpc(method, params=None, notify=False):
+    global _id
+    msg = {&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: method}
+    if params is not None:
+        msg[&quot;params&quot;] = params
+    if not notify:
+        _id += 1
+        msg[&quot;id&quot;] = _id
+    proc.stdin.write(json.dumps(msg) + &quot;\n&quot;)
+    proc.stdin.flush()
+    return None if notify else json.loads(proc.stdout.readline())
+
+rpc(&quot;initialize&quot;, {&quot;protocolVersion&quot;: &quot;2024-11-05&quot;, &quot;capabilities&quot;: {},
+                   &quot;clientInfo&quot;: {&quot;name&quot;: &quot;demo&quot;, &quot;version&quot;: &quot;0.1&quot;}})
+rpc(&quot;notifications/initialized&quot;, notify=True)          # 握手完成
+
+print(&quot;工具列表:&quot;, rpc(&quot;tools/list&quot;))
+print(&quot;调用结果:&quot;, rpc(&quot;tools/call&quot;, {&quot;name&quot;: &quot;cat&quot;, &quot;arguments&quot;: {&quot;path&quot;: &quot;/etc/hostname&quot;}}))</code></pre>
+<p>跑一下：</p>
+<pre><code class="language-bash">python client.py
+# 工具列表: {&#39;tools&#39;: [{&#39;name&#39;: &#39;cat&#39;, ...}]}
+# 调用结果: {&#39;content&#39;: [{&#39;type&#39;: &#39;text&#39;, &#39;text&#39;: &#39;your-hostname&#39;}]}</code></pre>
+<h2>和上一篇对照</h2>
+<table><thead><tr><th></th><th>上一篇（硬编码）</th><th>这一篇（MCP）</th></tr></thead><tbody><tr><td>工具定义</td><td>写在 Agent 代码里</td><td>独立进程，用 <code>tools/list</code> 声明</td></tr><tr><td>工具调用</td><td>直接函数调用</td><td><code>tools/call</code> JSON-RPC</td></tr><tr><td>谁能用</td><td>只有你自己</td><td><strong>任何支持 MCP 的 Host</strong></td></tr></tbody></table>
+<p><strong>本质没变</strong>：还是&quot;<strong>问模型 → 执行工具 → 回喂结果</strong>&quot;那个循环。MCP 只是把&quot;工具&quot;标准化，让你写的工具能被任何 LLM 应用复用——<strong>模型可换、工具可插，循环不变。</strong></p>
+<blockquote><p>📦 完整可运行代码：<strong><a href="https://github.com/zishuowang696/mcp-demo">github.com/zishuowang696/mcp-demo</a></strong></p><p>💬 有问题或建议？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696/mcp-demo/issues">提 Issue</a>。</p></blockquote>
+<p><em>（本文中英双语；本系列记录从 0 构建 Agent 的过程。）</em></p>', '---
+title: "用 30 行看懂 MCP：它其实就是标准化的 Function Calling"
+date: 2026-10-09
+tags: ["mcp", "ai-agent", "function-calling", "智能体", "教程"]
+summary: "MCP 不神秘：它就是一套基于 JSON-RPC 的协议，把上一篇硬编码的 cat 工具变成一个独立进程，让任何 LLM 应用都能接。附 30 行可跑的服务端和客户端。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+上一篇文章里，我们的 `cat` 工具是**硬编码**在 Agent 代码里的：
+
+```python
+# 工具写死在你的程序里
+TOOLS = [{"function": {"name": "cat", "...": "..."}}]
+
+def run_tool(name, args):
+    ...
+```
+
+问题很明显：**换个应用就得重写一遍**。你写的工具，只能给你自己用。
+
+**MCP（Model Context Protocol）解决的就是这件事——把工具变成一个独立进程，用一套标准协议对外暴露，任何 LLM 应用都能接。**
+
+一句话：**MCP = 标准化的 Function Calling。** 它不改变上一篇那个循环，只是把"工具从哪来、怎么调"这件事标准化了。
+
+## MCP 的三个角色
+
+- **Host（宿主）**：你用的 LLM 应用，比如 Claude Desktop、Cursor，或你自己的 Agent。
+- **Client（客户端）**：Host 内部的一小块，负责和 Server 通信（通常 Host 已经帮你建好）。
+- **Server（服务端）**：**你要写的东西**——一个进程，对外暴露工具（Tools）、资源（Resources）、提示（Prompts）。
+
+最常见的传输方式是 **stdio**：客户端启动服务端进程，用**每行一个 JSON**（JSON-RPC）在标准输入输出上：一问一答。
+
+有人叫它"AI 界的 USB-C"——一个标准口，插什么设备都能通。
+
+## 30 行写一个 MCP 服务端
+
+把上一篇的 `cat` 变成一个 MCP Server（`server.py`）：
+
+```python
+import json, subprocess, sys
+
+TOOLS = [{
+    "name": "cat",
+    "description": "读取一个文件的全部内容",
+    "inputSchema": {
+        "type": "object",
+        "properties": {"path": {"type": "string", "description": "文件路径"}},
+        "required": ["path"],
+    },
+}]
+
+def handle(msg):
+    m = msg["method"]
+    if m == "initialize":
+        return {"protocolVersion": msg["params"]["protocolVersion"],
+                "capabilities": {"tools": {}},
+                "serverInfo": {"name": "cat-mcp", "version": "0.1"}}
+    if m == "tools/list":
+        return {"tools": TOOLS}
+    if m == "tools/call":
+        path = msg["params"]["arguments"]["path"]
+        out = subprocess.run(["cat", path], capture_output=True, text=True)
+        return {"content": [{"type": "text", "text": out.stdout or out.stderr}]}
+    return {}
+
+for line in sys.stdin:
+    req = json.loads(line)
+    if "id" not in req:      # 通知（notification），不需要回
+        continue
+    res = handle(req)
+    sys.stdout.write(json.dumps({"jsonrpc": "2.0", "id": req["id"], "result": res}) + "\n")
+    sys.stdout.flush()
+```
+
+就这些。**MCP 服务端就是"读一行 JSON → 分发方法 → 写一行 JSON"。**
+
+## 30 行写一个客户端
+
+客户端只做三件事：**握手 → 列工具 → 调用**（`client.py`）：
+
+```python
+import json, subprocess, sys
+
+proc = subprocess.Popen([sys.executable, "server.py"],
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+_id = 0
+
+def rpc(method, params=None, notify=False):
+    global _id
+    msg = {"jsonrpc": "2.0", "method": method}
+    if params is not None:
+        msg["params"] = params
+    if not notify:
+        _id += 1
+        msg["id"] = _id
+    proc.stdin.write(json.dumps(msg) + "\n")
+    proc.stdin.flush()
+    return None if notify else json.loads(proc.stdout.readline())
+
+rpc("initialize", {"protocolVersion": "2024-11-05", "capabilities": {},
+                   "clientInfo": {"name": "demo", "version": "0.1"}})
+rpc("notifications/initialized", notify=True)          # 握手完成
+
+print("工具列表:", rpc("tools/list"))
+print("调用结果:", rpc("tools/call", {"name": "cat", "arguments": {"path": "/etc/hostname"}}))
+```
+
+跑一下：
+
+```bash
+python client.py
+# 工具列表: {''tools'': [{''name'': ''cat'', ...}]}
+# 调用结果: {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
+```
+
+## 和上一篇对照
+
+| | 上一篇（硬编码） | 这一篇（MCP） |
+| --- | --- | --- |
+| 工具定义 | 写在 Agent 代码里 | 独立进程，用 `tools/list` 声明 |
+| 工具调用 | 直接函数调用 | `tools/call` JSON-RPC |
+| 谁能用 | 只有你自己 | **任何支持 MCP 的 Host** |
+
+**本质没变**：还是"**问模型 → 执行工具 → 回喂结果**"那个循环。MCP 只是把"工具"标准化，让你写的工具能被任何 LLM 应用复用——**模型可换、工具可插，循环不变。**
+
+> 📦 完整可运行代码：**[github.com/zishuowang696/mcp-demo](https://github.com/zishuowang696/mcp-demo)**
+>
+> 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
+
+*（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
+', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-08T23:30:40.394Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In the previous post, our `cat` tool was **hardcoded** inside the agent:
+
+```python
+# the tool lives inside your program
+TOOLS = [{"function": {"name": "cat", "...": "..."}}]
+
+def run_tool(name, args):
+    ...
+```
+
+The problem is obvious: **switch apps and you rewrite it all.** A tool you wrote is only usable by you.
+
+**MCP (Model Context Protocol) fixes exactly that — it turns a tool into a standalone process, exposed over one standard protocol that any LLM app can connect to.**
+
+In one line: **MCP = standardized function calling.** It doesn''t change the loop from the last post; it just standardizes *where tools come from and how they''re called*.
+
+## The three roles
+
+- **Host**: the LLM app you use — Claude Desktop, Cursor, or your own agent.
+- **Client**: a small piece inside the host that talks to the server (usually the host builds it for you).
+- **Server**: **the part you write** — a process exposing Tools, Resources and Prompts.
+
+The most common transport is **stdio**: the client launches the server process and they exchange **one JSON per line** (JSON-RPC) over stdin/stdout.
+
+Some call it "USB-C for AI" — one port, any device.
+
+## A 30-line MCP server
+
+Turn last post''s `cat` into an MCP server (`server.py`):
+
+```python
+import json, subprocess, sys
+
+TOOLS = [{
+    "name": "cat",
+    "description": "Read the full contents of a file",
+    "inputSchema": {
+        "type": "object",
+        "properties": {"path": {"type": "string", "description": "file path"}},
+        "required": ["path"],
+    },
+}]
+
+def handle(msg):
+    m = msg["method"]
+    if m == "initialize":
+        return {"protocolVersion": msg["params"]["protocolVersion"],
+                "capabilities": {"tools": {}},
+                "serverInfo": {"name": "cat-mcp", "version": "0.1"}}
+    if m == "tools/list":
+        return {"tools": TOOLS}
+    if m == "tools/call":
+        path = msg["params"]["arguments"]["path"]
+        out = subprocess.run(["cat", path], capture_output=True, text=True)
+        return {"content": [{"type": "text", "text": out.stdout or out.stderr}]}
+    return {}
+
+for line in sys.stdin:
+    req = json.loads(line)
+    if "id" not in req:      # a notification — no reply needed
+        continue
+    res = handle(req)
+    sys.stdout.write(json.dumps({"jsonrpc": "2.0", "id": req["id"], "result": res}) + "\n")
+    sys.stdout.flush()
+```
+
+That''s it. **An MCP server is just "read a JSON line → dispatch by method → write a JSON line".**
+
+## A 30-line client
+
+A client does three things: **handshake → list tools → call** (`client.py`):
+
+```python
+import json, subprocess, sys
+
+proc = subprocess.Popen([sys.executable, "server.py"],
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+_id = 0
+
+def rpc(method, params=None, notify=False):
+    global _id
+    msg = {"jsonrpc": "2.0", "method": method}
+    if params is not None:
+        msg["params"] = params
+    if not notify:
+        _id += 1
+        msg["id"] = _id
+    proc.stdin.write(json.dumps(msg) + "\n")
+    proc.stdin.flush()
+    return None if notify else json.loads(proc.stdout.readline())
+
+rpc("initialize", {"protocolVersion": "2024-11-05", "capabilities": {},
+                   "clientInfo": {"name": "demo", "version": "0.1"}})
+rpc("notifications/initialized", notify=True)          # handshake done
+
+print("tools:", rpc("tools/list"))
+print("call:", rpc("tools/call", {"name": "cat", "arguments": {"path": "/etc/hostname"}}))
+```
+
+Run it:
+
+```bash
+python client.py
+# tools: {''tools'': [{''name'': ''cat'', ...}]}
+# call: {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
+```
+
+## vs. the last post
+
+| | Last post (hardcoded) | This post (MCP) |
+| --- | --- | --- |
+| Tool definition | lives in the agent code | standalone process, declared via `tools/list` |
+| Tool invocation | a direct function call | `tools/call` JSON-RPC |
+| Who can use it | only you | **any MCP-capable host** |
+
+**Nothing essential changed**: still the loop **"ask the model → run the tool → feed the result back."** MCP just standardizes the *tool*, so what you write is reusable by any LLM app — **swap the model, plug in tools, keep the loop.**
+
+> 📦 Complete runnable code: **[github.com/zishuowang696/mcp-demo](https://github.com/zishuowang696/mcp-demo)**
+>
+> 💬 Questions or feedback? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696/mcp-demo/issues) on GitHub.
+', '<p>In the previous post, our <code>cat</code> tool was <strong>hardcoded</strong> inside the agent:</p>
+<pre><code class="language-python"># the tool lives inside your program
+TOOLS = [{&quot;function&quot;: {&quot;name&quot;: &quot;cat&quot;, &quot;...&quot;: &quot;...&quot;}}]
+
+def run_tool(name, args):
+    ...</code></pre>
+<p>The problem is obvious: <strong>switch apps and you rewrite it all.</strong> A tool you wrote is only usable by you.</p>
+<p><strong>MCP (Model Context Protocol) fixes exactly that — it turns a tool into a standalone process, exposed over one standard protocol that any LLM app can connect to.</strong></p>
+<p>In one line: <strong>MCP = standardized function calling.</strong> It doesn&#39;t change the loop from the last post; it just standardizes <em>where tools come from and how they&#39;re called</em>.</p>
+<h2>The three roles</h2>
+<ul><li><strong>Host</strong>: the LLM app you use — Claude Desktop, Cursor, or your own agent.</li><li><strong>Client</strong>: a small piece inside the host that talks to the server (usually the host builds it for you).</li><li><strong>Server</strong>: <strong>the part you write</strong> — a process exposing Tools, Resources and Prompts.</li></ul>
+<p>The most common transport is <strong>stdio</strong>: the client launches the server process and they exchange <strong>one JSON per line</strong> (JSON-RPC) over stdin/stdout.</p>
+<p>Some call it &quot;USB-C for AI&quot; — one port, any device.</p>
+<h2>A 30-line MCP server</h2>
+<p>Turn last post&#39;s <code>cat</code> into an MCP server (<code>server.py</code>):</p>
+<pre><code class="language-python">import json, subprocess, sys
+
+TOOLS = [{
+    &quot;name&quot;: &quot;cat&quot;,
+    &quot;description&quot;: &quot;Read the full contents of a file&quot;,
+    &quot;inputSchema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {&quot;path&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;file path&quot;}},
+        &quot;required&quot;: [&quot;path&quot;],
+    },
+}]
+
+def handle(msg):
+    m = msg[&quot;method&quot;]
+    if m == &quot;initialize&quot;:
+        return {&quot;protocolVersion&quot;: msg[&quot;params&quot;][&quot;protocolVersion&quot;],
+                &quot;capabilities&quot;: {&quot;tools&quot;: {}},
+                &quot;serverInfo&quot;: {&quot;name&quot;: &quot;cat-mcp&quot;, &quot;version&quot;: &quot;0.1&quot;}}
+    if m == &quot;tools/list&quot;:
+        return {&quot;tools&quot;: TOOLS}
+    if m == &quot;tools/call&quot;:
+        path = msg[&quot;params&quot;][&quot;arguments&quot;][&quot;path&quot;]
+        out = subprocess.run([&quot;cat&quot;, path], capture_output=True, text=True)
+        return {&quot;content&quot;: [{&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: out.stdout or out.stderr}]}
+    return {}
+
+for line in sys.stdin:
+    req = json.loads(line)
+    if &quot;id&quot; not in req:      # a notification — no reply needed
+        continue
+    res = handle(req)
+    sys.stdout.write(json.dumps({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;id&quot;: req[&quot;id&quot;], &quot;result&quot;: res}) + &quot;\n&quot;)
+    sys.stdout.flush()</code></pre>
+<p>That&#39;s it. <strong>An MCP server is just &quot;read a JSON line → dispatch by method → write a JSON line&quot;.</strong></p>
+<h2>A 30-line client</h2>
+<p>A client does three things: <strong>handshake → list tools → call</strong> (<code>client.py</code>):</p>
+<pre><code class="language-python">import json, subprocess, sys
+
+proc = subprocess.Popen([sys.executable, &quot;server.py&quot;],
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+_id = 0
+
+def rpc(method, params=None, notify=False):
+    global _id
+    msg = {&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: method}
+    if params is not None:
+        msg[&quot;params&quot;] = params
+    if not notify:
+        _id += 1
+        msg[&quot;id&quot;] = _id
+    proc.stdin.write(json.dumps(msg) + &quot;\n&quot;)
+    proc.stdin.flush()
+    return None if notify else json.loads(proc.stdout.readline())
+
+rpc(&quot;initialize&quot;, {&quot;protocolVersion&quot;: &quot;2024-11-05&quot;, &quot;capabilities&quot;: {},
+                   &quot;clientInfo&quot;: {&quot;name&quot;: &quot;demo&quot;, &quot;version&quot;: &quot;0.1&quot;}})
+rpc(&quot;notifications/initialized&quot;, notify=True)          # handshake done
+
+print(&quot;tools:&quot;, rpc(&quot;tools/list&quot;))
+print(&quot;call:&quot;, rpc(&quot;tools/call&quot;, {&quot;name&quot;: &quot;cat&quot;, &quot;arguments&quot;: {&quot;path&quot;: &quot;/etc/hostname&quot;}}))</code></pre>
+<p>Run it:</p>
+<pre><code class="language-bash">python client.py
+# tools: {&#39;tools&#39;: [{&#39;name&#39;: &#39;cat&#39;, ...}]}
+# call: {&#39;content&#39;: [{&#39;type&#39;: &#39;text&#39;, &#39;text&#39;: &#39;your-hostname&#39;}]}</code></pre>
+<h2>vs. the last post</h2>
+<table><thead><tr><th></th><th>Last post (hardcoded)</th><th>This post (MCP)</th></tr></thead><tbody><tr><td>Tool definition</td><td>lives in the agent code</td><td>standalone process, declared via <code>tools/list</code></td></tr><tr><td>Tool invocation</td><td>a direct function call</td><td><code>tools/call</code> JSON-RPC</td></tr><tr><td>Who can use it</td><td>only you</td><td><strong>any MCP-capable host</strong></td></tr></tbody></table>
+<p><strong>Nothing essential changed</strong>: still the loop <strong>&quot;ask the model → run the tool → feed the result back.&quot;</strong> MCP just standardizes the <em>tool</em>, so what you write is reusable by any LLM app — <strong>swap the model, plug in tools, keep the loop.</strong></p>
+<blockquote><p>📦 Complete runnable code: <strong><a href="https://github.com/zishuowang696/mcp-demo">github.com/zishuowang696/mcp-demo</a></strong></p><p>💬 Questions or feedback? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696/mcp-demo/issues">open an Issue</a> on GitHub.</p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('mcp') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-in-30-lines' AND t.name = 'mcp'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-in-30-lines' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('function-calling') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-in-30-lines' AND t.name = 'function-calling'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('智能体') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-in-30-lines' AND t.name = '智能体'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('教程') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-in-30-lines' AND t.name = '教程'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('multi-source-download', '多源分段下载：什么时候多连接有用，什么时候没用（aria2 实测）', '同一个大文件，用多镜像、多连接分段下载到底能快多少？实测单连接、curl 多连接、aria2 多源分段，并给出判断瓶颈与正确配置的方法。', '<p>下载一个大文件很慢时，先别急着&quot;多加连接&quot;。慢有两种完全不同的原因：</p>
@@ -1595,7 +2039,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-08T23:16:56.742Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-08T23:30:40.395Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -1854,7 +2298,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-08T23:16:56.745Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-08T23:30:40.396Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -2024,7 +2468,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:16:56.746Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:30:40.397Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -2228,7 +2672,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-08T23:16:56.748Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-08T23:30:40.397Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -2515,7 +2959,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-08T23:16:56.749Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-08T23:30:40.398Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -2863,7 +3307,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-08T23:16:56.750Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-08T23:30:40.399Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -3099,5 +3543,5 @@ date: 2026-09-01
 - Markdown 写内容，启动时渲染入库
 
 > 注册账号即可在文章下评论；想协作/指正也欢迎留言。
-', '2026-09-01', '2026-10-08T23:16:56.751Z')
+', '2026-09-01', '2026-10-08T23:30:40.399Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
