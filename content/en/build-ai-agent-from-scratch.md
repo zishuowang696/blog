@@ -118,16 +118,6 @@ The code above uses **DeepSeek** (an OpenAI-compatible API). Want a different mo
 
 > That's the value of a standardized interface: the model is a replaceable part; your loop is the asset.
 
-## Next: get creative with `cat`
-
-The nice part: this most ordinary tool is already enough for a **self-maintaining device agent**:
-
-- Temperature: `cat /sys/class/thermal/thermal_zone0/temp`
-- Memory: `cat /proc/meminfo`
-- Load: `cat /proc/loadavg`
-
-The moment the model learns to "**`cat` the temperature first, then decide whether to throttle**," you've taken the first step toward edge-device self-maintenance. **A tool doesn't have to be fancy — if it can read and see, the model can judge.**
-
 ---
 
 **In one line**: **the essence of an agent is a single loop — call the API to ask the model → run the tool → feed the result back.** Frameworks change; the loop doesn't.
