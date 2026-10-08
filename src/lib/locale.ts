@@ -15,13 +15,30 @@ function parseCookies(header: string | undefined): Map<string, string> {
   return out
 }
 
+function fromAcceptLanguage(header: string | undefined): Lang | null {
+  if (!header) return null
+  const first = header.split(',')[0]?.trim().toLowerCase() ?? ''
+  if (first.startsWith('zh')) return 'zh'
+  if (first.startsWith('en')) return 'en'
+  const lower = header.toLowerCase()
+  if (/(^|[,;\s])zh\b/.test(lower)) return 'zh'
+  if (/(^|[,;\s])en\b/.test(lower)) return 'en'
+  return null
+}
+
 export function resolveLang(c: Context): Lang {
   const cookies = parseCookies(c.req.header('cookie'))
   const cookie = cookies.get(LANG_COOKIE)
   if (cookie === 'zh' || cookie === 'en') return cookie
+  // 浏览器语言优先（自建站无 CF-IPCountry 时的主判据）
+  const byBrowser = fromAcceptLanguage(c.req.header('accept-language'))
+  if (byBrowser) return byBrowser
+  // 若仍经 Cloudflare（有该头）再按国家
   const country = c.req.header('cf-ip-country')
   if (country === 'CN') return 'zh'
-  return 'en'
+  if (country) return 'en'
+  // 兜底：本站以中文为主
+  return 'zh'
 }
 
 export function setLangCookie(c: Context, lang: Lang): void {
