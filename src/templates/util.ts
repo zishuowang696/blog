@@ -7,4 +7,4 @@ export function tagHref(name: string): string {
 }
 
 export const SITE_NAME = 'Edge Embedded Notes'
-export const SITE_DESC = 'OpenWrt / Yocto / NVIDIA Tegra embedded development and edge AI gateway notes'
+export const SITE_DESC = 'Build AI agents and ship them on the edge — OpenWrt / Yocto / NVIDIA Tegra embedded & edge AI gateway notes'
