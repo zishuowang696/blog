@@ -124,3 +124,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 ---
 
 **一句话收尾**：**Agent 的本质，就是一个循环——调用 API 问模型 → 执行工具 → 回喂结果。** 框架会变，这个循环不会。
+
+> 📦 完整可运行代码：**[github.com/zishuowang696/agent-from-scratch](https://github.com/zishuowang696/agent-from-scratch)**
+
+*（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
