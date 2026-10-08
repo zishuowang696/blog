@@ -1,11 +1,11 @@
 ---
 title: "Building an AI agent from scratch: the core is ~20 lines"
-summary: "Strip away the frameworks and an agent is a loop plus a set of tools. One 'cat' tool and one complete runnable example explain the kernel of every agent framework."
+summary: "Strip away the frameworks and an agent is a loop plus a set of tools. One 'cat' tool and one complete runnable example using DeepSeek explain the kernel of every agent framework."
 ---
 
 New agent frameworks appear every month, which makes it easy to assume there's something deep inside. **There isn't.** Strip away the packaging and an agent is a loop plus a set of tools.
 
-Here is a **complete, runnable** minimal agent — with the most ordinary tool of all: `cat`.
+Here is a **complete, runnable** minimal agent — powered by **DeepSeek**, with the most ordinary tool of all: `cat`.
 
 ## The complete code
 
@@ -13,8 +13,11 @@ Here is a **complete, runnable** minimal agent — with the most ordinary tool o
 import json, subprocess
 from openai import OpenAI
 
-# Point at local Ollama (or any OpenAI-compatible API); switch providers here only
-client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+# DeepSeek exposes an OpenAI-compatible API — use it directly
+client = OpenAI(
+    base_url="https://api.deepseek.com",
+    api_key="sk-your-deepseek-key",
+)
 
 # 1) Tool definition: tell the model which functions exist and their parameters
 TOOLS = [{
@@ -46,7 +49,7 @@ def agent(user_input):
     messages = [{"role": "user", "content": user_input}]
     while True:
         reply = client.chat.completions.create(
-            model="qwen2.5", messages=messages, tools=TOOLS
+            model="deepseek-chat", messages=messages, tools=TOOLS
         )
         msg = reply.choices[0].message
         messages.append(msg)
@@ -101,11 +104,11 @@ You need, at minimum: each **model decision**, each **tool call** with its argum
 
 > **Debugging an agent is reading its execution trace.**
 
-## 4. Local models: offline, private, edge-ready
+## 4. Switching models is one line
 
-In the code, `base_url` points at **Ollama** — local: **free, offline, private** — and it fits **edge devices** (small models run on a Jetson). Most frameworks speak Ollama's unified API.
+The code above uses **DeepSeek** (an OpenAI-compatible API). Want a different model — GPT, Claude, any inference service? **Just change `base_url`, `api_key`, and `model`** — the `agent()` loop doesn't change at all.
 
-One lesson: **small models are weak at tool calling.** So the order is — **get the loop working on a strong model first, then size down.**
+> That's the value of a standardized interface: the model is a replaceable part; your agent logic is the asset.
 
 ## Next: get creative with `cat`
 
@@ -119,4 +122,4 @@ The moment the model learns to "**`cat` the temperature first, then decide wheth
 
 ---
 
-**In one line**: an agent = **a loop plus tools**; memory makes it remember, observability makes it debuggable, a local model makes it deployable. **Frameworks change — the kernel doesn't.**
+**In one line**: an agent = **a loop plus tools**; memory makes it remember, observability makes it debuggable, and the model is a swappable part. **Frameworks change — the kernel doesn't.**

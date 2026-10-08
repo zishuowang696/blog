@@ -1,15 +1,15 @@
 ---
 title: "从 0 构建一个 AI Agent：核心其实只有 20 行"
 date: 2026-09-30
-tags: [ai-agent, 智能体, 教程, function-calling, ollama]
-summary: "抛开所有框架，Agent 的本质是一个循环 + 一组工具。用一个 'cat' 工具和一段完整可跑的代码，讲清所有 Agent 框架的内核。"
+tags: [ai-agent, 智能体, 教程, function-calling, deepseek]
+summary: "抛开所有框架，Agent 的本质是一个循环 + 一组工具。用 DeepSeek 和一段完整可跑的代码，讲清所有 Agent 框架的内核。"
 series: "从 0 构建 AI Agent"
 published: true
 ---
 
 市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。**其实没有**：剥掉包装，Agent 的本质就是一个循环 + 一组工具。
 
-下面是一段**完整、可跑**的最小 Agent——示例工具就用最朴素的 `cat`（读文件）。
+下面是一段**完整、可跑**的最小 Agent——模型用 **DeepSeek**，示例工具就用最朴素的 `cat`（读文件）。
 
 ## 完整代码
 
@@ -17,8 +17,11 @@ published: true
 import json, subprocess
 from openai import OpenAI
 
-# 指向本地 Ollama（或任何 OpenAI 兼容服务）；换成云 API 只改这一处
-client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+# DeepSeek 提供 OpenAI 兼容接口，直接用它
+client = OpenAI(
+    base_url="https://api.deepseek.com",
+    api_key="sk-你的DeepSeek密钥",
+)
 
 # 1) 工具定义：告诉模型"有哪些函数、参数是什么"
 TOOLS = [{
@@ -49,7 +52,7 @@ def agent(user_input):
     messages = [{"role": "user", "content": user_input}]
     while True:
         reply = client.chat.completions.create(
-            model="qwen2.5", messages=messages, tools=TOOLS
+            model="deepseek-chat", messages=messages, tools=TOOLS
         )
         msg = reply.choices[0].message
         messages.append(msg)
@@ -104,11 +107,11 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 > **Agent 调试的本质，是读它的执行轨迹。**
 
-## 四、本地模型：离线、私有、能上边缘
+## 四、换模型只要一行
 
-代码里 `base_url` 指向的是 **Ollama**——本地跑：**免费、离线、数据不出场**，而且能跑在**边缘设备**上（Jetson 这类板子也能撑起小模型）。
+上面代码用的是 **DeepSeek**（OpenAI 兼容接口）。想换别的模型——GPT、Claude、任意推理服务——**只要改 `base_url`、`api_key` 和 `model` 这几处**，`agent()` 的循环一个字都不用动。
 
-一个经验：**小模型的工具调用能力弱**。所以顺序是——**先用强模型把循环跑通，再换小模型做优化**。
+> 这就是**接口标准化**的好处：模型是可替换的零件，你的 Agent 逻辑才是资产。
 
 ## 下一步：把 `cat` 用出花来
 
@@ -122,4 +125,4 @@ print(agent("读一下 /etc/hostname 里的内容"))
 
 ---
 
-**一句话收尾**：Agent = **一个循环 + 一组工具**；记忆让它记得住，可观测让它调得动，本地模型让它跑得起。**框架会变，这个内核不会。**
+**一句话收尾**：Agent = **一个循环 + 一组工具**；记忆让它记得住，可观测让它调得动，模型换个名字就能接着用。**框架会变，这个内核不会。**
