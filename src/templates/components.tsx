@@ -1,18 +1,18 @@
 import type { JSXNode } from 'hono/jsx'
 import type { Comment, Post, TagCount, User } from '../lib/db.ts'
-import { t, type Lang } from '../lib/locale.ts'
+import { langHref, t, type Lang } from '../lib/locale.ts'
 import { fmtDate, tagHref } from './util.ts'
 
 function seriesLabel(lang: Lang): string {
   return lang === 'zh' ? '系列' : 'Series'
 }
 
-export function TagLinks({ tags }: { tags: string[] }) {
+export function TagLinks({ tags, lang }: { tags: string[]; lang: Lang }) {
   if (tags.length === 0) return <span class="tag-list" />
   return (
     <span class="tag-list">
       {tags.map((tg) => (
-        <a class="tag" href={tagHref(tg)}>
+        <a class="tag" href={langHref(lang, tagHref(tg))}>
           {tg}
         </a>
       ))}
@@ -32,11 +32,11 @@ function PostCard({ post, lang }: { post: Post; lang: Lang }) {
         ) : null}
       </header>
       <h2 class="card-title">
-        <a href={`/posts/${post.slug}`}>{post.title}</a>
+        <a href={langHref(lang, `/posts/${post.slug}`)}>{post.title}</a>
       </h2>
       <p class="card-summary">{post.summary}</p>
       <footer class="card-meta">
-        <TagLinks tags={post.tags} />
+        <TagLinks tags={post.tags} lang={lang} />
       </footer>
     </article>
   )
@@ -90,7 +90,7 @@ export function TagCloud({ tags, lang }: { tags: TagCount[]; lang?: Lang }) {
   return (
     <p class="tag-cloud">
       {tags.map((tg) => (
-        <a class="tag chip" href={tagHref(tg.name)}>
+        <a class="tag chip" href={langHref(l, tagHref(tg.name))}>
           {tg.name}
           <span class="count">{tg.count}</span>
         </a>
@@ -106,7 +106,7 @@ export function CommentBody({ body }: { body: string }) {
 function CommentItem({ comment, user, lang }: { comment: Comment; user: User | null; lang: Lang }) {
   const canDelete = user !== null && (user.role === 'admin' || user.id === comment.user_id)
   const deleteHx = {
-    'hx-post': `/comments/${comment.id}/delete`,
+    'hx-post': langHref(lang, `/comments/${comment.id}/delete`),
     'hx-target': '#comments-box',
     'hx-swap': 'outerHTML',
     'hx-confirm': t(lang, 'c.confirm'),
@@ -117,7 +117,7 @@ function CommentItem({ comment, user, lang }: { comment: Comment; user: User | n
         <strong class="comment-name">{comment.display_name}</strong>
         <time datetime={comment.created_at}>{fmtDate(comment.created_at)}</time>
         {canDelete ? (
-          <form class="inline" action={`/comments/${comment.id}/delete`} method="post" {...deleteHx}>
+          <form class="inline" action={langHref(lang, `/comments/${comment.id}/delete`)} method="post" {...deleteHx}>
             <button class="linkish danger" type="submit">
               {t(lang, 'c.delete')}
             </button>
@@ -144,7 +144,7 @@ export function CommentsBox({
 }) {
   const l = lang ?? 'en'
   const commentHx = {
-    'hx-post': `/posts/${postSlug}/comments`,
+    'hx-post': langHref(l, `/posts/${postSlug}/comments`),
     'hx-target': '#comments-box',
     'hx-swap': 'outerHTML',
   }
@@ -164,7 +164,7 @@ export function CommentsBox({
         </ul>
       )}
       {user ? (
-        <form class="comment-form" action={`/posts/${postSlug}/comments`} method="post" {...commentHx}>
+        <form class="comment-form" action={langHref(l, `/posts/${postSlug}/comments`)} method="post" {...commentHx}>
           <label class="visually-hidden" htmlFor="comment-body">
             {t(l, 'c.title')}
           </label>
@@ -180,7 +180,7 @@ export function CommentsBox({
         </form>
       ) : (
         <p class="auth-hint">
-          <a href={`/login?next=/posts/${postSlug}`}>{t(l, 'acct.login')}</a> {t(l, 'c.login_hint')}
+          <a href={langHref(l, `/login?next=${encodeURIComponent(langHref(l, `/posts/${postSlug}`))}`)}>{t(l, 'acct.login')}</a> {t(l, 'c.login_hint')}
         </p>
       )}
     </section>

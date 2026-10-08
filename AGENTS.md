@@ -8,7 +8,7 @@
 内容主题：**OpenWrt / Yocto / NVIDIA Tegra（Jetson）嵌入式开发学习**，以及基于以上平台的 **AI 网关**（边缘 AI 网关）实践。
 
 站点尽量轻量：SSR 输出 HTML，htmx 只负责局部片段交互（分页、评论、搜索等），不引入重型前端工具链。
-站点**中英双语**（`lib/locale.ts`：cookie + `CF-IPCountry` 决定语言，`/lang` 可切换）；本地用 bun:sqlite，可选部署到 **Cloudflare Workers + D1**（同一套代码，双存储引擎）。
+站点**中英双语**（`lib/locale.ts`：**URL 决定语言**——中文用根路径、英文用 `/en` 前缀，`langHref()` 生成带前缀链接，`/lang` 302 到对应前缀）；本地用 bun:sqlite，可选部署到 **Cloudflare Workers + D1**（同一套代码，双存储引擎）。
 
 ## 技术栈
 
@@ -74,7 +74,7 @@ blog/
 │   │   ├── tables.ts       # Drizzle 表定义（与 db/schema.sql 保持一致，D1 迁移源）
 │   │   ├── md.ts           # Markdown + frontmatter 解析渲染
 │   │   ├── auth.ts         # PBKDF2 散列、Cookie 会话、角色工具
-│   │   ├── locale.ts       # 中英双语（resolveLang/t()/setLangCookie），按 cookie + CF-IPCountry
+│   │   ├── locale.ts       # 中英双语（resolveLang/t()/langHref），URL 前缀 /en 决定语言
 │   │   ├── env.ts          # envStr/setVars（跨 Bun/Worker 读环境变量）
 │   │   └── slug.ts         # 标题转 slug 等工具
 │   ├── middleware/         # http.ts：访问日志、安全头
@@ -162,7 +162,7 @@ blog/
 ### 双语内容与运营
 - **中文为源**：文章/页面的中文正文存 DB（`content/archive` 仅作 `db:import` 种子，或后台 `/admin` 直接写）。
 - **英文版**：正文放 `content/en/<slug>.md`（frontmatter 只需 `title`/`summary`），运行 `bun src/scripts/seed-en.ts` 写入 `posts.*_en` 列；前台按语言显示，英文缺失时**自动回退中文**。
-- **语言判定**：`src/lib/locale.ts` 的 `resolveLang(c)`——cookie `lang`（`/lang?lang=zh|en` 切换）优先，否则按 `CF-IPCountry`（CN→zh，其它→en）；UI 文案用 `t(lang, key)`。
+- **语言判定**：`src/lib/locale.ts` 的 `resolveLang(c)`——**由 URL 决定**：`/en/*` 为英文，其余为中文（确定、可被 Google 分别收录）；站内链接统一用 `langHref(lang, path)` 加前缀；`/lang?lang=zh|en&next=...` 302 到对应前缀；页面 head 输出 `hreflang`（zh-CN/en/x-default），sitemap 输出中英双 URL。UI 文案用 `t(lang, key)`。
 - **embedai docs 同步**：`content/docs-manifest.json` 映射 doc→slug，`bun run docs:sync`（或 `sync-embedai-docs.yml`）拉快照到 `content/upstream/embedai/`，中文/英文文章仍需人工更新。
 - **D1 发布**：结构走 `migrations/drizzle` + `wrangler d1 migrations apply`；内容可用 `db/seed-d1.sql` 首灌。后台写 DB 后线上（D1）需另行同步（新增文章目前用 `INSERT ... ON CONFLICT` 推送，见历史脚本）。
 - **`growth/` 是运营文档**（选题、视频脚本、商业化），**不属于站点内容**，不要出现在前台或 DB。
