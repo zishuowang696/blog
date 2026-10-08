@@ -116,7 +116,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-08T22:34:27.829Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-08T22:38:26.709Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -243,160 +243,248 @@ INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'ai-gateway-architecture' AND t.name = 'jetson'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
-  VALUES ('build-ai-agent-from-scratch', '从 0 构建一个 AI Agent（完整版）', '把''想→做→看→再想''这个循环、工具调用、记忆、可观测、本地模型和几十行复刻，合成一篇：读完你就懂了 Agent 的骨架。', '<p>很多人以为 AI Agent 很复杂。其实它<strong>只有一个循环</strong>，其余全是围绕它做的工程。这篇把核心一次讲透。</p>
-<h2>1. 核心：一个循环</h2>
-<ol><li>把<strong>问题</strong>和<strong>已有信息</strong>交给模型；</li></ol>
-<ol><li>模型决定：<strong>直接回答</strong>，还是<strong>调用一个工具</strong>；</li></ol>
-<ol><li>若调工具 → 执行 → 把<strong>结果</strong>塞回上下文；</li></ol>
-<ol><li><strong>再来一轮</strong>，直到给出最终答案。</li></ol>
-<p>就这么简单。所谓&quot;框架&quot;，大多只是把这个循环<strong>包装得更顺手</strong>。理解它最快的办法，是<strong>自己写一遍</strong>——你会发现核心真的只有几十行。</p>
-<h2>2. 让模型&quot;动手&quot;：工具调用</h2>
-<p>模型本身只会&quot;说话&quot;，不会&quot;做事&quot;。<strong>工具调用（function calling）</strong> 就是给它一双手：</p>
-<ul><li>你告诉模型：&quot;有哪些函数、参数是什么&quot;；</li><li>模型决定：<strong>调哪个、传什么参数</strong>；</li><li>你的程序<strong>真正执行</strong> → 把结果给它。</li></ul>
-<p>关键：<strong>模型不执行任何东西</strong>，它只输出&quot;我想调 <code>get_temp()</code>&quot;。<strong>真正干活的永远是你的代码</strong>——这也是安全的关键（你能拦、能审）。工具别贪多，<strong>先给 3 个真用得上的</strong>就够。</p>
-<h2>3. 记忆：短期 vs 长期</h2>
-<p>模型没有记忆——<strong>每次调用都是&quot;新人&quot;</strong>。Agent 的&quot;记忆&quot;全靠你喂上下文：</p>
-<ul><li><strong>短期</strong>：把对话历史拼进 prompt（简单，但越来越长、越贵）；</li><li><strong>长期</strong>：把要点存<strong>向量库</strong>，用时<strong>检索</strong>回来（省 token，可无限扩）。</li></ul>
-<p>经验：<strong>先做短期</strong>，量大或要跨会话再上长期。记住——<strong>记忆不是&quot;存下来&quot;，而是&quot;下次能取出来&quot;</strong>。</p>
-<h2>4. 为什么必须&quot;可观测&quot;</h2>
-<p>Agent 是<strong>不确定</strong>的：同样输入，可能走不同路径。所以<strong>看不到它每一步在干嘛 = 没法调</strong>。至少要能看到：每轮<strong>模型输出</strong>、每次<strong>工具调用</strong>的参数与结果、<strong>耗时与失败</strong>卡在哪。</p>
-<p>一句话：<strong>Agent 的调试，本质是&quot;看轨迹&quot;。</strong></p>
-<h2>5. 用本地模型跑（Ollama）</h2>
-<p>Agent 不一定要用云模型。用 <strong>Ollama</strong> 本地跑：<strong>免费、离线、数据不出场</strong>，还能接<strong>边缘设备</strong>（Jetson 上也能跑小模型）。主流框架都支持它的统一接口，把 base_url 指到本地即可。</p>
-<p>注意：小模型<strong>工具调用能力弱</strong> → <strong>先用强模型把循环跑通，再换小模型优化</strong>。</p>
-<h2>6. 从 0 复刻：几十行</h2>
-<p>最小 Agent 只需三件：</p>
-<ol><li><strong>循环</strong>：<code>while</code>，直到拿到答案；</li></ol>
-<ol><li><strong>工具</strong>：几个普通函数 + 名字和参数说明；</li></ol>
-<ol><li><strong>调用</strong>：把模型要的函数<strong>真的执行</strong>，结果塞回上下文。</li></ol>
-<p><strong>几十行</strong>就能跑。写完之后你会发现：<strong>框架不神秘，核心你已经掌握了</strong>。</p>
-<p>下一步：给它加你自己的工具——比如<strong>读设备温度</strong>，就迈出了&quot;设备自运维 Agent&quot;的第一步。</p>
+  VALUES ('build-ai-agent-from-scratch', '从 0 构建一个 AI Agent：核心其实只有 20 行', '抛开所有框架，Agent 的本质是一个循环 + 一组工具。看懂这段 20 行的骨架，你就掌握了所有 Agent 框架的内核。', '<p>市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。<strong>其实没有</strong>：剥掉包装，Agent 的本质就是下面这 20 行。</p>
+<h2>核心：一个循环</h2>
+<pre><code class="language-python">import json
+
+TOOLS = {
+    &quot;get_temp&quot;: lambda: {&quot;temp&quot;: 42},        # 你的真实函数
+}
+
+def agent(user_input):
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input}]
+    while True:
+        reply = llm(messages, tools=TOOLS)   # 1. 问模型
+        messages.append(reply)
+        if not reply.get(&quot;tool_calls&quot;):      # 2. 不用工具了 → 给答案
+            return reply[&quot;content&quot;]
+        for call in reply[&quot;tool_calls&quot;]:     # 3. 真正执行工具
+            result = TOOLS[call[&quot;name&quot;]]()
+            messages.append({&quot;role&quot;: &quot;tool&quot;, &quot;content&quot;: json.dumps(result)})</code></pre>
+<p>每一次循环只做三件事：<strong>问模型 → 执行它要的工具 → 把结果塞回去</strong>，直到模型给出最终答案。</p>
+<p>所有&quot;框架&quot;——LangChain、AutoGen、你见过的任何一个——<strong>都只是把这 20 行包得更顺手</strong>：加日志、加记忆、加并发、加 UI。内核没变。</p>
+<p>理解了这一点，剩下的四个概念就都好懂了。</p>
+<h2>一、工具调用：模型决定，你的代码执行</h2>
+<p>模型本身只会&quot;说话&quot;，不会&quot;做事&quot;。<strong>工具调用</strong>就是把&quot;做事的能力&quot;交给它：</p>
+<ul><li>你把函数<strong>名字和参数</strong>告诉模型；</li><li>模型决定<strong>调哪个、传什么</strong>；</li><li><strong>你的代码去真正执行</strong>，把结果回喂。</li></ul>
+<p>关键在这句：<strong>模型不执行任何东西</strong>，它只输出&quot;我想调 <code>get_temp()</code>&quot;。<strong>真正动手的永远是你的代码</strong>——这既是安全边界（你能拦、能审），也是为什么&quot;给模型一双干净的手&quot;比&quot;给它一百个工具&quot;更重要。</p>
+<blockquote><p>工具别贪多。<strong>先给 3 个真用得上的</strong>。</p></blockquote>
+<h2>二、记忆：短期靠拼，长期靠检索</h2>
+<p>模型<strong>没有记忆</strong>——每次调用都是&quot;新人&quot;。所谓 Agent 的&quot;记忆&quot;，只是你<strong>主动喂给它的上下文</strong>：</p>
+<ul><li><strong>短期</strong>：把对话历史拼进 prompt。简单，但越拼越长、越贵。</li><li><strong>长期</strong>：把要点存进<strong>向量库</strong>，需要时<strong>检索</strong>回来。省 token，且能无限扩展。</li></ul>
+<p><strong>先做短期</strong>，等到量大或要跨会话回忆，再上长期。</p>
+<p>记住一句话：<strong>记忆不是&quot;存下来&quot;，而是&quot;下次能取出来&quot;。</strong></p>
+<h2>三、可观测：Agent 的调试就是&quot;看轨迹&quot;</h2>
+<p>模型是<strong>不确定</strong>的：同样的输入，可能走完全不同的路径。所以你<strong>看不到它每一步在干嘛，就根本没法调</strong>。</p>
+<p>至少要能看见：每一轮<strong>模型的决定</strong>、每一次<strong>工具调用</strong>的参数与结果、以及<strong>时间和失败</strong>卡在哪里。</p>
+<blockquote><p><strong>Agent 调试的本质，是读它的执行轨迹。</strong></p></blockquote>
+<h2>四、本地模型：离线、私有、能上边缘</h2>
+<p>Agent 不一定要用云模型。用 <strong>Ollama</strong> 在本地跑：<strong>免费、离线、数据不出场</strong>——而且能跑在<strong>边缘设备</strong>上（Jetson 这类板子也能撑起小模型）。</p>
+<p>主流框架都支持它的统一接口，把 <code>base_url</code> 指到本地即可。</p>
+<p>一个经验：<strong>小模型的工具调用能力弱</strong>。所以顺序是——<strong>先用强模型把循环跑通，再换小模型做优化</strong>。</p>
+<h2>下一步：把它变成&quot;你的&quot; Agent</h2>
+<p>看懂这 20 行之后，你只需要做一件事：<strong>给它加一个你自己的工具</strong>。</p>
+<p>比如加一个 <code>get_device_temp()</code>——读板子温度的普通函数。当模型学会&quot;先看温度、再决定要不要降频&quot;时，你就已经迈出了<strong>设备自运维 Agent</strong> 的第一步。</p>
 <hr>
-<p><strong>总结</strong>：Agent = <strong>循环</strong>（想→做→看→再想）+ <strong>工具</strong>（模型决定，你的代码执行）+ <strong>记忆</strong>（喂上下文）+ <strong>可观测</strong>（看轨迹）。把它跑在<strong>本地模型</strong>上，你会得到一个<strong>离线、私有、可嵌入边缘</strong>的智能体。</p>', '---
-title: "从 0 构建一个 AI Agent（完整版）"
+<p><strong>一句话收尾</strong>：Agent = <strong>一个循环 + 一组工具</strong>；记忆让它记得住，可观测让它调得动，本地模型让它跑得起。<strong>框架会变，这个内核不会。</strong></p>', '---
+title: "从 0 构建一个 AI Agent：核心其实只有 20 行"
 date: 2026-09-30
 tags: ["ai-agent", "智能体", "教程", "function-calling", "ollama"]
-summary: "把''想→做→看→再想''这个循环、工具调用、记忆、可观测、本地模型和几十行复刻，合成一篇：读完你就懂了 Agent 的骨架。"
+summary: "抛开所有框架，Agent 的本质是一个循环 + 一组工具。看懂这段 20 行的骨架，你就掌握了所有 Agent 框架的内核。"
 series: "从 0 构建 AI Agent"
 published: true
 ---
 
-很多人以为 AI Agent 很复杂。其实它**只有一个循环**，其余全是围绕它做的工程。这篇把核心一次讲透。
+市面上的 Agent 框架层出不穷，容易让人以为里面有什么高深的东西。**其实没有**：剥掉包装，Agent 的本质就是下面这 20 行。
 
-## 1. 核心：一个循环
+## 核心：一个循环
 
-1. 把**问题**和**已有信息**交给模型；
-2. 模型决定：**直接回答**，还是**调用一个工具**；
-3. 若调工具 → 执行 → 把**结果**塞回上下文；
-4. **再来一轮**，直到给出最终答案。
+```python
+import json
 
-就这么简单。所谓"框架"，大多只是把这个循环**包装得更顺手**。理解它最快的办法，是**自己写一遍**——你会发现核心真的只有几十行。
+TOOLS = {
+    "get_temp": lambda: {"temp": 42},        # 你的真实函数
+}
 
-## 2. 让模型"动手"：工具调用
+def agent(user_input):
+    messages = [{"role": "user", "content": user_input}]
+    while True:
+        reply = llm(messages, tools=TOOLS)   # 1. 问模型
+        messages.append(reply)
+        if not reply.get("tool_calls"):      # 2. 不用工具了 → 给答案
+            return reply["content"]
+        for call in reply["tool_calls"]:     # 3. 真正执行工具
+            result = TOOLS[call["name"]]()
+            messages.append({"role": "tool", "content": json.dumps(result)})
+```
 
-模型本身只会"说话"，不会"做事"。**工具调用（function calling）** 就是给它一双手：
+每一次循环只做三件事：**问模型 → 执行它要的工具 → 把结果塞回去**，直到模型给出最终答案。
 
-- 你告诉模型："有哪些函数、参数是什么"；
-- 模型决定：**调哪个、传什么参数**；
-- 你的程序**真正执行** → 把结果给它。
+所有"框架"——LangChain、AutoGen、你见过的任何一个——**都只是把这 20 行包得更顺手**：加日志、加记忆、加并发、加 UI。内核没变。
 
-关键：**模型不执行任何东西**，它只输出"我想调 `get_temp()`"。**真正干活的永远是你的代码**——这也是安全的关键（你能拦、能审）。工具别贪多，**先给 3 个真用得上的**就够。
+理解了这一点，剩下的四个概念就都好懂了。
 
-## 3. 记忆：短期 vs 长期
+## 一、工具调用：模型决定，你的代码执行
 
-模型没有记忆——**每次调用都是"新人"**。Agent 的"记忆"全靠你喂上下文：
+模型本身只会"说话"，不会"做事"。**工具调用**就是把"做事的能力"交给它：
 
-- **短期**：把对话历史拼进 prompt（简单，但越来越长、越贵）；
-- **长期**：把要点存**向量库**，用时**检索**回来（省 token，可无限扩）。
+- 你把函数**名字和参数**告诉模型；
+- 模型决定**调哪个、传什么**；
+- **你的代码去真正执行**，把结果回喂。
 
-经验：**先做短期**，量大或要跨会话再上长期。记住——**记忆不是"存下来"，而是"下次能取出来"**。
+关键在这句：**模型不执行任何东西**，它只输出"我想调 `get_temp()`"。**真正动手的永远是你的代码**——这既是安全边界（你能拦、能审），也是为什么"给模型一双干净的手"比"给它一百个工具"更重要。
 
-## 4. 为什么必须"可观测"
+> 工具别贪多。**先给 3 个真用得上的**。
 
-Agent 是**不确定**的：同样输入，可能走不同路径。所以**看不到它每一步在干嘛 = 没法调**。至少要能看到：每轮**模型输出**、每次**工具调用**的参数与结果、**耗时与失败**卡在哪。
+## 二、记忆：短期靠拼，长期靠检索
 
-一句话：**Agent 的调试，本质是"看轨迹"。**
+模型**没有记忆**——每次调用都是"新人"。所谓 Agent 的"记忆"，只是你**主动喂给它的上下文**：
 
-## 5. 用本地模型跑（Ollama）
+- **短期**：把对话历史拼进 prompt。简单，但越拼越长、越贵。
+- **长期**：把要点存进**向量库**，需要时**检索**回来。省 token，且能无限扩展。
 
-Agent 不一定要用云模型。用 **Ollama** 本地跑：**免费、离线、数据不出场**，还能接**边缘设备**（Jetson 上也能跑小模型）。主流框架都支持它的统一接口，把 base_url 指到本地即可。
+**先做短期**，等到量大或要跨会话回忆，再上长期。
 
-注意：小模型**工具调用能力弱** → **先用强模型把循环跑通，再换小模型优化**。
+记住一句话：**记忆不是"存下来"，而是"下次能取出来"。**
 
-## 6. 从 0 复刻：几十行
+## 三、可观测：Agent 的调试就是"看轨迹"
 
-最小 Agent 只需三件：
+模型是**不确定**的：同样的输入，可能走完全不同的路径。所以你**看不到它每一步在干嘛，就根本没法调**。
 
-1. **循环**：`while`，直到拿到答案；
-2. **工具**：几个普通函数 + 名字和参数说明；
-3. **调用**：把模型要的函数**真的执行**，结果塞回上下文。
+至少要能看见：每一轮**模型的决定**、每一次**工具调用**的参数与结果、以及**时间和失败**卡在哪里。
 
-**几十行**就能跑。写完之后你会发现：**框架不神秘，核心你已经掌握了**。
+> **Agent 调试的本质，是读它的执行轨迹。**
 
-下一步：给它加你自己的工具——比如**读设备温度**，就迈出了"设备自运维 Agent"的第一步。
+## 四、本地模型：离线、私有、能上边缘
 
----
+Agent 不一定要用云模型。用 **Ollama** 在本地跑：**免费、离线、数据不出场**——而且能跑在**边缘设备**上（Jetson 这类板子也能撑起小模型）。
 
-**总结**：Agent = **循环**（想→做→看→再想）+ **工具**（模型决定，你的代码执行）+ **记忆**（喂上下文）+ **可观测**（看轨迹）。把它跑在**本地模型**上，你会得到一个**离线、私有、可嵌入边缘**的智能体。
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-08T22:34:27.831Z', 'Building an AI agent from scratch (complete)', 'The think→act→observe loop, tool calling, memory, observability, local models, and a few-dozen-line rebuild — merged into one read.', 'Many people think AI agents are complicated. In reality there''s **one loop**, and everything else is engineering around it.
+主流框架都支持它的统一接口，把 `base_url` 指到本地即可。
 
-## 1. The core: a loop
+一个经验：**小模型的工具调用能力弱**。所以顺序是——**先用强模型把循环跑通，再换小模型做优化**。
 
-1. Give the model the **question** and current context;
-2. It either **answers**, or **calls a tool**;
-3. Run the tool → **feed the result back**;
-4. **Repeat** until it answers.
+## 下一步：把它变成"你的" Agent
 
-That''s it. Frameworks mostly just make this loop nicer. The fastest way to get it is to **write it yourself** — the core is a few dozen lines.
+看懂这 20 行之后，你只需要做一件事：**给它加一个你自己的工具**。
 
-## 2. Giving the model hands: tool calling
-
-A model can talk, not act. **Tool calling** gives it hands: you describe the functions and their parameters; the model picks **which one and with what arguments**; **your code actually runs it** and returns the result.
-
-The model runs nothing — it only emits "call `get_temp()`". **Your code always does the work**, which is where safety lives. Start with three genuinely useful tools.
-
-## 3. Memory: short vs long term
-
-Models have no memory — every call is a stranger. Memory is whatever you feed back. **Short-term**: append history (simple, grows). **Long-term**: store key facts in a vector store and retrieve them (cheaper, scales). Start short; add long when needed. **Memory isn''t "storing" — it''s "retrieving next time."**
-
-## 4. Why observability matters
-
-Agents are non-deterministic. If you can''t see each step — each model decision, each tool call with its arguments and result, where time goes — you can''t debug. **Debugging an agent is reading its trace.**
-
-## 5. Running on a local model (Ollama)
-
-Agents don''t need the cloud. With Ollama: **free, offline, private**, and it fits **edge devices** (small models on a Jetson). Point the base URL at localhost. Caveat: small models are **weak at tool calling** — **get the loop working on a strong model first, then size down**.
-
-## 6. Rebuild it in a few dozen lines
-
-A minimal agent needs three things: a **loop** until an answer; a few **tools** (plain functions with parameter docs); and **execution** that feeds results back. A few dozen lines is enough. Then you''ll see frameworks aren''t magic — **you own the core.**
-
-Next: give it your own tool — like **reading a device''s temperature** — and you''ve started a self-maintaining device agent.
+比如加一个 `get_device_temp()`——读板子温度的普通函数。当模型学会"先看温度、再决定要不要降频"时，你就已经迈出了**设备自运维 Agent** 的第一步。
 
 ---
 
-**Summary**: an agent = **loop** + **tools** (the model decides, your code executes) + **memory** + **observability**, run on a **local model** for an **offline, private, edge-ready** assistant.
-', '<p>Many people think AI agents are complicated. In reality there&#39;s <strong>one loop</strong>, and everything else is engineering around it.</p>
-<h2>1. The core: a loop</h2>
-<ol><li>Give the model the <strong>question</strong> and current context;</li></ol>
-<ol><li>It either <strong>answers</strong>, or <strong>calls a tool</strong>;</li></ol>
-<ol><li>Run the tool → <strong>feed the result back</strong>;</li></ol>
-<ol><li><strong>Repeat</strong> until it answers.</li></ol>
-<p>That&#39;s it. Frameworks mostly just make this loop nicer. The fastest way to get it is to <strong>write it yourself</strong> — the core is a few dozen lines.</p>
-<h2>2. Giving the model hands: tool calling</h2>
-<p>A model can talk, not act. <strong>Tool calling</strong> gives it hands: you describe the functions and their parameters; the model picks <strong>which one and with what arguments</strong>; <strong>your code actually runs it</strong> and returns the result.</p>
-<p>The model runs nothing — it only emits &quot;call <code>get_temp()</code>&quot;. <strong>Your code always does the work</strong>, which is where safety lives. Start with three genuinely useful tools.</p>
-<h2>3. Memory: short vs long term</h2>
-<p>Models have no memory — every call is a stranger. Memory is whatever you feed back. <strong>Short-term</strong>: append history (simple, grows). <strong>Long-term</strong>: store key facts in a vector store and retrieve them (cheaper, scales). Start short; add long when needed. <strong>Memory isn&#39;t &quot;storing&quot; — it&#39;s &quot;retrieving next time.&quot;</strong></p>
-<h2>4. Why observability matters</h2>
-<p>Agents are non-deterministic. If you can&#39;t see each step — each model decision, each tool call with its arguments and result, where time goes — you can&#39;t debug. <strong>Debugging an agent is reading its trace.</strong></p>
-<h2>5. Running on a local model (Ollama)</h2>
-<p>Agents don&#39;t need the cloud. With Ollama: <strong>free, offline, private</strong>, and it fits <strong>edge devices</strong> (small models on a Jetson). Point the base URL at localhost. Caveat: small models are <strong>weak at tool calling</strong> — <strong>get the loop working on a strong model first, then size down</strong>.</p>
-<h2>6. Rebuild it in a few dozen lines</h2>
-<p>A minimal agent needs three things: a <strong>loop</strong> until an answer; a few <strong>tools</strong> (plain functions with parameter docs); and <strong>execution</strong> that feeds results back. A few dozen lines is enough. Then you&#39;ll see frameworks aren&#39;t magic — <strong>you own the core.</strong></p>
-<p>Next: give it your own tool — like <strong>reading a device&#39;s temperature</strong> — and you&#39;ve started a self-maintaining device agent.</p>
+**一句话收尾**：Agent = **一个循环 + 一组工具**；记忆让它记得住，可观测让它调得动，本地模型让它跑得起。**框架会变，这个内核不会。**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-08T22:38:26.711Z', 'Building an AI agent from scratch: the core is 20 lines', 'Strip away the frameworks and an agent is a loop plus a set of tools. Understand this 20-line skeleton and you understand the kernel of every agent framework.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.** Strip away the packaging and an agent is the 20 lines below.
+
+## The core: a loop
+
+```python
+import json
+
+TOOLS = {
+    "get_temp": lambda: {"temp": 42},        # your real function
+}
+
+def agent(user_input):
+    messages = [{"role": "user", "content": user_input}]
+    while True:
+        reply = llm(messages, tools=TOOLS)   # 1. ask the model
+        messages.append(reply)
+        if not reply.get("tool_calls"):      # 2. no tool needed -> answer
+            return reply["content"]
+        for call in reply["tool_calls"]:     # 3. actually run the tools
+            result = TOOLS[call["name"]]()
+            messages.append({"role": "tool", "content": json.dumps(result)})
+```
+
+Every iteration does three things: **ask the model → run the tool it asked for → feed the result back**, until the model gives a final answer.
+
+Every "framework" — LangChain, AutoGen, all of them — **is just this loop wrapped more conveniently**: logging, memory, concurrency, a UI. The kernel never changes.
+
+Once that clicks, the other four ideas are easy.
+
+## 1. Tool calling: the model decides, your code executes
+
+A model can talk, not act. **Tool calling** hands it the ability to do things: you tell it the function **names and parameters**; it decides **which one and with what arguments**; **your code actually runs it** and feeds the result back.
+
+The key line: **the model executes nothing**. It only emits "call `get_temp()`". **Your code always does the work** — that''s your safety boundary, and the reason "give the model a clean pair of hands" beats "give it a hundred tools."
+
+> Don''t hoard tools. **Start with three you truly need.**
+
+## 2. Memory: paste it short, retrieve it long
+
+Models **have no memory** — every call is a stranger. An agent''s "memory" is just the context **you choose to feed back**:
+
+- **Short-term**: append the conversation. Simple, but it grows and costs more.
+- **Long-term**: store key facts in a **vector store** and **retrieve** them when needed. Cheaper, and it scales.
+
+**Start short-term**; add long-term when volume or cross-session recall demands it.
+
+One line to keep: **memory isn''t "storing" — it''s "retrieving next time."**
+
+## 3. Observability: debugging an agent means reading its trace
+
+Models are **non-deterministic**: the same input can take completely different paths. So **if you can''t see each step, you can''t debug at all.**
+
+You need, at minimum: each **model decision**, each **tool call** with its arguments and result, and where **time and failures** go.
+
+> **Debugging an agent is reading its execution trace.**
+
+## 4. Local models: offline, private, edge-ready
+
+Agents don''t need the cloud. Run them locally with **Ollama**: **free, offline, private** — and it fits **edge devices** (small models run on a Jetson). Most frameworks speak Ollama''s unified API; point `base_url` at localhost.
+
+One lesson: **small models are weak at tool calling.** So the order is — **get the loop working on a strong model first, then size down.**
+
+## Next: make it *your* agent
+
+Once you understand those 20 lines, you only need to do one thing: **give it a tool of your own.**
+
+Add a `get_device_temp()` — a plain function that reads a board''s temperature. The moment the model learns to "check the temperature first, then decide whether to throttle," you''ve taken the first step toward a **self-maintaining device agent**.
+
+---
+
+**In one line**: an agent = **a loop plus tools**; memory makes it remember, observability makes it debuggable, a local model makes it deployable. **Frameworks change — the kernel doesn''t.**
+', '<p>New agent frameworks appear every month, which makes it easy to assume there&#39;s something deep inside. <strong>There isn&#39;t.</strong> Strip away the packaging and an agent is the 20 lines below.</p>
+<h2>The core: a loop</h2>
+<pre><code class="language-python">import json
+
+TOOLS = {
+    &quot;get_temp&quot;: lambda: {&quot;temp&quot;: 42},        # your real function
+}
+
+def agent(user_input):
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input}]
+    while True:
+        reply = llm(messages, tools=TOOLS)   # 1. ask the model
+        messages.append(reply)
+        if not reply.get(&quot;tool_calls&quot;):      # 2. no tool needed -&gt; answer
+            return reply[&quot;content&quot;]
+        for call in reply[&quot;tool_calls&quot;]:     # 3. actually run the tools
+            result = TOOLS[call[&quot;name&quot;]]()
+            messages.append({&quot;role&quot;: &quot;tool&quot;, &quot;content&quot;: json.dumps(result)})</code></pre>
+<p>Every iteration does three things: <strong>ask the model → run the tool it asked for → feed the result back</strong>, until the model gives a final answer.</p>
+<p>Every &quot;framework&quot; — LangChain, AutoGen, all of them — <strong>is just this loop wrapped more conveniently</strong>: logging, memory, concurrency, a UI. The kernel never changes.</p>
+<p>Once that clicks, the other four ideas are easy.</p>
+<h2>1. Tool calling: the model decides, your code executes</h2>
+<p>A model can talk, not act. <strong>Tool calling</strong> hands it the ability to do things: you tell it the function <strong>names and parameters</strong>; it decides <strong>which one and with what arguments</strong>; <strong>your code actually runs it</strong> and feeds the result back.</p>
+<p>The key line: <strong>the model executes nothing</strong>. It only emits &quot;call <code>get_temp()</code>&quot;. <strong>Your code always does the work</strong> — that&#39;s your safety boundary, and the reason &quot;give the model a clean pair of hands&quot; beats &quot;give it a hundred tools.&quot;</p>
+<blockquote><p>Don&#39;t hoard tools. <strong>Start with three you truly need.</strong></p></blockquote>
+<h2>2. Memory: paste it short, retrieve it long</h2>
+<p>Models <strong>have no memory</strong> — every call is a stranger. An agent&#39;s &quot;memory&quot; is just the context <strong>you choose to feed back</strong>:</p>
+<ul><li><strong>Short-term</strong>: append the conversation. Simple, but it grows and costs more.</li><li><strong>Long-term</strong>: store key facts in a <strong>vector store</strong> and <strong>retrieve</strong> them when needed. Cheaper, and it scales.</li></ul>
+<p><strong>Start short-term</strong>; add long-term when volume or cross-session recall demands it.</p>
+<p>One line to keep: <strong>memory isn&#39;t &quot;storing&quot; — it&#39;s &quot;retrieving next time.&quot;</strong></p>
+<h2>3. Observability: debugging an agent means reading its trace</h2>
+<p>Models are <strong>non-deterministic</strong>: the same input can take completely different paths. So <strong>if you can&#39;t see each step, you can&#39;t debug at all.</strong></p>
+<p>You need, at minimum: each <strong>model decision</strong>, each <strong>tool call</strong> with its arguments and result, and where <strong>time and failures</strong> go.</p>
+<blockquote><p><strong>Debugging an agent is reading its execution trace.</strong></p></blockquote>
+<h2>4. Local models: offline, private, edge-ready</h2>
+<p>Agents don&#39;t need the cloud. Run them locally with <strong>Ollama</strong>: <strong>free, offline, private</strong> — and it fits <strong>edge devices</strong> (small models run on a Jetson). Most frameworks speak Ollama&#39;s unified API; point <code>base_url</code> at localhost.</p>
+<p>One lesson: <strong>small models are weak at tool calling.</strong> So the order is — <strong>get the loop working on a strong model first, then size down.</strong></p>
+<h2>Next: make it <em>your</em> agent</h2>
+<p>Once you understand those 20 lines, you only need to do one thing: <strong>give it a tool of your own.</strong></p>
+<p>Add a <code>get_device_temp()</code> — a plain function that reads a board&#39;s temperature. The moment the model learns to &quot;check the temperature first, then decide whether to throttle,&quot; you&#39;ve taken the first step toward a <strong>self-maintaining device agent</strong>.</p>
 <hr>
-<p><strong>Summary</strong>: an agent = <strong>loop</strong> + <strong>tools</strong> (the model decides, your code executes) + <strong>memory</strong> + <strong>observability</strong>, run on a <strong>local model</strong> for an <strong>offline, private, edge-ready</strong> assistant.</p>')
+<p><strong>In one line</strong>: an agent = <strong>a loop plus tools</strong>; memory makes it remember, observability makes it debuggable, a local model makes it deployable. <strong>Frameworks change — the kernel doesn&#39;t.</strong></p>')
   ON CONFLICT(slug) DO UPDATE SET
     title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
     source_md = excluded.source_md, series = excluded.series, published = excluded.published,
@@ -548,7 +636,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-08T22:34:27.832Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-08T22:38:26.715Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -831,7 +919,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T22:34:27.834Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T22:38:26.717Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1072,7 +1160,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-08T22:34:27.834Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-08T22:38:26.722Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1324,7 +1412,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-08T22:34:27.835Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-08T22:38:26.724Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -1583,7 +1671,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-08T22:34:27.836Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-08T22:38:26.725Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -1753,7 +1841,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T22:34:27.837Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T22:38:26.726Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -1957,7 +2045,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-08T22:34:27.838Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-08T22:38:26.727Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -2244,7 +2332,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-08T22:34:27.839Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-08T22:38:26.728Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -2592,7 +2680,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-08T22:34:27.840Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-08T22:38:26.728Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -2828,5 +2916,5 @@ date: 2026-09-01
 - Markdown 写内容，启动时渲染入库
 
 > 注册账号即可在文章下评论；想协作/指正也欢迎留言。
-', '2026-09-01', '2026-10-08T22:34:27.841Z')
+', '2026-09-01', '2026-10-08T22:38:26.729Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
