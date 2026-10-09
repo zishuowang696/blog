@@ -168,7 +168,10 @@ export function Sidebar({ lang, latest, tags }: { lang: Lang; latest: PostMeta[]
       {tags.length > 0 ? (
         <div class="side-card">
           <h3 class="side-title">{lang === 'zh' ? '标签' : 'Tags'}</h3>
-          <TagCloud tags={tags} lang={lang} />
+          <TagCloud tags={tags.slice(0, 18)} lang={lang} />
+          <a class="side-more" href={langHref(lang, '/tags')}>
+            {lang === 'zh' ? '全部标签 →' : 'All tags →'}
+          </a>
         </div>
       ) : null}
     </aside>
