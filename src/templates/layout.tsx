@@ -77,6 +77,7 @@ export function Layout({ title, description, active, user, lang, path, ogType, j
         <link rel="alternate" hreflang="zh-CN" href={zhUrl} />
         <link rel="alternate" hreflang="en" href={enUrl} />
         <link rel="alternate" hreflang="x-default" href={zhUrl} />
+        <meta name="msvalidate.01" content="A6BA56FB366CE57CB2410A2B115268A6" />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:type" content={ogType ?? 'website'} />
         <meta property="og:title" content={docTitle} />
