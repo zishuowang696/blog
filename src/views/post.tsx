@@ -31,8 +31,8 @@ export function PostView({
   lang: Lang
 }) {
   const { html: bodyHtml, toc } = withToc(post.content_html)
-  return (
-    <div class="reading">
+  const article = (
+    <>
       <article class="post">
         <header class="post-head">
           <p class="crumbs">
@@ -45,18 +45,6 @@ export function PostView({
             <TagLinks tags={post.tags} lang={lang} />
           </div>
         </header>
-        {toc.length >= 2 ? (
-          <nav class="toc">
-            <div class="toc-title">{lang === 'zh' ? '目录' : 'Contents'}</div>
-            <ul>
-              {toc.map((it) => (
-                <li class={`toc-l${it.level}`} key={it.id}>
-                  <a href={`#${it.id}`}>{it.text}</a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ) : null}
         <div class="markdown-body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
         <footer class="post-foot">
           <nav class="pager neighbors">
@@ -66,6 +54,28 @@ export function PostView({
         </footer>
       </article>
       <CommentsBox postSlug={post.slug} comments={comments} user={user} lang={lang} />
+    </>
+  )
+
+  if (toc.length < 2) {
+    return <div class="reading">{article}</div>
+  }
+
+  return (
+    <div class="content-grid">
+      <div>{article}</div>
+      <aside class="sidebar">
+        <div class="side-card">
+          <h3 class="side-title">{lang === 'zh' ? '目录' : 'Contents'}</h3>
+          <ul class="toc-list">
+            {toc.map((it) => (
+              <li class={`toc-l${it.level}`} key={it.id}>
+                <a href={`#${it.id}`}>{it.text}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
     </div>
   )
 }
