@@ -51,6 +51,7 @@ const loadMoreHx = (url: string) => ({
   'hx-get': url,
   'hx-target': '#post-list',
   'hx-swap': 'beforeend',
+  'hx-trigger': 'revealed',
   'hx-on::after-request': "this.closest('.loadmore').remove()",
 })
 
