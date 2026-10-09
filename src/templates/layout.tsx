@@ -6,7 +6,7 @@ import { resolveLang, stripLang, t, EN_PREFIX, langHref, type Lang } from '../li
 import { SITE_DESC, SITE_NAME } from './util.ts'
 import { envStr } from '../lib/env.ts'
 
-export type NavKey = 'home' | 'tags' | 'about' | 'console' | ''
+export type NavKey = 'home' | 'tags' | 'series' | 'about' | 'console' | ''
 
 const LOGO_MARK = (
   <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -117,6 +117,7 @@ export function Layout({ title, description, active, user, lang, path, query, pr
             <nav class="nav-main">
               {nav('home', t(lang, 'nav.posts'), langHref(lang, '/'))}
               {nav('tags', t(lang, 'nav.tags'), langHref(lang, '/tags'))}
+              {nav('series', t(lang, 'nav.series'), langHref(lang, '/series'))}
               {nav('about', t(lang, 'nav.about'), langHref(lang, '/about'))}
             </nav>
             <div class="header-actions">

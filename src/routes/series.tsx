@@ -3,40 +3,40 @@ import type { Context } from 'hono'
 import { listAllPostsMeta, listPosts, listSeries, listTags } from '../lib/db.ts'
 import { langHref, resolveLang, t } from '../lib/locale.ts'
 import { renderHtml } from '../templates/layout.tsx'
-import { TagsIndexView, TagPostsView } from '../views/tags.tsx'
+import { SeriesIndexView, SeriesPostsView } from '../views/series.tsx'
 
 function pageNum(c: Context): number {
   const raw = Number(c.req.query('page'))
   return Number.isInteger(raw) && raw > 0 ? raw : 1
 }
 
-export const tagRoutes = new Hono()
+export const seriesRoutes = new Hono()
 
-tagRoutes.get('/', async (c) => {
+seriesRoutes.get('/', async (c) => {
   const lang = resolveLang(c)
-  const tags = await listTags()
-  const body = <TagsIndexView tags={tags} latest={(await listAllPostsMeta()).slice(0, 6)} series={await listSeries()} lang={lang} />
-  return c.html(await renderHtml(c, { title: t(lang, 'tags.title'), active: 'tags', body }))
+  const series = await listSeries()
+  const body = <SeriesIndexView series={series} latest={(await listAllPostsMeta()).slice(0, 6)} tags={await listTags()} lang={lang} />
+  return c.html(await renderHtml(c, { title: t(lang, 'series.title'), active: 'series', body }))
 })
 
-tagRoutes.get('/:tag', async (c) => {
+seriesRoutes.get('/:name', async (c) => {
   const lang = resolveLang(c)
-  const tag = c.req.param('tag')
+  const name = c.req.param('name')
   const page = pageNum(c)
-  const list = await listPosts({ page, tag, lang })
-  const base = `/tags/${encodeURIComponent(tag)}`
+  const list = await listPosts({ page, series: name, lang })
+  const base = `/series/${encodeURIComponent(name)}`
   const makeHref = (p: number) => langHref(lang, p === 1 ? base : `${base}?page=${p}`)
 
   const body = (
-    <TagPostsView
-      tag={tag}
+    <SeriesPostsView
+      name={name}
       posts={list.items}
       page={page}
       totalPages={list.totalPages}
       total={list.total}
       latest={(await listAllPostsMeta()).slice(0, 6)}
       tags={await listTags()}
-      series={await listSeries()}
+      allSeries={await listSeries()}
       makeHref={makeHref}
       lang={lang}
     />
@@ -44,5 +44,5 @@ tagRoutes.get('/:tag', async (c) => {
   const query = page > 1 ? `?page=${page}` : undefined
   const prev = page > 1 ? makeHref(page - 1) : undefined
   const next = page < list.totalPages ? makeHref(page + 1) : undefined
-  return c.html(await renderHtml(c, { title: t(lang, 'tags.title_one', { tag }), active: 'tags', query, prev, next, body }))
+  return c.html(await renderHtml(c, { title: t(lang, 'series.title_one', { name }), active: 'series', query, prev, next, body }))
 })

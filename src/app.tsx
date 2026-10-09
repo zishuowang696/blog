@@ -9,6 +9,7 @@ import { postRoutes } from './routes/posts.tsx'
 import { tagRoutes } from './routes/tags.tsx'
 import { pageRoutes } from './routes/pages.tsx'
 import { searchRoutes } from './routes/search.tsx'
+import { seriesRoutes } from './routes/series.tsx'
 import { sitemapRoutes } from './routes/sitemap.ts'
 import { resolveLang } from './lib/locale.ts'
 import { NotFoundView, renderHtml } from './templates/layout.tsx'
@@ -32,6 +33,7 @@ app.use('*', async (c, next) => {
 app.route('/', homeRoutes)
 app.route('/posts', postRoutes)
 app.route('/tags', tagRoutes)
+app.route('/series', seriesRoutes)
 app.route('/', pageRoutes)
 app.route('/search', searchRoutes)
 app.route('/', authRoutes)
@@ -40,6 +42,7 @@ app.route('/', commentRoutes)
 app.route('/en', homeRoutes)
 app.route('/en/posts', postRoutes)
 app.route('/en/tags', tagRoutes)
+app.route('/en/series', seriesRoutes)
 app.route('/en', pageRoutes)
 app.route('/en/search', searchRoutes)
 app.route('/en', authRoutes)

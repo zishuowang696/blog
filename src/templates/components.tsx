@@ -1,7 +1,7 @@
 import type { JSXNode } from 'hono/jsx'
 import type { Comment, Post, PostMeta, TagCount, User } from '../lib/db.ts'
 import { langHref, t, type Lang } from '../lib/locale.ts'
-import { fmtDate, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
+import { fmtDate, seriesHref, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
 
 function seriesLabel(lang: Lang): string {
   return lang === 'zh' ? '系列' : 'Series'
@@ -135,7 +135,17 @@ export function TagCloud({ tags, lang }: { tags: TagCount[]; lang?: Lang }) {
   )
 }
 
-export function Sidebar({ lang, latest, tags }: { lang: Lang; latest: PostMeta[]; tags: TagCount[] }) {
+export function Sidebar({
+  lang,
+  latest,
+  tags,
+  series,
+}: {
+  lang: Lang
+  latest: PostMeta[]
+  tags: TagCount[]
+  series: TagCount[]
+}) {
   return (
     <aside class="sidebar">
       <div class="side-card">
@@ -150,6 +160,32 @@ export function Sidebar({ lang, latest, tags }: { lang: Lang; latest: PostMeta[]
           </a>
         </div>
       </div>
+      <div class="side-card side-cta">
+        <h3 class="side-title">{lang === 'zh' ? '需要定制？' : 'Need something built?'}</h3>
+        <p>
+          {lang === 'zh'
+            ? '嵌入式 / 边缘 AI / AI Agent 的定制、咨询与交付。'
+            : 'Custom work and consulting for embedded, edge AI and agents.'}
+        </p>
+        <a class="btn small" href={langHref(lang, '/about')}>
+          {lang === 'zh' ? '了解与联系 →' : 'Learn more →'}
+        </a>
+      </div>
+      {series.length > 0 ? (
+        <div class="side-card">
+          <h3 class="side-title">{t(lang, 'nav.series')}</h3>
+          <ul class="latest-list">
+            {series.slice(0, 8).map((s) => (
+              <li key={s.name}>
+                <a href={langHref(lang, seriesHref(s.name))}>
+                  {s.name}
+                  <span class="d">{t(lang, 'series.count', { n: s.count })}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       {latest.length > 0 ? (
         <div class="side-card">
           <h3 class="side-title">{lang === 'zh' ? '最新文章' : 'Latest'}</h3>

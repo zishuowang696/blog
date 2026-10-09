@@ -3,7 +3,17 @@ import type { Lang } from '../lib/locale.ts'
 import { t } from '../lib/locale.ts'
 import { Pagination, PostList, Sidebar, TagCloud } from '../templates/components.tsx'
 
-export function TagsIndexView({ tags, latest, lang }: { tags: TagCount[]; latest: PostMeta[]; lang: Lang }) {
+export function TagsIndexView({
+  tags,
+  latest,
+  series,
+  lang,
+}: {
+  tags: TagCount[]
+  latest: PostMeta[]
+  series: TagCount[]
+  lang: Lang
+}) {
   return (
     <>
       <section class="page-head">
@@ -14,7 +24,7 @@ export function TagsIndexView({ tags, latest, lang }: { tags: TagCount[]; latest
         <section>
           <TagCloud tags={tags} lang={lang} />
         </section>
-        <Sidebar lang={lang} latest={latest} tags={tags} />
+        <Sidebar lang={lang} latest={latest} tags={tags} series={series} />
       </div>
     </>
   )
@@ -28,6 +38,7 @@ export function TagPostsView({
   total,
   latest,
   tags,
+  series,
   makeHref,
   lang,
 }: {
@@ -38,6 +49,7 @@ export function TagPostsView({
   total: number
   latest: PostMeta[]
   tags: TagCount[]
+  series: TagCount[]
   makeHref: (p: number) => string
   lang: Lang
 }) {
@@ -61,7 +73,7 @@ export function TagPostsView({
             lang={lang}
           />
         </section>
-        <Sidebar lang={lang} latest={latest} tags={tags} />
+        <Sidebar lang={lang} latest={latest} tags={tags} series={series} />
       </div>
     </>
   )
