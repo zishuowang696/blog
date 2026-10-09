@@ -344,6 +344,17 @@ export async function listSeries(): Promise<TagCount[]> {
   return rows as unknown as TagCount[]
 }
 
+export async function listSeriesPosts(series: string, lang: Lang = 'en'): Promise<{ slug: string; title: string }[]> {
+  const rows = await useEngine().all(
+    `SELECT posts.slug AS slug, ${pickField('title', 'title_en', lang)} AS title
+     FROM posts
+     WHERE posts.published = 1 AND posts.series = ?
+     ORDER BY posts.created_at ASC, posts.id ASC`,
+    [series],
+  )
+  return rows as unknown as { slug: string; title: string }[]
+}
+
 export async function getAdjacentPosts(slug: string, lang: Lang = 'en'): Promise<{ older: Post | null; newer: Post | null }> {
   const current = await getPost(slug, lang)
   if (!current) return { older: null, newer: null }

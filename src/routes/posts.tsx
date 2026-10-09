@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { getAdjacentPosts, getPost, listComments } from '../lib/db.ts'
+import { getAdjacentPosts, getPost, listComments, listSeriesPosts } from '../lib/db.ts'
 import { getSessionUser } from '../lib/auth.ts'
 import { langHref, resolveLang } from '../lib/locale.ts'
 import { envStr } from '../lib/env.ts'
@@ -18,6 +18,7 @@ postRoutes.get('/:slug', async (c) => {
 
   const user = await getSessionUser(c)
   const { older, newer } = await getAdjacentPosts(slug, lang)
+  const seriesPosts = post.series ? await listSeriesPosts(post.series, lang) : []
   const body = (
     <PostView
       post={post}
@@ -25,6 +26,7 @@ postRoutes.get('/:slug', async (c) => {
       user={user}
       older={older}
       newer={newer}
+      seriesPosts={seriesPosts}
       lang={lang}
     />
   )

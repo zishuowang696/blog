@@ -21,6 +21,7 @@ export function PostView({
   user,
   older,
   newer,
+  seriesPosts,
   lang,
 }: {
   post: Post
@@ -28,9 +29,13 @@ export function PostView({
   user: User | null
   older: Post | null
   newer: Post | null
+  seriesPosts: { slug: string; title: string }[]
   lang: Lang
 }) {
   const { html: bodyHtml, toc } = withToc(post.content_html)
+  const hasSeries = seriesPosts.length > 1
+  const hasToc = toc.length >= 2
+
   const article = (
     <>
       <article class="post">
@@ -57,25 +62,42 @@ export function PostView({
     </>
   )
 
-  if (toc.length < 2) {
+  if (!hasSeries && !hasToc) {
     return <div class="reading">{article}</div>
   }
 
+  const cls = hasSeries && hasToc ? 'three' : hasSeries ? 'series-only' : 'two'
   return (
-    <div class="content-grid">
+    <div class={`article-grid ${cls}`}>
+      {hasSeries ? (
+        <aside class="series-nav">
+          <div class="side-card">
+            <h3 class="side-title">{post.series}</h3>
+            <ol class="chapter-list">
+              {seriesPosts.map((sp) => (
+                <li class={sp.slug === post.slug ? 'on' : undefined} key={sp.slug}>
+                  <a href={langHref(lang, `/posts/${sp.slug}`)}>{sp.title}</a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </aside>
+      ) : null}
       <div>{article}</div>
-      <aside class="sidebar">
-        <div class="side-card">
-          <h3 class="side-title">{lang === 'zh' ? '目录' : 'Contents'}</h3>
-          <ul class="toc-list">
-            {toc.map((it) => (
-              <li class={`toc-l${it.level}`} key={it.id}>
-                <a href={`#${it.id}`}>{it.text}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside>
+      {hasToc ? (
+        <aside class="sidebar">
+          <div class="side-card">
+            <h3 class="side-title">{lang === 'zh' ? '目录' : 'Contents'}</h3>
+            <ul class="toc-list">
+              {toc.map((it) => (
+                <li class={`toc-l${it.level}`} key={it.id}>
+                  <a href={`#${it.id}`}>{it.text}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      ) : null}
     </div>
   )
 }
