@@ -8,6 +8,20 @@ import { envStr } from '../lib/env.ts'
 
 export type NavKey = 'home' | 'tags' | 'about' | 'console' | ''
 
+const LOGO_MARK = (
+  <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <path d="M16 3 28 10v12L16 29 4 22V10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    <circle cx="16" cy="16" r="3.2" fill="currentColor" />
+  </svg>
+)
+
+const SEARCH_ICON = (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+)
+
 function AccountArea({ user, lang }: { user: User | null; lang: Lang }) {
   if (!user) {
     return (
@@ -91,24 +105,55 @@ export function Layout({ title, description, active, user, lang, path, ogType, j
         <header class="site-header">
           <div class="container nav">
             <a class="logo" href={langHref(lang, '/')}>
-              {SITE_NAME}
+              <span class="logo-mark">{LOGO_MARK}</span>
+              <span class="logo-text">{SITE_NAME}</span>
             </a>
-            <nav class="nav-links">
+            <nav class="nav-main">
               {nav('home', t(lang, 'nav.posts'), langHref(lang, '/'))}
               {nav('tags', t(lang, 'nav.tags'), langHref(lang, '/tags'))}
               {nav('about', t(lang, 'nav.about'), langHref(lang, '/about'))}
+            </nav>
+            <div class="header-actions">
+              <a class="icon-search" href={langHref(lang, '/search')} aria-label={t(lang, 'search.title')} title={t(lang, 'search.title')}>
+                {SEARCH_ICON}
+              </a>
               <span class="lang-switch">
                 <a href={switchHref}>{switchLabel}</a>
               </span>
               <AccountArea user={user} lang={lang} />
-            </nav>
+            </div>
           </div>
         </header>
         <main class="container main">{children}</main>
         <footer class="site-footer">
-          <div class="container foot">
-            <span>© {new Date().getFullYear()} {SITE_NAME}</span>
-            <span class="muted">Bun · Hono · htmx · SQLite</span>
+          <div class="container">
+            <div class="foot-cols">
+              <div>
+                <a class="logo" href={langHref(lang, '/')}>
+                  <span class="logo-mark">{LOGO_MARK}</span>
+                  <span class="logo-text">{SITE_NAME}</span>
+                </a>
+                <p class="foot-desc">{SITE_DESC}</p>
+              </div>
+              <div>
+                <h4>{t(lang, 'nav.posts')}</h4>
+                <a href={langHref(lang, '/')}>{t(lang, 'nav.posts')}</a>
+                <a href={langHref(lang, '/tags')}>{t(lang, 'nav.tags')}</a>
+                <a href={langHref(lang, '/about')}>{t(lang, 'nav.about')}</a>
+              </div>
+              <div>
+                <h4>{lang === 'zh' ? '更多' : 'More'}</h4>
+                <a href={langHref(lang, '/sitemap.xml')}>Sitemap</a>
+                <a href={langHref(lang, '/llms.txt')}>llms.txt</a>
+                <a href="https://github.com/zishuowang696" target="_blank" rel="noopener">GitHub</a>
+              </div>
+            </div>
+            <div class="foot-bottom">
+              <span>
+                © {new Date().getFullYear()} {SITE_NAME}
+              </span>
+              <span class="muted">Bun · Hono · htmx · SQLite</span>
+            </div>
           </div>
         </footer>
       </body>

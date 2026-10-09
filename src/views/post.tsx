@@ -30,7 +30,7 @@ export function PostView({
   lang: Lang
 }) {
   return (
-    <>
+    <div class="reading">
       <article class="post">
         <header class="post-head">
           <p class="crumbs">
@@ -52,6 +52,6 @@ export function PostView({
         </footer>
       </article>
       <CommentsBox postSlug={post.slug} comments={comments} user={user} lang={lang} />
-    </>
+    </div>
   )
 }
