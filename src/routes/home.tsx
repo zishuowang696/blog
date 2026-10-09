@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
-import { listPosts, listTags, POSTS_PER_PAGE } from '../lib/db.ts'
+import { listAllPostsMeta, listPosts, listTags, POSTS_PER_PAGE } from '../lib/db.ts'
 import { langHref, resolveLang, t } from '../lib/locale.ts'
 import { ListChunk } from '../templates/components.tsx'
 import { renderHtml } from '../templates/layout.tsx'
@@ -28,7 +28,17 @@ homeRoutes.get('/', async (c) => {
     return c.html(String(<ListChunk posts={list.items} moreUrl={moreUrl} lang={lang} />))
   }
 
-  const body = <HomeView posts={list.items} moreUrl={moreUrl} page={page} tags={await listTags()} postsPerPage={POSTS_PER_PAGE} lang={lang} />
+  const body = (
+    <HomeView
+      posts={list.items}
+      moreUrl={moreUrl}
+      page={page}
+      tags={await listTags()}
+      latest={(await listAllPostsMeta()).slice(0, 6)}
+      postsPerPage={POSTS_PER_PAGE}
+      lang={lang}
+    />
+  )
   const title = `${SITE_NAME} — ${t(lang, 'home.hero')}`
   return c.html(await renderHtml(c, { title, active: 'home', body }))
 })

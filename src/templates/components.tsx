@@ -1,7 +1,7 @@
 import type { JSXNode } from 'hono/jsx'
-import type { Comment, Post, TagCount, User } from '../lib/db.ts'
+import type { Comment, Post, PostMeta, TagCount, User } from '../lib/db.ts'
 import { langHref, t, type Lang } from '../lib/locale.ts'
-import { fmtDate, tagHref } from './util.ts'
+import { fmtDate, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
 
 function seriesLabel(lang: Lang): string {
   return lang === 'zh' ? '系列' : 'Series'
@@ -96,6 +96,46 @@ export function TagCloud({ tags, lang }: { tags: TagCount[]; lang?: Lang }) {
         </a>
       ))}
     </p>
+  )
+}
+
+export function Sidebar({ lang, latest, tags }: { lang: Lang; latest: PostMeta[]; tags: TagCount[] }) {
+  return (
+    <aside class="sidebar">
+      <div class="side-card">
+        <div class="side-brand">{SITE_NAME}</div>
+        <p>{SITE_DESC}</p>
+        <div class="side-links">
+          <a class="btn small ghost" href={langHref(lang, '/about')}>
+            {t(lang, 'nav.about')}
+          </a>
+          <a class="btn small ghost" href={langHref(lang, '/tags')}>
+            {t(lang, 'nav.tags')}
+          </a>
+        </div>
+      </div>
+      {latest.length > 0 ? (
+        <div class="side-card">
+          <h3 class="side-title">{lang === 'zh' ? '最新文章' : 'Latest'}</h3>
+          <ul class="latest-list">
+            {latest.map((p) => (
+              <li key={p.slug}>
+                <a href={langHref(lang, `/posts/${p.slug}`)}>
+                  {p.title}
+                  <span class="d">{fmtDate(p.date)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {tags.length > 0 ? (
+        <div class="side-card">
+          <h3 class="side-title">{lang === 'zh' ? '标签' : 'Tags'}</h3>
+          <TagCloud tags={tags} lang={lang} />
+        </div>
+      ) : null}
+    </aside>
   )
 }
 

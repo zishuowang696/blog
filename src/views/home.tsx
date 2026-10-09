@@ -1,7 +1,7 @@
-import type { Post, TagCount } from '../lib/db.ts'
+import type { Post, PostMeta, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
-import { PostList, TagCloud } from '../templates/components.tsx'
+import { PostList, Sidebar } from '../templates/components.tsx'
 import { SITE_DESC } from '../templates/util.ts'
 
 export function HomeView({
@@ -9,6 +9,7 @@ export function HomeView({
   moreUrl,
   page,
   tags,
+  latest,
   postsPerPage,
   lang,
 }: {
@@ -16,6 +17,7 @@ export function HomeView({
   moreUrl?: string
   page: number
   tags: TagCount[]
+  latest: PostMeta[]
   postsPerPage: number
   lang: Lang
 }) {
@@ -23,26 +25,35 @@ export function HomeView({
     <>
       <section class="hero">
         <h1>{t(lang, 'home.hero')}</h1>
-        <p class="muted">{SITE_DESC}</p>
+        <p>{SITE_DESC}</p>
+        <div class="hero-actions">
+          <a class="btn" href={langHref(lang, '/tags')}>
+            {t(lang, 'nav.tags')}
+          </a>
+          <a class="btn ghost" href={langHref(lang, '/about')}>
+            {t(lang, 'nav.about')}
+          </a>
+        </div>
       </section>
-      <form class="searchbar" action={langHref(lang, '/search')} method="get" role="search">
-        <input type="search" name="q" placeholder={t(lang, 'search.placeholder')} aria-label={t(lang, 'search.title')} />
-        <button class="btn" type="submit">
-          {t(lang, 'search.submit')}
-        </button>
-      </form>
-      <section class="cards-wrap">
-        <PostList posts={posts} moreUrl={moreUrl} lang={lang} />
-        {page > 1 ? (
-          <p class="muted page-info">
-            {lang === 'zh' ? `第 ${page} 页（每页 ${postsPerPage} 篇）` : `Page ${page} (${postsPerPage} posts per page)`}
-          </p>
-        ) : null}
-      </section>
-      <section class="topics">
-        <h2>{t(lang, 'nav.tags')}</h2>
-        <TagCloud tags={tags} lang={lang} />
-      </section>
+      <div class="content-grid">
+        <div>
+          <form class="searchbar" action={langHref(lang, '/search')} method="get" role="search">
+            <input type="search" name="q" placeholder={t(lang, 'search.placeholder')} aria-label={t(lang, 'search.title')} />
+            <button class="btn" type="submit">
+              {t(lang, 'search.submit')}
+            </button>
+          </form>
+          <section class="cards-wrap">
+            <PostList posts={posts} moreUrl={moreUrl} lang={lang} />
+            {page > 1 ? (
+              <p class="muted page-info">
+                {lang === 'zh' ? `第 ${page} 页（每页 ${postsPerPage} 篇）` : `Page ${page} (${postsPerPage} posts per page)`}
+              </p>
+            ) : null}
+          </section>
+        </div>
+        <Sidebar lang={lang} latest={latest} tags={tags} />
+      </div>
     </>
   )
 }

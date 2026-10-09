@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
-import { listPosts, listTags } from '../lib/db.ts'
+import { listAllPostsMeta, listPosts, listTags } from '../lib/db.ts'
 import { langHref, resolveLang, t } from '../lib/locale.ts'
 import { ListChunk } from '../templates/components.tsx'
 import { renderHtml } from '../templates/layout.tsx'
@@ -19,7 +19,8 @@ export const tagRoutes = new Hono()
 
 tagRoutes.get('/', async (c) => {
   const lang = resolveLang(c)
-  const body = <TagsIndexView tags={await listTags()} lang={lang} />
+  const tags = await listTags()
+  const body = <TagsIndexView tags={tags} latest={(await listAllPostsMeta()).slice(0, 6)} lang={lang} />
   return c.html(await renderHtml(c, { title: t(lang, 'tags.title'), active: 'tags', body }))
 })
 
@@ -34,6 +35,16 @@ tagRoutes.get('/:tag', async (c) => {
     return c.html(String(<ListChunk posts={list.items} moreUrl={moreUrl} lang={lang} />))
   }
 
-  const body = <TagPostsView tag={tag} posts={list.items} moreUrl={moreUrl} total={list.total} lang={lang} />
+  const body = (
+    <TagPostsView
+      tag={tag}
+      posts={list.items}
+      moreUrl={moreUrl}
+      total={list.total}
+      latest={(await listAllPostsMeta()).slice(0, 6)}
+      tags={await listTags()}
+      lang={lang}
+    />
+  )
   return c.html(await renderHtml(c, { title: t(lang, 'tags.title_one', { tag }), active: 'tags', body }))
 })
