@@ -47,42 +47,76 @@ export function PostGrid({ posts, lang }: { posts: Post[]; lang?: Lang }) {
   return <>{posts.map((p) => <PostCard key={p.id} post={p} lang={l} />)}</>
 }
 
-const loadMoreHx = (url: string) => ({
-  'hx-get': url,
-  'hx-target': '#post-list',
-  'hx-swap': 'beforeend',
-  'hx-trigger': 'revealed',
-  'hx-on::after-request': "this.closest('.loadmore').remove()",
-})
-
-function LoadMore({ url, lang }: { url: string; lang: Lang }) {
-  return (
-    <div class="loadmore" {...loadMoreHx(url)}>
-      <a class="btn" href={url}>
-        {t(lang, 'list.more')}
-      </a>
-      <span class="spinner" aria-hidden="true" />
-    </div>
-  )
-}
-
-export function PostList({ posts, moreUrl, lang }: { posts: Post[]; moreUrl?: string; lang?: Lang }) {
+export function PostList({ posts, lang }: { posts: Post[]; lang?: Lang }) {
   const l = lang ?? 'en'
   return (
     <div id="post-list">
       <PostGrid posts={posts} lang={l} />
-      {moreUrl ? <LoadMore url={moreUrl} lang={l} /> : null}
     </div>
   )
 }
 
-export function ListChunk({ posts, moreUrl, lang }: { posts: Post[]; moreUrl?: string; lang?: Lang }) {
+export function Pagination({
+  page,
+  totalPages,
+  makeHref,
+  prev,
+  next,
+  lang,
+}: {
+  page: number
+  totalPages: number
+  makeHref: (p: number) => string
+  prev?: string
+  next?: string
+  lang?: Lang
+}) {
   const l = lang ?? 'en'
+  if (totalPages <= 1) return null
+  const nums: number[] = []
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - page) <= 1) nums.push(i)
+  }
+  const items: (number | '...')[] = []
+  let last = 0
+  for (const n of nums) {
+    if (last && n - last > 1) items.push('...')
+    items.push(n)
+    last = n
+  }
   return (
-    <>
-      <PostGrid posts={posts} lang={l} />
-      {moreUrl ? <LoadMore url={moreUrl} lang={l} /> : null}
-    </>
+    <nav class="pagination" aria-label="pagination">
+      {prev ? (
+        <a class="page-link prev" href={prev}>
+          ← {t(l, 'ui.prev')}
+        </a>
+      ) : (
+        <span class="page-link disabled">← {t(l, 'ui.prev')}</span>
+      )}
+      {items.map((it, i) =>
+        it === '...' ? (
+          <span class="page-ellipsis" key={`e${i}`}>
+            …
+          </span>
+        ) : (
+          <a
+            class={'page-link' + (it === page ? ' on' : '')}
+            href={makeHref(it)}
+            key={it}
+            aria-current={it === page ? 'page' : undefined}
+          >
+            {it}
+          </a>
+        ),
+      )}
+      {next ? (
+        <a class="page-link next" href={next}>
+          {t(l, 'ui.next')} →
+        </a>
+      ) : (
+        <span class="page-link disabled">{t(l, 'ui.next')} →</span>
+      )}
+    </nav>
   )
 }
 
