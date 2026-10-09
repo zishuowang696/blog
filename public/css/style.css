@@ -102,7 +102,7 @@ button.linkish.danger:hover { color: #e5484d; }
 .theme-toggle svg { width: 18px; height: 18px; }
 
 /* main + grid */
-.main { padding: 40px 0 72px; }
+.main { padding-top: 40px; padding-bottom: 72px; }
 .content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start; }
 .content-grid > *, .article-grid > * { min-width: 0; }
 .article-grid { display: grid; gap: 36px; align-items: start; }
@@ -338,7 +338,7 @@ button.linkish.danger:hover { color: #e5484d; }
   .nav-main { gap: 16px; margin-left: 0; }
   .header-actions { gap: 12px; }
   .hero h1 { font-size: 1.9rem; }
-  .main { padding: 28px 0 56px; }
+  .main { padding-top: 28px; padding-bottom: 56px; }
   .pager { flex-direction: column; }
   .neighbor { max-width: 100%; }
   .foot-cols { grid-template-columns: 1fr; gap: 20px; }
