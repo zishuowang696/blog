@@ -138,12 +138,10 @@ export function TagCloud({ tags, lang }: { tags: TagCount[]; lang?: Lang }) {
 export function Sidebar({
   lang,
   latest,
-  tags,
   series,
 }: {
   lang: Lang
   latest: PostMeta[]
-  tags: TagCount[]
   series: TagCount[]
 }) {
   return (
@@ -159,17 +157,6 @@ export function Sidebar({
             {t(lang, 'nav.tags')}
           </a>
         </div>
-      </div>
-      <div class="side-card side-cta">
-        <h3 class="side-title">{lang === 'zh' ? '需要定制？' : 'Need something built?'}</h3>
-        <p>
-          {lang === 'zh'
-            ? '嵌入式 / 边缘 AI / AI Agent 的定制、咨询与交付。'
-            : 'Custom work and consulting for embedded, edge AI and agents.'}
-        </p>
-        <a class="btn small" href={langHref(lang, '/about')}>
-          {lang === 'zh' ? '了解与联系 →' : 'Learn more →'}
-        </a>
       </div>
       {series.length > 0 ? (
         <div class="side-card">
@@ -201,16 +188,33 @@ export function Sidebar({
           </ul>
         </div>
       ) : null}
+    </aside>
+  )
+}
+
+export function BottomSection({ tags, lang }: { tags: TagCount[]; lang: Lang }) {
+  return (
+    <section class="below">
+      <div class="cta-band">
+        <div class="cta-text">
+          <h2>{lang === 'zh' ? '需要定制？' : 'Need something built?'}</h2>
+          <p>
+            {lang === 'zh'
+              ? '嵌入式 / 边缘 AI / AI Agent 的定制、开发与咨询。'
+              : 'Custom development and consulting for embedded, edge AI and agents.'}
+          </p>
+        </div>
+        <a class="btn" href={langHref(lang, '/about')}>
+          {lang === 'zh' ? '了解与联系 →' : 'Learn more →'}
+        </a>
+      </div>
       {tags.length > 0 ? (
-        <div class="side-card">
-          <h3 class="side-title">{lang === 'zh' ? '标签' : 'Tags'}</h3>
-          <TagCloud tags={tags.slice(0, 18)} lang={lang} />
-          <a class="side-more" href={langHref(lang, '/tags')}>
-            {lang === 'zh' ? '全部标签 →' : 'All tags →'}
-          </a>
+        <div class="tags-band">
+          <h2 class="band-title">{lang === 'zh' ? '标签' : 'Tags'}</h2>
+          <TagCloud tags={tags} lang={lang} />
         </div>
       ) : null}
-    </aside>
+    </section>
   )
 }
 

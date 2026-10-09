@@ -1,7 +1,7 @@
 import type { Post, PostMeta, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { t } from '../lib/locale.ts'
-import { Pagination, PostList, Sidebar, TagCloud } from '../templates/components.tsx'
+import { BottomSection, Pagination, PostList, Sidebar, TagCloud } from '../templates/components.tsx'
 
 export function TagsIndexView({
   tags,
@@ -24,8 +24,9 @@ export function TagsIndexView({
         <section>
           <TagCloud tags={tags} lang={lang} />
         </section>
-        <Sidebar lang={lang} latest={latest} tags={tags} series={series} />
+        <Sidebar lang={lang} latest={latest} series={series} />
       </div>
+      <BottomSection tags={tags} lang={lang} />
     </>
   )
 }
@@ -73,8 +74,9 @@ export function TagPostsView({
             lang={lang}
           />
         </section>
-        <Sidebar lang={lang} latest={latest} tags={tags} series={series} />
+        <Sidebar lang={lang} latest={latest} series={series} />
       </div>
+      <BottomSection tags={tags} lang={lang} />
     </>
   )
 }

@@ -1,7 +1,7 @@
 import type { Post, PostMeta, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
-import { Pagination, PostList, Sidebar } from '../templates/components.tsx'
+import { BottomSection, Pagination, PostList, Sidebar } from '../templates/components.tsx'
 import { seriesHref } from '../templates/util.ts'
 
 export function SeriesIndexView({
@@ -34,8 +34,9 @@ export function SeriesIndexView({
             ))
           )}
         </section>
-        <Sidebar lang={lang} latest={latest} tags={tags} series={series} />
+        <Sidebar lang={lang} latest={latest} series={series} />
       </div>
+      <BottomSection tags={tags} lang={lang} />
     </>
   )
 }
@@ -84,8 +85,9 @@ export function SeriesPostsView({
             lang={lang}
           />
         </section>
-        <Sidebar lang={lang} latest={latest} tags={tags} series={allSeries} />
+        <Sidebar lang={lang} latest={latest} series={allSeries} />
       </div>
+      <BottomSection tags={tags} lang={lang} />
     </>
   )
 }
