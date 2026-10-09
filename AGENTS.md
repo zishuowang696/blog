@@ -53,6 +53,7 @@ bun run db:seed-d1   # 从 content/archive 生成 D1 首灌种子 SQL（db/seed-
 bun run schema:gen     # 结构变更后：db/schema.sql → src/lib/schema.ts（重新内嵌）
 bun run drizzle:generate  # 结构变更后：src/lib/tables.ts → migrations/drizzle/（D1 迁移）
 bun run docs:sync      # 需 EMBEDAI_DIR=<embedai 克隆>；按 content/docs-manifest.json 生成 content/upstream/embedai 快照
+bun run baidu:push [slug...]  # 发布后把 URL 主动推送给百度（需 .env 的 BAIDU_PUSH_TOKEN）
 ```
 
 > 环境变量（见 `.env.example`）：`PORT`/`HOST`/`SITE_URL`（https 时 Cookie 加 Secure，sitemap 域名）、`ADMIN_USERNAMES`（逗号分隔，命中即授予 admin 角色）、`BLOG_DB_FILE`（测试指临时库）、`BLOG_ROOT`（单文件二进制部署时指向含 public/ 与 db/ 的工作目录）。Bun 启动时自动加载 `.env`。

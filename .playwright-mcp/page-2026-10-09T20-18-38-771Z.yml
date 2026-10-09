@@ -1,0 +1,300 @@
+- generic [ref=f94e2]:
+  - generic [ref=f94e5]:
+    - link [ref=f94e7] [cursor=pointer]:
+      - /url: /
+      - img "logo" [ref=f94e8]
+    - list [ref=f94e10] [cursor=pointer]:
+      - listitem [ref=f94e11]:
+        - link "搜索学堂" [ref=f94e12]:
+          - /url: /college#/type=1&cate=newcontent
+      - listitem [ref=f94e13]:
+        - link "搜索服务" [ref=f94e14]:
+          - /url: /dashboard/index
+      - listitem [ref=f94e15]: 互动交流
+      - listitem [ref=f94e16]:
+        - link "资源合作" [ref=f94e17]:
+          - /url: /cooperateresource/index
+      - listitem [ref=f94e18]:
+        - link "用户中心" [ref=f94e19]:
+          - /url: /site/index
+    - generic [ref=f94e20] [cursor=pointer]:
+      - link "" [ref=f94e21]:
+        - /url: /prompt/index
+      - link [ref=f94e23]:
+        - /url: https://passport.baidu.com
+      - link "wangbin1087" [ref=f94e25]:
+        - /url: https://passport.baidu.com
+      - text: "|"
+      - link "退出" [ref=f94e26]:
+        - /url: /auth/logout?u=https%3A%2F%2Fziyuan.baidu.com%2Flinksubmit%2Findex
+  - list [ref=f94e27]:
+    - link "" [ref=f94e28] [cursor=pointer]:
+      - /url: https://zhiqiu.baidu.com/imcswebchat/roulette/in?id=16606&token=i7mdgusjlsnblnfm10iehei4cs56v5p4&domainID=zhanzhang&type=2
+      - listitem [ref=f94e29]:
+        - generic [ref=f94e30]: 
+    - link "" [ref=f94e31] [cursor=pointer]:
+      - /url: /feedback/index
+      - listitem [ref=f94e32]:
+        - generic [ref=f94e33]: 
+    - link:
+      - /url: "#top"
+      - text: 
+  - generic [ref=f94e35]:
+    - generic [ref=f94e36]:
+      - generic [ref=f94e37]:
+        - generic [ref=f94e38] [cursor=pointer]: 站点
+        - generic [ref=f94e39] [cursor=pointer]
+      - textbox "点击选择站点" [ref=f94e44]: https://embedai.com.cn
+    - generic [ref=f94e47] [cursor=pointer]: 将该网站设置为默认站点
+  - generic [ref=f94e48]:
+    - generic [ref=f94e49]:
+      - generic [ref=f94e50]:
+        - term [ref=f94e51]:
+          - generic [ref=f94e52]: 
+          - link "站点信息" [ref=f94e53] [cursor=pointer]:
+            - /url: /dashboard/index?site=https://embedai.com.cn/
+        - definition
+      - generic [ref=f94e54]:
+        - term [ref=f94e55]:
+          - generic [ref=f94e56]: 
+          - link "资源提交" [ref=f94e57] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f94e58]: 
+        - definition [ref=f94e59]:
+          - link "快速抓取" [ref=f94e60] [cursor=pointer]:
+            - /url: /fastcrawl/index?site=https://embedai.com.cn/
+          - link "普通收录" [ref=f94e61] [cursor=pointer]:
+            - /url: /linksubmit/index?site=https://embedai.com.cn/
+          - link "移动适配" [ref=f94e62] [cursor=pointer]:
+            - /url: /mobile/index?site=https://embedai.com.cn/
+          - link "死链提交" [ref=f94e63] [cursor=pointer]:
+            - /url: /badlink/index?site=https://embedai.com.cn/
+      - generic [ref=f94e64]:
+        - term [ref=f94e65]:
+          - generic [ref=f94e66]: 
+          - link "数据统计" [ref=f94e67] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f94e68]: 
+        - definition [ref=f94e69]:
+          - link "索引量" [ref=f94e70] [cursor=pointer]:
+            - /url: /indexs/index?site=https://embedai.com.cn/
+          - link "流量与关键词" [ref=f94e71] [cursor=pointer]:
+            - /url: /keywords/index?site=https://embedai.com.cn/
+          - link "抓取频次" [ref=f94e72] [cursor=pointer]:
+            - /url: /pressure/index?site=https://embedai.com.cn/
+          - link "抓取诊断" [ref=f94e73] [cursor=pointer]:
+            - /url: /crawltools/index?site=https://embedai.com.cn/
+          - link "抓取异常" [ref=f94e74] [cursor=pointer]:
+            - /url: /crawl/index?site=https://embedai.com.cn/
+          - link "Robots" [ref=f94e75] [cursor=pointer]:
+            - /url: /robots/index?site=https://embedai.com.cn/
+      - generic [ref=f94e76]:
+        - term [ref=f94e77]:
+          - generic [ref=f94e78]: 
+          - link "搜索小工具" [ref=f94e79] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f94e80]: 
+        - definition [ref=f94e81]:
+          - link "小工具提交" [ref=f94e82] [cursor=pointer]:
+            - /url: /aitoolset/index?site=https://embedai.com.cn/
+          - link "我的小工具列表" [ref=f94e83] [cursor=pointer]:
+            - /url: /aitoolset/list?site=https://embedai.com.cn/
+          - link "数据看板" [ref=f94e84] [cursor=pointer]:
+            - /url: /aitoolset/databoard?site=https://embedai.com.cn/
+      - generic [ref=f94e85]:
+        - term [ref=f94e86]:
+          - generic [ref=f94e87]: 
+          - link "权威溯源" [ref=f94e88] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f94e89]: 
+        - definition [ref=f94e90]:
+          - link "权威提交" [ref=f94e91] [cursor=pointer]:
+            - /url: /sourcetrace/index?site=https://embedai.com.cn/
+          - link "我的溯源提交" [ref=f94e92] [cursor=pointer]:
+            - /url: /sourcetrace/dashboard?site=https://embedai.com.cn/
+      - generic [ref=f94e93]:
+        - term [ref=f94e94]:
+          - generic [ref=f94e95]: 
+          - link "AI流量分析" [ref=f94e96] [cursor=pointer]:
+            - /url: /aiflow/index?site=https://embedai.com.cn/
+        - definition
+      - generic [ref=f94e97]:
+        - term [ref=f94e98]:
+          - generic [ref=f94e99]: 
+          - link "搜索展现" [ref=f94e100] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f94e101]: 
+        - definition [ref=f94e102]:
+          - link "站点属性" [ref=f94e103] [cursor=pointer]:
+            - /url: /property/index?site=https://embedai.com.cn/
+          - link "站点子链" [ref=f94e104] [cursor=pointer]:
+            - /url: /sitelink/index?site=https://embedai.com.cn/
+          - link "视频极速服务" [ref=f94e105] [cursor=pointer]:
+            - /url: /videomonetize/index?site=https://embedai.com.cn/
+      - generic [ref=f94e106]:
+        - term [ref=f94e107]:
+          - generic [ref=f94e108]: 
+          - link "优化与维护" [ref=f94e109] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f94e110]: 
+        - definition [ref=f94e111]:
+          - link "网站改版" [ref=f94e112] [cursor=pointer]:
+            - /url: /rewrite/index?site=https://embedai.com.cn/
+    - generic [ref=f94e113]:
+      - text: 
+      - heading "普通收录" [level=1] [ref=f94e115]
+      - generic [ref=f94e116]:
+        - generic [ref=f94e117]: 使用说明
+        - list [ref=f94e118]:
+          - listitem [ref=f94e119]: 1、普通收录工具可以向百度搜索主动推送资源，缩短爬虫发现网站链接的时间，不保证收录和展现效果。
+          - listitem [ref=f94e120]: 2、API提交和手动提交共享配额，sitemap提交配额不与其他方式共享，具体配额以站点页面显示数据为准 。配额不可累计，当日有效。
+          - listitem [ref=f94e121]: 3、若链接存在跳转关系，请直接提交跳转后链接。如网站换域名，需提交新域名资源；进行HTTPS改造页面，请提交HTTPS资源。
+      - generic [ref=f94e122]:
+        - generic [ref=f94e123]:
+          - link "资源提交" [ref=f94e124] [cursor=pointer]:
+            - /url: javascript:void(0);
+          - link "数据反馈" [ref=f94e125] [cursor=pointer]:
+            - /url: javascript:void(0);
+        - generic [ref=f94e126]:
+          - list [ref=f94e128]:
+            - listitem [ref=f94e129] [cursor=pointer]: API提交
+            - listitem [ref=f94e130] [cursor=pointer]: sitemap
+            - listitem [ref=f94e131] [cursor=pointer]: 手动提交
+          - generic [ref=f94e133]:
+            - generic [ref=f94e134]:
+              - generic [ref=f94e135]:
+                - heading [level=3] [ref=f94e136]:
+                  - text: 推送接口
+                  - link "修改准入密钥" [ref=f94e137] [cursor=pointer]:
+                    - /url: javascript:void(0)
+                - generic [ref=f94e138]:
+                  - paragraph [ref=f94e139]:
+                    - text: 接口调用地址：
+                    - generic [ref=f94e140]:
+                      - text: http://data.zz.baidu.com/urls?
+                      - emphasis [ref=f94e141]: site
+                      - text: =https://embedai.com.cn&
+                      - emphasis [ref=f94e142]: token
+                      - text: =XvQP4jYrnvG4RFmu
+                  - table [ref=f94e143]:
+                    - rowgroup [ref=f94e144]:
+                      - row [ref=f94e145]:
+                        - columnheader "参数名称" [ref=f94e146]
+                        - columnheader "是否必选" [ref=f94e147]
+                        - columnheader "参数类型" [ref=f94e148]
+                        - columnheader "说明" [ref=f94e149]
+                    - rowgroup [ref=f94e150]:
+                      - row [ref=f94e151]:
+                        - cell "site" [ref=f94e152]
+                        - cell "是" [ref=f94e153]
+                        - cell "string" [ref=f94e154]
+                        - cell "在搜索资源平台验证的站点，比如www.example.com" [ref=f94e155]
+                      - row [ref=f94e156]:
+                        - cell "token" [ref=f94e157]
+                        - cell "是" [ref=f94e158]
+                        - cell "string" [ref=f94e159]
+                        - cell "在搜索资源平台申请的推送用的准入密钥" [ref=f94e160]
+              - generic [ref=f94e161]:
+                - heading "推送示例" [level=3] [ref=f94e162]
+                - generic [ref=f94e163]:
+                  - list [ref=f94e164]:
+                    - listitem [ref=f94e165] [cursor=pointer]: curl推送示例
+                    - listitem [ref=f94e166] [cursor=pointer]: post推送示例
+                    - listitem [ref=f94e167] [cursor=pointer]: php推送示例
+                    - listitem [ref=f94e168] [cursor=pointer]: ruby推送示例
+                  - list [ref=f94e169]:
+                    - listitem [ref=f94e170]:
+                      - generic [ref=f94e171]:
+                        - paragraph [ref=f94e172]: 将要提交的链接按照每行一条的格式写入一个文本文件中，命名此文件为urls.txt，然后进入该文件所在目录，执行如下命令：
+                        - generic [ref=f94e173]: curl -H 'Content-Type:text/plain' --data-binary @urls.txt "http://data.zz.baidu.com/urls?site=https://embedai.com.cn&token=XvQP4jYrnvG4RFmu"
+                        - text: 使用php、python、java等可以参照这个过程推送结构化数据。
+                        - paragraph
+            - generic [ref=f94e174]:
+              - heading "查看推送反馈" [level=3] [ref=f94e175]
+              - generic [ref=f94e176]:
+                - list [ref=f94e177]:
+                  - listitem [ref=f94e178] [cursor=pointer]: 推送成功
+                  - listitem [ref=f94e179] [cursor=pointer]: 推送失败
+                - list [ref=f94e180]:
+                  - listitem [ref=f94e181]:
+                    - generic [ref=f94e182]:
+                      - paragraph [ref=f94e183]: 状态码为200，可能返回以下字段：
+                      - table [ref=f94e184]:
+                        - rowgroup [ref=f94e185]:
+                          - row [ref=f94e186]:
+                            - columnheader "字段" [ref=f94e187]
+                            - columnheader "是否必选" [ref=f94e188]
+                            - columnheader "参数类型" [ref=f94e189]
+                            - columnheader "说明" [ref=f94e190]
+                        - rowgroup [ref=f94e191]:
+                          - row [ref=f94e192]:
+                            - cell "success" [ref=f94e193]
+                            - cell "是" [ref=f94e194]
+                            - cell "int" [ref=f94e195]
+                            - cell "成功推送的url条数" [ref=f94e196]
+                          - row [ref=f94e197]:
+                            - cell "remain" [ref=f94e198]
+                            - cell "是" [ref=f94e199]
+                            - cell "int" [ref=f94e200]
+                            - cell "当天剩余的可推送url条数" [ref=f94e201]
+                          - row [ref=f94e202]:
+                            - cell "not_same_site" [ref=f94e203]
+                            - cell "否" [ref=f94e204]
+                            - cell "array" [ref=f94e205]
+                            - cell "由于不是本站url而未处理的url列表" [ref=f94e206]
+                          - row [ref=f94e207]:
+                            - cell "not_valid" [ref=f94e208]
+                            - cell "否" [ref=f94e209]
+                            - cell "array" [ref=f94e210]
+                            - cell "不合法的url列表" [ref=f94e211]
+                      - paragraph [ref=f94e212]: 成功返回示例：
+                      - generic [ref=f94e213]: "{ \"remain\":99998, \"success\":2, \"not_same_site\":[], \"not_valid\":[] }"
+            - list [ref=f94e214]:
+              - listitem [ref=f94e215]:
+                - link "Q：使用API提交功能会达到怎样的效果？" [ref=f94e216] [cursor=pointer]:
+                  - /url: /college/courseinfo?id=267&page=2
+              - listitem [ref=f94e217]:
+                - link "Q：如何使用API提交？" [ref=f94e218] [cursor=pointer]:
+                  - /url: /college/courseinfo?id=267&page=2
+              - listitem [ref=f94e219]:
+                - link "Q：如何查看推送反馈？" [ref=f94e220] [cursor=pointer]:
+                  - /url: /college/courseinfo?id=267&page=2
+              - listitem [ref=f94e221]:
+                - link "Q：API提交常见问题？" [ref=f94e222] [cursor=pointer]:
+                  - /url: /college/courseinfo?id=267&page=2
+              - listitem [ref=f94e223]:
+                - link "Q：如何选择提交方式？" [ref=f94e224] [cursor=pointer]:
+                  - /url: /college/courseinfo?id=267&page=2
+              - listitem [ref=f94e225]:
+                - link "查看更多>>" [ref=f94e226] [cursor=pointer]:
+                  - /url: /college/courseinfo?id=267&page=2
+          - text:  
+  - generic [ref=f94e227]:
+    - generic [ref=f94e229]:
+      - link "智能小程序" [ref=f94e230] [cursor=pointer]:
+        - /url: https://smartprogram.baidu.com/developer/index.html
+      - link "投诉平台" [ref=f94e231] [cursor=pointer]:
+        - /url: //help.baidu.com/newadd?prod_id=1&category=1
+      - link "百度统计" [ref=f94e232] [cursor=pointer]:
+        - /url: https://tongji.baidu.com/web/welcome/login
+      - link "百度智能云" [ref=f94e233] [cursor=pointer]:
+        - /url: https://cloud.baidu.com/
+      - link "百度云加速" [ref=f94e234] [cursor=pointer]:
+        - /url: https://su.baidu.com/
+      - link "百度安全" [ref=f94e235] [cursor=pointer]:
+        - /url: http://anquan.baidu.com/
+      - link "百度大脑" [ref=f94e236] [cursor=pointer]:
+        - /url: https://ai.baidu.com/
+      - link "百度保障" [ref=f94e237] [cursor=pointer]:
+        - /url: https://baozhang.baidu.com/guarantee/?from=ziyuan
+      - link "百度开发者中心" [ref=f94e238] [cursor=pointer]:
+        - /url: https://developer.baidu.com/?hmsr=站长平台&hmpl=&hmcu=&hmkw=&hmci
+      - link "联系我们" [ref=f94e239] [cursor=pointer]:
+        - /url: //ziyuan.baidu.com/college/articleinfo?id=2114
+      - link "微信公众号" [ref=f94e240] [cursor=pointer]:
+        - /url: //ziyuan.baidu.com/wiki/3148
+    - generic [ref=f94e241]:
+      - text: ©2026 Baidu
+      - link "使用百度前必读" [ref=f94e242] [cursor=pointer]:
+        - /url: https://www.baidu.com/duty/
+      - text: 京ICP证030173号
