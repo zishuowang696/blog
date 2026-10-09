@@ -2,7 +2,7 @@ import { renderMarkdown } from './md.ts'
 import { renderPageSource, renderPostSource, type PageInput, type PostInput } from './content.ts'
 import { useEngine } from './engine.ts'
 
-export const POSTS_PER_PAGE = 8
+export const POSTS_PER_PAGE = 6
 
 export interface Post {
   id: number

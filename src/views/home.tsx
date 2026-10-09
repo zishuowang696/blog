@@ -1,7 +1,7 @@
 import type { Post, PostMeta, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
-import { Pagination, PostList, Sidebar } from '../templates/components.tsx'
+import { BottomSection, Pagination, PostList, Sidebar } from '../templates/components.tsx'
 import { SITE_DESC } from '../templates/util.ts'
 
 export function HomeView({
@@ -57,8 +57,9 @@ export function HomeView({
             lang={lang}
           />
         </div>
-        <Sidebar lang={lang} latest={latest} tags={tags} series={series} />
+        <Sidebar lang={lang} latest={latest} series={series} />
       </div>
+      <BottomSection tags={tags} lang={lang} />
     </>
   )
 }
