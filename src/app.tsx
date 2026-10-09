@@ -17,6 +17,17 @@ export const app = new Hono()
 
 app.use('*', accessLogger, securityHeaders)
 
+// 根级文件不区分大小写：/Sitemap.xml、/ROBOTS.TXT 等 301 跳到小写规范地址
+const ROOT_FILES = new Set(['/sitemap.xml', '/robots.txt', '/llms.txt'])
+app.use('*', async (c, next) => {
+  const path = c.req.path
+  const lower = path.toLowerCase()
+  if (path !== lower && ROOT_FILES.has(lower)) {
+    return c.redirect(lower + new URL(c.req.url).search, 301)
+  }
+  await next()
+})
+
 // 中文：根路径；英文：/en 前缀（URL 决定语言，便于中英各自被收录）
 app.route('/', homeRoutes)
 app.route('/posts', postRoutes)
