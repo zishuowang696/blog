@@ -83,6 +83,7 @@ export function Layout({ title, description, active, user, lang, path, ogType, j
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <meta name="description" content={pageDesc} />
         <title>{docTitle}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

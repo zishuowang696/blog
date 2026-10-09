@@ -57,10 +57,11 @@ const loadMoreHx = (url: string) => ({
 
 function LoadMore({ url, lang }: { url: string; lang: Lang }) {
   return (
-    <div class="loadmore">
-      <a class="btn" href={url} {...loadMoreHx(url)}>
+    <div class="loadmore" {...loadMoreHx(url)}>
+      <a class="btn" href={url}>
         {t(lang, 'list.more')}
       </a>
+      <span class="spinner" aria-hidden="true" />
     </div>
   )
 }

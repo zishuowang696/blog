@@ -152,6 +152,14 @@ button.linkish.danger:hover { color: #e5484d; }
 
 /* load more / pager */
 .loadmore { text-align: center; margin: 26px 0 0; }
+.loadmore .spinner {
+  display: none; width: 22px; height: 22px; margin: 6px auto;
+  border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.js .loadmore .btn { display: none; }
+.js .loadmore .spinner { display: block; }
 .page-info { text-align: center; margin: 14px 0 0; }
 .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 20px; }
 .pager.only-next { justify-content: flex-end; }
