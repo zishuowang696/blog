@@ -99,13 +99,11 @@ button.linkish.danger:hover { color: #e5484d; }
 .crumbs { margin: 0 0 14px; font-size: 0.9rem; }
 .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--fg-muted); font-size: 0.9rem; }
 .post-head { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 26px; }
-.toc { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 22px; margin: 0 0 28px; }
-.toc-title { font-weight: 700; font-size: 0.9rem; color: var(--fg); margin-bottom: 10px; }
-.toc ul { list-style: none; margin: 0; padding: 0; }
-.toc li { margin: 5px 0; font-size: 0.9rem; line-height: 1.5; }
-.toc li.toc-l3 { padding-left: 20px; font-size: 0.86rem; }
-.toc a { color: var(--fg-muted); }
-.toc a:hover { color: var(--accent); text-decoration: none; }
+.toc-list { list-style: none; margin: 0; padding: 0; }
+.toc-list li { margin: 6px 0; font-size: 0.88rem; line-height: 1.5; }
+.toc-list li.toc-l3 { padding-left: 14px; font-size: 0.84rem; }
+.toc-list a { color: var(--fg-muted); }
+.toc-list a:hover { color: var(--accent); text-decoration: none; }
 
 /* buttons */
 .btn {
@@ -286,7 +284,7 @@ button.linkish.danger:hover { color: #e5484d; }
 .editor-card h2.en-block { font-size: 1.02rem; border-top: 1px dashed var(--border); padding-top: 16px; margin: 6px 0 0; }
 
 /* reading width for article */
-.reading { max-width: 780px; margin: 0 auto; }
+.reading { max-width: 780px; }
 
 @media (max-width: 900px) {
   .content-grid { grid-template-columns: 1fr; gap: 30px; }
