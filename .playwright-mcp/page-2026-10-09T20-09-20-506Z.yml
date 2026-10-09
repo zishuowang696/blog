@@ -1,0 +1,115 @@
+- generic [active] [ref=f55e1]:
+  - generic [ref=f55e2]:
+    - generic [ref=f55e5]:
+      - link [ref=f55e7] [cursor=pointer]:
+        - /url: /
+        - img "logo" [ref=f55e8]
+      - list [ref=f55e10] [cursor=pointer]:
+        - listitem [ref=f55e11]:
+          - link "搜索学堂" [ref=f55e12]:
+            - /url: /college#/type=1&cate=newcontent
+        - listitem [ref=f55e13]:
+          - link "搜索服务" [ref=f55e14]:
+            - /url: /dashboard/index
+        - listitem [ref=f55e15]: 互动交流
+        - listitem [ref=f55e16]:
+          - link "资源合作" [ref=f55e17]:
+            - /url: /cooperateresource/index
+        - listitem [ref=f55e18]:
+          - link "用户中心" [ref=f55e19]:
+            - /url: /site/index
+      - generic [ref=f55e20] [cursor=pointer]:
+        - link "" [ref=f55e21]:
+          - /url: /prompt/index
+        - link [ref=f55e23]:
+          - /url: https://passport.baidu.com
+        - link "wangbin1087" [ref=f55e25]:
+          - /url: https://passport.baidu.com
+        - text: "|"
+        - link "退出" [ref=f55e26]:
+          - /url: /auth/logout?u=https%3A%2F%2Fziyuan.baidu.com%2Fsite%2Fsiteadd%3Fsiteurl%3D
+    - list [ref=f55e27]:
+      - link "" [ref=f55e28] [cursor=pointer]:
+        - /url: https://zhiqiu.baidu.com/imcswebchat/roulette/in?id=16606&token=i7mdgusjlsnblnfm10iehei4cs56v5p4&domainID=zhanzhang&type=2
+        - listitem [ref=f55e29]:
+          - generic [ref=f55e30]: 
+      - link "" [ref=f55e31] [cursor=pointer]:
+        - /url: /feedback/index
+        - listitem [ref=f55e32]:
+          - generic [ref=f55e33]: 
+      - link:
+        - /url: "#top"
+        - text: 
+    - generic [ref=f55e35]:
+      - generic [ref=f55e37]:
+        - term [ref=f55e38]:
+          - generic [ref=f55e39]: 
+          - link "站点管理" [ref=f55e40] [cursor=pointer]:
+            - /url: /site/index
+        - term [ref=f55e41]:
+          - generic [ref=f55e42]: 
+          - link "消息提醒" [ref=f55e43] [cursor=pointer]:
+            - /url: /prompt/index
+          - generic [ref=f55e44]: "58"
+        - term [ref=f55e45]:
+          - generic [ref=f55e46]: 
+          - link "联系方式" [ref=f55e47] [cursor=pointer]:
+            - /url: /usercfg/editaccount
+        - term [ref=f55e48]:
+          - generic [ref=f55e49]: 
+          - link "管理员设置" [ref=f55e50] [cursor=pointer]:
+            - /url: /user/index
+        - term [ref=f55e51]:
+          - generic [ref=f55e52]: 
+          - link "安全防护" [ref=f55e53] [cursor=pointer]:
+            - /url: /wafproduct/index
+      - generic [ref=f55e54]:
+        - generic [ref=f55e55]:
+          - link "站点管理" [ref=f55e56] [cursor=pointer]:
+            - /url: /site/index
+          - generic [ref=f55e57]: 
+          - text: 添加网站
+        - generic [ref=f55e58]:
+          - generic [ref=f55e59]: 第一步：输入网站
+          - generic [ref=f55e60]: 第二步：站点属性
+          - generic [ref=f55e61]: 第三步：验证网站
+        - generic [ref=f55e62]:
+          - paragraph [ref=f55e63]: 输入您想要添加的网站：
+          - generic [ref=f55e64]:
+            - generic [ref=f55e65]:
+              - textbox [ref=f55e66]: 请选择协议头
+              - generic [ref=f55e67] [cursor=pointer]
+              - generic [ref=f55e152]:
+                - generic [ref=f55e153] [cursor=pointer]: http://
+                - generic [ref=f55e154] [cursor=pointer]: https://
+            - textbox "例：www.baidu.com" [ref=f55e69]
+          - button "下一步" [ref=f55e71] [cursor=pointer]
+  - generic [ref=f55e73]:
+    - generic [ref=f55e75]:
+      - link "智能小程序" [ref=f55e76] [cursor=pointer]:
+        - /url: https://smartprogram.baidu.com/developer/index.html
+      - link "投诉平台" [ref=f55e77] [cursor=pointer]:
+        - /url: //help.baidu.com/newadd?prod_id=1&category=1
+      - link "百度统计" [ref=f55e78] [cursor=pointer]:
+        - /url: https://tongji.baidu.com/web/welcome/login
+      - link "百度智能云" [ref=f55e79] [cursor=pointer]:
+        - /url: https://cloud.baidu.com/
+      - link "百度云加速" [ref=f55e80] [cursor=pointer]:
+        - /url: https://su.baidu.com/
+      - link "百度安全" [ref=f55e81] [cursor=pointer]:
+        - /url: http://anquan.baidu.com/
+      - link "百度大脑" [ref=f55e82] [cursor=pointer]:
+        - /url: https://ai.baidu.com/
+      - link "百度保障" [ref=f55e83] [cursor=pointer]:
+        - /url: https://baozhang.baidu.com/guarantee/?from=ziyuan
+      - link "百度开发者中心" [ref=f55e84] [cursor=pointer]:
+        - /url: https://developer.baidu.com/?hmsr=站长平台&hmpl=&hmcu=&hmkw=&hmci
+      - link "联系我们" [ref=f55e85] [cursor=pointer]:
+        - /url: //ziyuan.baidu.com/college/articleinfo?id=2114
+      - link "微信公众号" [ref=f55e86] [cursor=pointer]:
+        - /url: //ziyuan.baidu.com/wiki/3148
+    - generic [ref=f55e87]:
+      - text: ©2026 Baidu
+      - link "使用百度前必读" [ref=f55e88] [cursor=pointer]:
+        - /url: https://www.baidu.com/duty/
+      - text: 京ICP证030173号

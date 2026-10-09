@@ -9,8 +9,8 @@ for (const prefix of ['/css', '/js', '/vendor', '/img']) {
   app.use(`${prefix}/*`, serveStatic({ root: publicRoot }))
 }
 app.get('/favicon.svg', serveStatic({ root: publicRoot }))
-// 搜索引擎所有权验证文件（Google 等要求根路径可直接访问）
-app.get('/:file{[a-zA-Z0-9_]+\\.html}', serveStatic({ root: publicRoot }))
+// 搜索引擎所有权验证文件（Google/Bing/百度 等要求根路径可直接访问）
+app.get('/:file{[a-zA-Z0-9_-]+\\.html}', serveStatic({ root: publicRoot }))
 
 await initLocalDb()
 

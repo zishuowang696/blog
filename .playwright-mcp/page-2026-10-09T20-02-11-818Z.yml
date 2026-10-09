@@ -1,0 +1,167 @@
+- generic [ref=f24e3]:
+  - banner [ref=f24e4]:
+    - generic [ref=f24e5]:
+      - link "Skip to main content" [ref=f24e334] [cursor=pointer]:
+        - /url: "#content"
+      - button "Show Bing tools" [ref=f24e335] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f24e8]: 
+      - img "white bwt logo microsoft bing webmaster" [ref=f24e336]
+    - generic [ref=f24e53]:
+      - button "Copilot" [ref=f24e337] [cursor=pointer]
+      - button "Notifications" [ref=f24e338] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f24e56]: 
+      - button "Help" [ref=f24e339] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f24e59]: 
+      - button "Feedback" [ref=f24e340] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f24e62]: 
+      - button "Settings" [ref=f24e341] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f24e65]: 
+      - button "Profile" [ref=f24e342] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f24e69]: 兵王
+  - generic [ref=f24e71]:
+    - generic [ref=f24e89]:
+      - button "Select website" [ref=f24e343] [cursor=pointer]:
+        - generic [ref=f24e92]:
+          - generic [ref=f24e93]:
+            - generic [aria-hidden] [ref=f24e94]: 
+            - generic [ref=f24e95]: embedai.com.cn
+          - generic [aria-hidden] [ref=f24e97]: 
+      - navigation "Main menu" [ref=f24e344]:
+        - tree [ref=f24e99]:
+          - treeitem "Home" [ref=f24e345] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e346]: 
+            - text: Home
+          - treeitem "Search Performance" [ref=f24e347] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e348]: 
+            - text: Search Performance
+          - treeitem "AI Performance BETA" [ref=f24e349] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e350]: 
+            - text: AI Performance
+            - generic [ref=f24e109]: BETA
+          - treeitem "URL Inspection" [ref=f24e351] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e352]: 
+            - text: URL Inspection
+          - treeitem "Site Explorer" [ref=f24e353] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e354]: 
+            - text: Site Explorer
+          - treeitem "Sitemaps" [ref=f24e355] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e356]: 
+            - text: Sitemaps
+          - treeitem "IndexNow" [ref=f24e357] [cursor=pointer]
+          - treeitem "Backlinks" [ref=f24e362] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e363]: 
+            - text: Backlinks
+          - treeitem "Keyword Research" [ref=f24e364] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e365]: 
+            - text: Keyword Research
+          - treeitem "Recommendations" [ref=f24e366] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e367]: 
+            - text: Recommendations
+          - treeitem "Site Scan" [ref=f24e368] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e369]: 
+            - text: Site Scan
+          - treeitem "Configuration" [ref=f24e370] [cursor=pointer]:
+            - generic [ref=f24e141]:
+              - text: Configuration
+              - generic [aria-hidden] [ref=f24e142]: 
+          - treeitem "Tools & Enhancements" [ref=f24e371] [cursor=pointer]:
+            - generic [ref=f24e147]:
+              - text: Tools & Enhancements
+              - generic [aria-hidden] [ref=f24e148]: 
+          - treeitem "Security & Privacy" [ref=f24e372] [cursor=pointer]:
+            - generic [ref=f24e153]:
+              - text: Security & Privacy
+              - generic [aria-hidden] [ref=f24e154]: 
+          - treeitem "User management" [ref=f24e373] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e374]: 
+            - text: User management
+          - treeitem "Microsoft Clarity" [ref=f24e375] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e376]: 
+            - text: Microsoft Clarity
+    - main [ref=f24e161]:
+      - generic [ref=f24e163]:
+        - heading "Sitemaps" [level=2] [ref=f24e377]
+        - button "Submit sitemap" [active] [ref=f24e378] [cursor=pointer]
+      - generic [ref=f24e170]:
+        - generic [ref=f24e171]:
+          - generic [ref=f24e379]:
+            - heading "Known sitemaps" [level=4] [ref=f24e381]
+            - generic [ref=f24e382]: "1"
+          - generic [ref=f24e383]:
+            - heading "Sitemaps with errors" [level=4] [ref=f24e385]
+            - generic [ref=f24e386]: "0"
+          - generic [ref=f24e387]:
+            - heading "Sitemaps with warnings" [level=4] [ref=f24e389]
+            - generic [ref=f24e390]: "0"
+          - generic [ref=f24e391]:
+            - heading "Total URLs discovered" [level=4] [ref=f24e393]
+            - generic [ref=f24e394]: "0"
+        - heading "Sitemap details" [level=3] [ref=f24e395]
+        - generic [ref=f24e193]:
+          - generic [ref=f24e194]:
+            - combobox [ref=f24e196]:
+              - generic [ref=f24e198] [cursor=pointer]:
+                - generic [aria-hidden] [ref=f24e199]: 
+                - generic [ref=f24e200]: Type:All
+              - generic [aria-hidden] [ref=f24e202] [cursor=pointer]: 
+            - combobox [ref=f24e204]:
+              - generic [ref=f24e206] [cursor=pointer]:
+                - generic [aria-hidden] [ref=f24e207]: 
+                - generic [ref=f24e208]: Status:All
+              - generic [aria-hidden] [ref=f24e210] [cursor=pointer]: 
+          - button "Download all" [ref=f24e396] [cursor=pointer]:
+            - generic [ref=f24e214]:
+              - generic [ref=f24e215]: Download all
+              - generic [aria-hidden] [ref=f24e216]: 
+        - generic [ref=f24e217]:
+          - grid "Sitemap details" [ref=f24e401]:
+            - row "select all items Sitemap URL, sortable Last submit, sortable Last crawl, sortable Status, sortable URLs discovered, sortable, sorted descending order Action" [ref=f24e402]:
+              - columnheader "select all items" [ref=f24e403]:
+                - checkbox "select all items" [ref=f24e405]:
+                  - generic [aria-hidden] [ref=f24e406]: 
+              - generic [aria-hidden] [ref=f24e407]: select all items
+              - columnheader [ref=f24e408] [cursor=pointer]:
+                - button "Sitemap URL, sortable" [ref=f24e410]:
+                  - generic [ref=f24e411]: Sitemap URL
+              - columnheader [ref=f24e412] [cursor=pointer]:
+                - button "Last submit, sortable" [ref=f24e414]:
+                  - generic [ref=f24e415]: Last submit
+              - columnheader [ref=f24e416] [cursor=pointer]:
+                - button "Last crawl, sortable" [ref=f24e418]:
+                  - generic [ref=f24e419]: Last crawl
+              - columnheader [ref=f24e420] [cursor=pointer]:
+                - button "Status, sortable" [ref=f24e422]:
+                  - generic [ref=f24e423]: Status
+              - columnheader [ref=f24e424] [cursor=pointer]:
+                - button "URLs discovered, sortable, sorted descending order" [ref=f24e426]:
+                  - generic [ref=f24e427]: URLs discovered
+                  - generic [aria-hidden] [ref=f24e428]: 
+              - columnheader "Action" [ref=f24e429]
+            - row [ref=f24e434]:
+              - gridcell [ref=f24e435]:
+                - checkbox "select item" [ref=f24e436]:
+                  - generic [aria-hidden] [ref=f24e437]: 
+              - generic [ref=f24e438] [cursor=pointer]:
+                - gridcell "https://embedai.com.cn/sitemap.xml URL actions" [ref=f24e439]:
+                  - generic [ref=f24e440]:
+                    - generic [ref=f24e441]: https://embedai.com.cn/sitemap.xml
+                    - group "URL actions" [ref=f24e442]:
+                      - button "Copy" [ref=f24e443]:
+                        - generic [aria-hidden] [ref=f24e445]: 
+                      - button "Open in new tab" [ref=f24e446]:
+                        - generic [aria-hidden] [ref=f24e448]: 
+                - gridcell "10/9/2026 Submitted" [ref=f24e449]:
+                  - generic [ref=f24e450]: 10/9/2026
+                  - generic [ref=f24e451]: Submitted
+                - gridcell "-" [ref=f24e452]
+                - gridcell "Processing" [ref=f24e454]
+                - gridcell "-" [ref=f24e456]
+                - gridcell [ref=f24e458]:
+                  - button "More" [ref=f24e459]:
+                    - generic [aria-hidden] [ref=f24e461]: 
+          - navigation [ref=f24e256]:
+            - generic [ref=f24e257]: 1 row
+        - alert [ref=f24e462]:
+          - paragraph [ref=f24e465]: "Success: https://embedai.com.cn/sitemap.xml is successfully submitted for processing."
+          - button "Close" [ref=f24e467] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f24e469]: 
