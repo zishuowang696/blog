@@ -18,5 +18,9 @@ tests/.tmp-test.sqlite*
 # 编辑器残留
 *.swp
 
+# Playwright MCP 产物（快照/截图，默认落在工作目录根）
+.playwright-mcp/
+/*.png
+
 # 临时克隆的上游仓库
 upstream-embedai/
