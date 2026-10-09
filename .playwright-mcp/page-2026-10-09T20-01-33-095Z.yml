@@ -1,0 +1,98 @@
+- generic [active] [ref=f23e1]:
+  - generic [ref=f23e3]:
+    - banner [ref=f23e4]:
+      - generic [ref=f23e5]:
+        - link [ref=f23e116] [cursor=pointer]:
+          - /url: "#content"
+          - text: Skip to main content
+        - button [ref=f23e117] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f23e8]: 
+      - generic [ref=f23e53]:
+        - button [ref=f23e119] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f23e56]: 
+        - button [ref=f23e120] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f23e59]: 
+        - button [ref=f23e121] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f23e62]: 
+        - button [ref=f23e122] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f23e65]: 
+        - button [ref=f23e123] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f23e71]: 兵王
+    - main [ref=f23e73]:
+      - generic [ref=f23e74]:
+        - heading [level=2] [ref=f23e124]: Welcome to Bing Webmaster Tools
+        - text: Get started by adding your site and improve your performance on Bing.
+        - generic [ref=f23e76]:
+          - generic [ref=f23e77]:
+            - generic [ref=f23e78]: Google Search Console
+            - generic [ref=f23e80]: Already verified on Google Search Console?
+            - heading [level=2] [ref=f23e126]: Import your sites from GSC
+            - generic [ref=f23e82]:
+              - generic [ref=f23e83]:
+                - generic [aria-hidden] [ref=f23e84]: 
+                - generic [ref=f23e85]: No site verification required
+              - generic [ref=f23e86]:
+                - generic [aria-hidden] [ref=f23e87]: 
+                - generic [ref=f23e88]: Import sitemaps instantly
+              - generic [ref=f23e89]:
+                - generic [aria-hidden] [ref=f23e90]: 
+                - generic [ref=f23e91]: Saves a lot of time, you can edit after importing if details are obsolete.
+            - button [ref=f23e127] [cursor=pointer]:
+              - generic [ref=f23e93]: Import
+            - generic [ref=f23e96]: Google and the Google logo are registered trademarks of Google LLC, used with permission.
+          - generic [ref=f23e97]: OR
+          - generic [ref=f23e101]:
+            - generic [ref=f23e102]: Bing Webmaster Tools
+            - heading [level=4] [ref=f23e129]: Add your site manually
+            - generic [ref=f23e106]:
+              - generic [aria-hidden] [ref=f23e107]: 
+              - generic [ref=f23e108]: Add your site to Bing Webmaster tools by making detectable changes on your site.
+            - textbox [ref=f23e130]:
+              - /placeholder: Enter your site URL
+            - button [disabled] [ref=f23e131]:
+              - generic [ref=f23e114]: Add
+        - grid [ref=f23e137]:
+          - row [ref=f23e138]:
+            - columnheader [ref=f23e139]:
+              - generic [ref=f23e140]: Site URL
+            - columnheader [ref=f23e143]:
+              - generic [ref=f23e144]: Modified
+            - columnheader [ref=f23e147]:
+              - generic [ref=f23e148]: Status
+            - columnheader [ref=f23e151]:
+              - generic [ref=f23e152]: Action
+          - row [ref=f23e156]:
+            - generic [ref=f23e157]:
+              - rowheader [ref=f23e158]:
+                - generic [ref=f23e160]:
+                  - generic [ref=f23e161]: https://embedai.com.cn/
+                  - group [ref=f23e162]:
+                    - button [ref=f23e163] [cursor=pointer]:
+                      - generic [aria-hidden] [ref=f23e165]: 
+                    - button [ref=f23e166] [cursor=pointer]:
+                      - generic [aria-hidden] [ref=f23e168]: 
+              - rowheader [ref=f23e169]:
+                - generic [ref=f23e170]: 49 seconds ago
+              - rowheader [ref=f23e171]:
+                - generic [ref=f23e172]: Not verified
+              - rowheader [ref=f23e173]:
+                - link [ref=f23e175] [cursor=pointer]:
+                  - /url: /webmasters?siteUrl=https://embedai.com.cn/&state=verifySite
+                  - text: Verify now
+  - generic:
+    - generic:
+      - dialog "Add & verify site":
+        - generic:
+          - generic [ref=f23e176] [cursor=pointer]
+          - generic [ref=f23e179]:
+            - generic [ref=f23e181]:
+              - heading "Add & verify site" [level=2] [ref=f23e182]
+              - button "Close panel" [ref=f23e183] [cursor=pointer]:
+                - generic [aria-hidden] [ref=f23e185]: 
+            - alert [ref=f23e280]:
+              - generic [ref=f23e281]:
+                - generic [aria-hidden] [ref=f23e283]: 
+                - generic [ref=f23e284]: Congratulations!
+                - generic [ref=f23e285]: Site addition successful
+              - generic [ref=f23e286]: Your domain https://embedai.com.cn is successfully added to Bing Webmaster Tools.
+            - button "Done" [ref=f23e289] [cursor=pointer]
