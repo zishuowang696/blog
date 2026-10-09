@@ -1,0 +1,219 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e52]:
+      - button "Help" [ref=f1e53] [cursor=pointer]
+      - combobox "dropdown filter" [ref=f1e59]:
+        - generic [ref=f1e60] [cursor=pointer]: EN
+        - generic [aria-hidden] [ref=f1e62] [cursor=pointer]: 
+      - button "Sign In" [ref=f1e63] [cursor=pointer]
+  - main [ref=f1e68]:
+    - generic "Sign Up" [ref=f1e82] [cursor=pointer]:
+      - generic [ref=f1e83]:
+        - generic [ref=f1e84]: Sign up now to get $500 in search advertising when you spend $250 in Microsoft Advertising.
+        - link "Terms and Conditions Apply." [ref=f1e85]:
+          - /url: https://about.ads.microsoft.com/en/h/a/microsoft-advertising?s_cid=en-us-acq-onemsft-src_webmastertools-sub_wmtui#offer-details
+      - generic [aria-hidden] [ref=f1e86]: 
+    - generic [ref=f1e89]:
+      - generic [ref=f1e90]: Want more users for your site?
+      - generic [ref=f1e91]: Get your site's performance data, take advantage of free SEO/GEO tools and analyse insights to improve your page rankings on Bing search results.
+      - button "Get started" [ref=f1e92] [cursor=pointer]
+    - generic [ref=f1e198]:
+      - generic [ref=f1e199]: Get insights into your site
+      - generic [ref=f1e200]: Understand what leads people to your site, what people are searching for and focus on increasing traffic to your site with our reports and tools and get personalised messages and alerts for your sites.
+      - generic [ref=f1e201]:
+        - generic [ref=f1e202]: Dashboard
+        - generic [ref=f1e216]: SEO/GEO tools
+        - generic [ref=f1e233]: Reporting tools
+        - generic [ref=f1e257]: Diagnostic tools
+        - generic [ref=f1e276]: Communication
+        - button "Sign Up to see more insights" [ref=f1e288] [cursor=pointer]:
+          - generic [ref=f1e289]:
+            - generic [ref=f1e290]:
+              - text: Sign Up
+              - generic [aria-hidden] [ref=f1e291]: 
+            - generic [ref=f1e292]: to see more insights
+    - generic [ref=f1e293]:
+      - generic [ref=f1e296]:
+        - generic [ref=f1e297]: SEO/GEO features
+        - generic [ref=f1e298]: Our unique SEO/GEO tools let you explore your site, analyse backlinks, manage keywords and more to help your website reach your targeted users fast and first.
+        - generic [ref=f1e299]:
+          - tablist "Feature Tabs" [ref=f1e300]:
+            - tab "Backlinks Your sites backlink profile helps analyse the referring pages, domains and anchor texts" [ref=f1e301] [cursor=pointer]:
+              - generic [ref=f1e302]:
+                - generic [ref=f1e303]:
+                  - generic [aria-hidden] [ref=f1e304]: 
+                  - generic [ref=f1e305]: Backlinks
+                - generic [ref=f1e306]: Your sites backlink profile helps analyse the referring pages, domains and anchor texts
+            - tab "Keyword research Keyword Research allows you to check the phrases and keywords that searchers are querying for and their corresponding search volumes." [ref=f1e307] [cursor=pointer]:
+              - generic [ref=f1e308]:
+                - generic [ref=f1e309]:
+                  - generic [aria-hidden] [ref=f1e310]: 
+                  - generic [ref=f1e311]: Keyword research
+                - generic [ref=f1e312]: Keyword Research allows you to check the phrases and keywords that searchers are querying for and their corresponding search volumes.
+            - tab "SEO/GEO Report SEO/GEO reports contain aggregated counts of all the errors found across the entire website scanned and total pages containing errors" [ref=f1e313] [cursor=pointer]:
+              - generic [ref=f1e314]:
+                - generic [ref=f1e315]:
+                  - generic [aria-hidden] [ref=f1e316]: 
+                  - generic [ref=f1e317]: SEO/GEO Report
+                - generic [ref=f1e318]: SEO/GEO reports contain aggregated counts of all the errors found across the entire website scanned and total pages containing errors
+            - tab "Site Scan Site Scan is an on-demand site audit tool which crawls your site and checks for common technical SEO/GEO issues." [ref=f1e319] [cursor=pointer]:
+              - generic [ref=f1e320]:
+                - generic [ref=f1e321]:
+                  - generic [aria-hidden] [ref=f1e322]: 
+                  - generic [ref=f1e323]: Site Scan
+                - generic [ref=f1e324]: Site Scan is an on-demand site audit tool which crawls your site and checks for common technical SEO/GEO issues.
+          - img "Backlinks" [ref=f1e326]
+        - button [ref=f1e327] [cursor=pointer]:
+          - generic [ref=f1e328]:
+            - text: Get started for free
+            - generic [aria-hidden] [ref=f1e329]: 
+      - generic [ref=f1e332]:
+        - generic [ref=f1e333]: Do more with your site
+        - generic [ref=f1e334]: Take a look at our extended features and public tools that help you manage your site
+        - generic [ref=f1e335]:
+          - generic [ref=f1e429]:
+            - generic [ref=f1e430]: Wordpress Plugin for URL Submission
+            - generic [ref=f1e431]: Bing URL Submission Plugin for WordPress enables automated submission of URLs from WordPress sites to the Bing index.
+            - link [ref=f1e432] [cursor=pointer]:
+              - /url: https://wordpress.org/plugins/bing-webmaster-tools/
+              - generic [ref=f1e433]:
+                - text: Learn more
+                - generic [aria-hidden] [ref=f1e434]: 
+          - generic [ref=f1e485]:
+            - generic [ref=f1e486]: Mobile friendly
+            - generic [ref=f1e487]: Check if your site is mobile friendly with the Bing Mobile Friendliness tool
+            - link [ref=f1e488] [cursor=pointer]:
+              - /url: https://www.bing.com/webmaster/tools/mobile-friendliness
+              - generic [ref=f1e489]:
+                - text: Learn more
+                - generic [aria-hidden] [ref=f1e490]: 
+    - generic [ref=f1e493]:
+      - generic [ref=f1e494]: Know more about Webmaster
+      - generic [ref=f1e495]: We have you covered on all your queries with our support ecosystem and extensive documentation.
+      - generic [ref=f1e496]:
+        - generic [ref=f1e497]:
+          - generic [ref=f1e498]:
+            - generic [aria-hidden] [ref=f1e500]: 
+            - generic [ref=f1e501]: Guidelines
+          - generic [ref=f1e502]: The Bing Webmaster guidelines cover a broad range of topics and will help you get your site indexed and discovered on Bing
+          - link "Learn more" [ref=f1e503] [cursor=pointer]:
+            - /url: https://www.bing.com/webmaster/help/webmaster-guidelines-30fba23a
+            - text: Learn more
+            - generic [aria-hidden] [ref=f1e504]: 
+        - generic [ref=f1e505]:
+          - generic [ref=f1e506]:
+            - generic [aria-hidden] [ref=f1e508]: 
+            - generic [ref=f1e509]: API Access
+          - generic [ref=f1e510]: The Bing Webmaster Application Programming Interface (API), enables webmasters to programmatically access their website information
+          - link "Learn more" [ref=f1e511] [cursor=pointer]:
+            - /url: https://docs.microsoft.com/bingwebmaster/
+            - text: Learn more
+            - generic [aria-hidden] [ref=f1e512]: 
+        - generic [ref=f1e513]:
+          - generic [ref=f1e514]:
+            - generic [aria-hidden] [ref=f1e516]: 
+            - generic [ref=f1e517]: Help Center
+          - generic [ref=f1e518]: The Webmaster How-To-Center provides you with assistance and help on specific topics and sections of our tools
+          - link "Learn more" [ref=f1e519] [cursor=pointer]:
+            - /url: https://www.bing.com/webmaster/help
+            - text: Learn more
+            - generic [aria-hidden] [ref=f1e520]: 
+        - generic [ref=f1e521]:
+          - generic [ref=f1e522]:
+            - generic [aria-hidden] [ref=f1e524]: 
+            - generic [ref=f1e525]: Support
+          - generic [ref=f1e526]: Get support with issues or questions you are facing on Webmaster tools
+          - link "Learn more" [ref=f1e527] [cursor=pointer]:
+            - /url: https://www.bing.com/webmaster/help/webmaster-support-24ab5ebf
+            - text: Learn more
+            - generic [aria-hidden] [ref=f1e528]: 
+        - generic [ref=f1e529]:
+          - generic [ref=f1e530]:
+            - generic [aria-hidden] [ref=f1e532]: 
+            - generic [ref=f1e533]: Blog
+          - generic [ref=f1e534]: Stay in touch with the latest updates and announcements from our blog
+          - link "Learn more" [ref=f1e535] [cursor=pointer]:
+            - /url: https://blogs.bing.com/webmaster
+            - text: Learn more
+            - generic [aria-hidden] [ref=f1e536]: 
+        - generic [ref=f1e537]:
+          - generic [ref=f1e538]:
+            - generic [aria-hidden] [ref=f1e540]: 
+            - generic [ref=f1e541]: URL Submission API
+          - generic [ref=f1e542]: Easy to plug-in API solution that websites can call to notify Bing on content updated, allowing instant crawling, indexing and discovery of your site content.
+          - link "Learn more" [ref=f1e543] [cursor=pointer]:
+            - /url: https://www.bing.com/webmasters/url-submission-api
+            - text: Learn more
+            - generic [aria-hidden] [ref=f1e544]: 
+    - generic [ref=f1e547]:
+      - generic [ref=f1e548]: Follow us on
+      - generic [ref=f1e549]:
+        - link "Facebook" [ref=f1e550] [cursor=pointer]:
+          - /url: https://www.facebook.com/Bingwebmaster/
+        - link "Twitter" [ref=f1e556] [cursor=pointer]:
+          - /url: https://twitter.com/BingWMC
+    - generic [ref=f1e563]:
+      - generic [ref=f1e564]:
+        - generic [ref=f1e565]:
+          - paragraph [ref=f1e566]: Dev centers
+          - list [ref=f1e567]:
+            - listitem [ref=f1e568]:
+              - link "Windows" [ref=f1e569] [cursor=pointer]:
+                - /url: https://dev.windows.com/
+            - listitem [ref=f1e570]:
+              - link "Office" [ref=f1e571] [cursor=pointer]:
+                - /url: https://developer.microsoft.com/en-us/office
+            - listitem [ref=f1e572]:
+              - link "Visual Studio" [ref=f1e573] [cursor=pointer]:
+                - /url: https://www.visualstudio.com/
+            - listitem [ref=f1e574]:
+              - link "Microsoft Azure" [ref=f1e575] [cursor=pointer]:
+                - /url: https://azure.microsoft.com/documentation
+        - generic [ref=f1e576]:
+          - paragraph [ref=f1e577]: Bing Services
+          - list [ref=f1e578]:
+            - listitem [ref=f1e579]:
+              - link "Bing for partners" [ref=f1e580] [cursor=pointer]:
+                - /url: https://www.bing.com/partners
+            - listitem [ref=f1e581]:
+              - link "Bing Places" [ref=f1e582] [cursor=pointer]:
+                - /url: https://bingplaces.com/
+            - listitem [ref=f1e583]:
+              - link "Microsoft Advertising" [ref=f1e584] [cursor=pointer]:
+                - /url: http://about.ads.microsoft.com/en-us/home
+            - listitem [ref=f1e585]:
+              - link "Bing Developer Center" [ref=f1e586] [cursor=pointer]:
+                - /url: https://www.bing.com/dev/dev-center
+            - listitem [ref=f1e587]:
+              - link "Bing Knowledge widget" [ref=f1e588] [cursor=pointer]:
+                - /url: /widget/knowledge
+            - listitem [ref=f1e589]:
+              - link "Bing Translator widget" [ref=f1e590] [cursor=pointer]:
+                - /url: https://www.microsoft.com/translator/business/web/
+        - generic [ref=f1e591]:
+          - paragraph [ref=f1e592]: Blogs
+          - list [ref=f1e593]:
+            - listitem [ref=f1e594]:
+              - link "Bing webmaster blog" [ref=f1e595] [cursor=pointer]:
+                - /url: http://blogs.bing.com/webmaster
+            - listitem [ref=f1e596]:
+              - link "Bing search blog" [ref=f1e597] [cursor=pointer]:
+                - /url: http://blogs.bing.com/search
+      - generic [ref=f1e598]:
+        - combobox "dropdown filter" [ref=f1e601]:
+          - generic [ref=f1e602] [cursor=pointer]: English (United States)
+          - generic [aria-hidden] [ref=f1e604] [cursor=pointer]: 
+        - list [ref=f1e605]:
+          - listitem [ref=f1e606]:
+            - link "Consumer Health Privacy" [ref=f1e607] [cursor=pointer]:
+              - /url: https://privacy.microsoft.com/en-US/microsoft-consumer-health-data-privacy-policy
+          - listitem [ref=f1e608]:
+            - link "Privacy and Cookies" [ref=f1e609] [cursor=pointer]:
+              - /url: http://go.microsoft.com/fwlink/?LinkId=248686
+          - listitem [ref=f1e610]:
+            - link "Legal" [ref=f1e611] [cursor=pointer]:
+              - /url: https://www.microsoft.com/en-us/servicesagreement/
+          - listitem [ref=f1e612]:
+            - link "Contact us" [ref=f1e613] [cursor=pointer]:
+              - /url: https://www.bing.com/webmasters/help/webmaster-support-24ab5ebf
+          - listitem [ref=f1e614]: © 2026 Microsoft
