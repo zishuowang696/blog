@@ -31,6 +31,6 @@ published: true
 ## 联系我
 
 - **站内评论**：在任意文章下方留言（注册即可，我会看到）；
-- **邮箱**：<wangbing1087@qq.com>
+- **邮箱**：[wangbing1087@qq.com](mailto:wangbing1087@qq.com)
 
 > 描述清你的**场景 / 硬件 / 目标**，我会尽快回复。
