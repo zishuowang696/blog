@@ -24,3 +24,6 @@ tests/.tmp-test.sqlite*
 
 # 临时克隆的上游仓库
 upstream-embedai/
+
+# 运营/商业文档（不进公开仓库）
+growth/
