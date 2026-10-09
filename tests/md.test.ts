@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { parseFrontmatter, renderMarkdown, extractPlainText } from '../src/lib/md.ts'
+import { parseFrontmatter, renderMarkdown, extractPlainText, withToc } from '../src/lib/md.ts'
 
 describe('parseFrontmatter', () => {
   test('解析完整 frontmatter', () => {
@@ -66,5 +66,22 @@ describe('renderMarkdown', () => {
 describe('extractPlainText', () => {
   test('剥离标签', () => {
     expect(extractPlainText('<p>hello <b>world</b></p>')).toBe('hello world')
+  })
+})
+
+describe('withToc', () => {
+  test('给 h2/h3 加 id 并抽目录，重复标题去重', () => {
+    const html = renderMarkdown('## MCP 的三个角色\n\n正文\n\n### 用法\n\n## MCP 的三个角色')
+    const { html: out, toc } = withToc(html)
+    expect(out).toContain('<h2 id="mcp-的三个角色">')
+    expect(out).toContain('<h3 id="用法">')
+    expect(out).toContain('<h2 id="mcp-的三个角色-2">')
+    expect(toc.map((t) => t.id)).toEqual(['mcp-的三个角色', '用法', 'mcp-的三个角色-2'])
+    expect(toc.map((t) => t.level)).toEqual([2, 3, 2])
+  })
+
+  test('无标题时目录为空', () => {
+    const { toc } = withToc('<p>只有段落</p>')
+    expect(toc).toEqual([])
   })
 })

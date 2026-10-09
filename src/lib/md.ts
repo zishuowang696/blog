@@ -252,3 +252,39 @@ export function parseFrontmatter(src: string): Frontmatter {
 export function extractPlainText(html: string): string {
   return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
+
+export interface TocItem {
+  level: number
+  id: string
+  text: string
+}
+
+function slugifyHeading(text: string): string {
+  return (
+    text
+      .trim()
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
+      .replace(/^-+|-+$/g, '') || 'section'
+  )
+}
+
+// 为已渲染的正文补 h2/h3 锚点 id，并抽出目录（TOC）
+export function withToc(html: string): { html: string; toc: TocItem[] } {
+  const toc: TocItem[] = []
+  const seen = new Map<string, number>()
+  const out = html.replace(/<h([23])>([\s\S]*?)<\/h\1>/g, (_m, lvl: string, inner: string) => {
+    const text = inner.replace(/<[^>]+>/g, '').trim()
+    let id = slugifyHeading(text)
+    const n = seen.get(id)
+    if (n) {
+      seen.set(id, n + 1)
+      id = `${id}-${n + 1}`
+    } else {
+      seen.set(id, 1)
+    }
+    toc.push({ level: Number(lvl), id, text })
+    return `<h${lvl} id="${id}">${inner}</h${lvl}>`
+  })
+  return { html: out, toc }
+}
