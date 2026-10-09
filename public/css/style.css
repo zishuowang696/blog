@@ -15,8 +15,21 @@
   --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
 }
 
+:root[data-theme="dark"] {
+  --bg: #0e1116;
+  --bg-soft: #161a21;
+  --bg-code: #0b0e13;
+  --fg: #e7eaf0;
+  --fg-muted: #94a0b0;
+  --accent: #2dd4bf;
+  --accent-soft: #11302c;
+  --accent-bg: #0d9488;
+  --border: #262c37;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0e1116;
     --bg-soft: #161a21;
     --bg-code: #0b0e13;
@@ -80,6 +93,13 @@ button.linkish.danger:hover { color: #e5484d; }
   padding: 3px 10px; border-radius: 999px; letter-spacing: 0.3px;
 }
 .lang-switch a:hover { color: var(--accent); border-color: var(--accent); text-decoration: none; }
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; padding: 0; background: none;
+  border: 1px solid var(--border); border-radius: 999px; color: var(--fg-muted); cursor: pointer;
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.theme-toggle svg { width: 18px; height: 18px; }
 
 /* main + grid */
 .main { padding: 40px 0 72px; }

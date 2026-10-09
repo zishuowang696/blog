@@ -22,6 +22,13 @@ const SEARCH_ICON = (
   </svg>
 )
 
+const THEME_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none" />
+  </svg>
+)
+
 function AccountArea({ user, lang }: { user: User | null; lang: Lang }) {
   if (!user) {
     return (
@@ -87,6 +94,7 @@ export function Layout({ title, description, active, user, lang, path, query, pr
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}" }} />
         <meta name="description" content={pageDesc} />
         <title>{docTitle}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -127,6 +135,9 @@ export function Layout({ title, description, active, user, lang, path, query, pr
               <span class="lang-switch">
                 <a href={switchHref}>{switchLabel}</a>
               </span>
+              <button type="button" class="theme-toggle" id="theme-toggle" aria-label={t(lang, 'ui.theme')} title={t(lang, 'ui.theme')}>
+                {THEME_ICON}
+              </button>
               <AccountArea user={user} lang={lang} />
             </div>
           </div>
@@ -163,6 +174,12 @@ export function Layout({ title, description, active, user, lang, path, query, pr
             </div>
           </div>
         </footer>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var b=document.getElementById('theme-toggle');if(!b)return;b.addEventListener('click',function(){var d=document.documentElement.getAttribute('data-theme');var s=window.matchMedia('(prefers-color-scheme: dark)').matches;var cur=d||(s?'dark':'light');var nx=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nx);try{localStorage.setItem('theme',nx)}catch(e){}})})()",
+          }}
+        />
       </body>
     </html>
   )
