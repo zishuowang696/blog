@@ -1,24 +1,24 @@
 import type { Post, PostMeta, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
-import { PostList, Sidebar } from '../templates/components.tsx'
+import { Pagination, PostList, Sidebar } from '../templates/components.tsx'
 import { SITE_DESC } from '../templates/util.ts'
 
 export function HomeView({
   posts,
-  moreUrl,
   page,
+  totalPages,
   tags,
   latest,
-  postsPerPage,
+  makeHref,
   lang,
 }: {
   posts: Post[]
-  moreUrl?: string
   page: number
+  totalPages: number
   tags: TagCount[]
   latest: PostMeta[]
-  postsPerPage: number
+  makeHref: (p: number) => string
   lang: Lang
 }) {
   return (
@@ -44,13 +44,16 @@ export function HomeView({
             </button>
           </form>
           <section class="cards-wrap">
-            <PostList posts={posts} moreUrl={moreUrl} lang={lang} />
-            {page > 1 ? (
-              <p class="muted page-info">
-                {lang === 'zh' ? `第 ${page} 页（每页 ${postsPerPage} 篇）` : `Page ${page} (${postsPerPage} posts per page)`}
-              </p>
-            ) : null}
+            <PostList posts={posts} lang={lang} />
           </section>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            makeHref={makeHref}
+            prev={page > 1 ? makeHref(page - 1) : undefined}
+            next={page < totalPages ? makeHref(page + 1) : undefined}
+            lang={lang}
+          />
         </div>
         <Sidebar lang={lang} latest={latest} tags={tags} />
       </div>

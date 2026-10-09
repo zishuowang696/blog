@@ -53,15 +53,19 @@ interface LayoutProps {
   user: User | null
   lang: Lang
   path: string
+  query?: string
+  prev?: string
+  next?: string
   ogType?: string
   jsonLd?: Record<string, unknown>[]
   children?: Child
 }
 
-export function Layout({ title, description, active, user, lang, path, ogType, jsonLd, children }: LayoutProps) {
+export function Layout({ title, description, active, user, lang, path, query, prev, next, ogType, jsonLd, children }: LayoutProps) {
+  const q = query ?? ''
   const docTitle = title.startsWith(SITE_NAME) ? title : `${title} · ${SITE_NAME}`
   const siteUrl = (envStr('SITE_URL') ?? 'http://localhost:3000').replace(/\/+$/, '')
-  const canonical = siteUrl + path
+  const canonical = siteUrl + path + q
   const pageDesc = description ?? SITE_DESC
   const ld: Record<string, unknown>[] = [
     { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, description: SITE_DESC, url: siteUrl, inLanguage: lang },
@@ -76,19 +80,20 @@ export function Layout({ title, description, active, user, lang, path, ogType, j
   const otherLang: Lang = lang === 'zh' ? 'en' : 'zh'
   const switchHref = langHref(otherLang, stripLang(path))
   const basePath = stripLang(path)
-  const zhUrl = siteUrl + basePath
-  const enUrl = siteUrl + (basePath === '/' ? EN_PREFIX : EN_PREFIX + basePath)
+  const zhUrl = siteUrl + basePath + q
+  const enUrl = siteUrl + (basePath === '/' ? EN_PREFIX : EN_PREFIX + basePath) + q
   return (
     <html lang={lang}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <meta name="description" content={pageDesc} />
         <title>{docTitle}</title>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="/css/style.css" />
         <link rel="canonical" href={canonical} />
+        {prev ? <link rel="prev" href={prev.startsWith('http') ? prev : siteUrl + prev} /> : null}
+        {next ? <link rel="next" href={next.startsWith('http') ? next : siteUrl + next} /> : null}
         <link rel="alternate" hreflang="zh-CN" href={zhUrl} />
         <link rel="alternate" hreflang="en" href={enUrl} />
         <link rel="alternate" hreflang="x-default" href={zhUrl} />
@@ -166,6 +171,9 @@ export interface PageOpts {
   title: string
   description?: string
   active?: NavKey
+  query?: string
+  prev?: string
+  next?: string
   ogType?: string
   jsonLd?: Record<string, unknown>[]
   body: Child
@@ -177,7 +185,19 @@ export function renderHtml(c: Context, opts: PageOpts): Promise<string> {
   return getSessionUser(c).then((user) =>
     '<!doctype html>\n' +
     String(
-      <Layout title={opts.title} description={opts.description} active={opts.active} ogType={opts.ogType} jsonLd={opts.jsonLd} user={user} lang={lang} path={path}>
+      <Layout
+        title={opts.title}
+        description={opts.description}
+        active={opts.active}
+        query={opts.query}
+        prev={opts.prev}
+        next={opts.next}
+        ogType={opts.ogType}
+        jsonLd={opts.jsonLd}
+        user={user}
+        lang={lang}
+        path={path}
+      >
         {opts.body}
       </Layout>,
     ),
