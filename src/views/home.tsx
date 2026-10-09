@@ -10,6 +10,7 @@ export function HomeView({
   totalPages,
   tags,
   latest,
+  series,
   makeHref,
   lang,
 }: {
@@ -18,6 +19,7 @@ export function HomeView({
   totalPages: number
   tags: TagCount[]
   latest: PostMeta[]
+  series: TagCount[]
   makeHref: (p: number) => string
   lang: Lang
 }) {
@@ -55,7 +57,7 @@ export function HomeView({
             lang={lang}
           />
         </div>
-        <Sidebar lang={lang} latest={latest} tags={tags} />
+        <Sidebar lang={lang} latest={latest} tags={tags} series={series} />
       </div>
     </>
   )

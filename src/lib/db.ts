@@ -270,7 +270,7 @@ export async function listAllPagesMeta(): Promise<PageMeta[]> {
   })
 }
 
-export async function listPosts(opts: { page?: number; tag?: string; q?: string; lang?: Lang } = {}): Promise<PostList> {
+export async function listPosts(opts: { page?: number; tag?: string; series?: string; q?: string; lang?: Lang } = {}): Promise<PostList> {
   const e = useEngine()
   const lang = opts.lang ?? 'en'
   const page = Math.max(1, opts.page ?? 1)
@@ -283,6 +283,10 @@ export async function listPosts(opts: { page?: number; tag?: string; q?: string;
     where.push(`EXISTS (SELECT 1 FROM post_tags pt JOIN tags t ON t.id = pt.tag_id
                   WHERE pt.post_id = posts.id AND t.name = ?)`)
     args.push(opts.tag)
+  }
+  if (opts.series) {
+    where.push('posts.series = ?')
+    args.push(opts.series)
   }
   if (opts.q) {
     where.push(
@@ -325,6 +329,17 @@ export async function listTags(): Promise<TagCount[]> {
      WHERE p.published = 1
      GROUP BY t.name
      ORDER BY count DESC, t.name ASC`,
+  )
+  return rows as unknown as TagCount[]
+}
+
+export async function listSeries(): Promise<TagCount[]> {
+  const rows = await useEngine().all(
+    `SELECT series AS name, COUNT(*) AS count
+     FROM posts
+     WHERE published = 1 AND series IS NOT NULL AND series <> ''
+     GROUP BY series
+     ORDER BY count DESC, series ASC`,
   )
   return rows as unknown as TagCount[]
 }

@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
-import { listAllPostsMeta, listPosts, listTags } from '../lib/db.ts'
+import { listAllPostsMeta, listPosts, listSeries, listTags } from '../lib/db.ts'
 import { langHref, resolveLang, t } from '../lib/locale.ts'
 import { renderHtml } from '../templates/layout.tsx'
 import { TagsIndexView, TagPostsView } from '../views/tags.tsx'
@@ -15,7 +15,7 @@ export const tagRoutes = new Hono()
 tagRoutes.get('/', async (c) => {
   const lang = resolveLang(c)
   const tags = await listTags()
-  const body = <TagsIndexView tags={tags} latest={(await listAllPostsMeta()).slice(0, 6)} lang={lang} />
+  const body = <TagsIndexView tags={tags} latest={(await listAllPostsMeta()).slice(0, 6)} series={await listSeries()} lang={lang} />
   return c.html(await renderHtml(c, { title: t(lang, 'tags.title'), active: 'tags', body }))
 })
 
@@ -36,6 +36,7 @@ tagRoutes.get('/:tag', async (c) => {
       total={list.total}
       latest={(await listAllPostsMeta()).slice(0, 6)}
       tags={await listTags()}
+      series={await listSeries()}
       makeHref={makeHref}
       lang={lang}
     />
