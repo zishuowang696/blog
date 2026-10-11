@@ -116,7 +116,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:12:34.874Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:22:38.097Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -460,7 +460,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-from-scratch/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:12:34.875Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:22:38.100Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
 **The essence of an agent is a single loop:**
 
@@ -840,7 +840,7 @@ journalctl -u agent -f      # 看日志
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-on-jetson/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:12:34.877Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
+', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:22:38.102Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
 
 So the right approach: **get it running on x86 first, then move it to the device as-is** — the business code usually doesn''t change at all.
 
@@ -1123,7 +1123,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:12:34.878Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:22:38.103Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1406,7 +1406,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:12:34.879Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:22:38.107Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1647,7 +1647,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:12:34.881Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:22:38.107Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1750,7 +1750,7 @@ INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'jetson-orin-tensorrt-gateway' AND t.name = 'ai网关'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
-  VALUES ('mcp-in-30-lines', '用 30 行看懂 MCP：它其实就是标准化的 Function Calling', 'MCP 不神秘：它就是一套基于 JSON-RPC 的协议，把上一篇硬编码的 cat 工具变成一个独立进程，让任何 LLM 应用都能接。附 30 行可跑的服务端和客户端。', '<p>上一篇文章里，我们的 <code>cat</code> 工具是<strong>硬编码</strong>在 Agent 代码里的：</p>
+  VALUES ('mcp-in-30-lines', '用 30 行看懂 MCP：它其实就是标准化的 Function Calling', 'MCP 不神秘：它就是一套基于 JSON-RPC 的协议，把上一篇硬编码的 cat 工具变成一个独立进程，让任何 LLM 应用都能接。附 30 行可跑的服务端和客户端。', '<p>在《从 0 构建一个 AI Agent》里，我们的 <code>cat</code> 工具是<strong>硬编码</strong>在 Agent 代码里的：</p>
 <pre><code class="language-python"># 工具写死在你的程序里
 TOOLS = [{&quot;function&quot;: {&quot;name&quot;: &quot;cat&quot;, &quot;...&quot;: &quot;...&quot;}}]
 
@@ -1842,7 +1842,7 @@ series: "从 0 构建 AI Agent"
 published: true
 ---
 
-上一篇文章里，我们的 `cat` 工具是**硬编码**在 Agent 代码里的：
+在《从 0 构建一个 AI Agent》里，我们的 `cat` 工具是**硬编码**在 Agent 代码里的：
 
 ```python
 # 工具写死在你的程序里
@@ -1964,7 +1964,7 @@ python client.py
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:12:34.882Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In the previous post, our `cat` tool was **hardcoded** inside the agent:
+', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:22:38.108Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
 
 ```python
 # the tool lives inside your program
@@ -2084,7 +2084,7 @@ python client.py
 > 📦 Complete runnable code: **[github.com/zishuowang696/mcp-demo](https://github.com/zishuowang696/mcp-demo)**
 >
 > 💬 Questions or feedback? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696/mcp-demo/issues) on GitHub.
-', '<p>In the previous post, our <code>cat</code> tool was <strong>hardcoded</strong> inside the agent:</p>
+', '<p>In <a href="/en/posts/build-ai-agent-from-scratch">Building an AI agent from scratch</a>, our <code>cat</code> tool was <strong>hardcoded</strong> inside the agent:</p>
 <pre><code class="language-python"># the tool lives inside your program
 TOOLS = [{&quot;function&quot;: {&quot;name&quot;: &quot;cat&quot;, &quot;...&quot;: &quot;...&quot;}}]
 
@@ -2304,7 +2304,7 @@ published: true
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:12:34.883Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
+', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:22:38.109Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
 
 > **Why does MCP use pipes (stdio) instead of sockets?**
 
@@ -2579,7 +2579,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:12:34.885Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:22:38.109Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -2838,7 +2838,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:12:34.886Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:22:38.110Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -3008,7 +3008,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:12:34.887Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:22:38.111Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -3212,7 +3212,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:12:34.889Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:22:38.111Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -3350,6 +3350,458 @@ INSERT INTO post_tags (post_id, tag_id)
 INSERT INTO tags (name) VALUES ('bmaptool') ON CONFLICT(name) DO NOTHING;
 INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'sparse-images' AND t.name = 'bmaptool'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('write-an-mcp-client', '手写一个标准的 MCP 客户端（不用自己写服务端）', 'MCP 标准决定了 client 怎么写。这篇不写服务端，只用 40 行标准库实现一个标准的 MCP 客户端：握手 → 读 capabilities → tools/list → tools/call，可连接任意 MCP server。', '<p>上一篇《从 0 构建一个 AI Agent》讲了 Agent 的循环；这一篇进入 <strong>MCP</strong>。</p>
+<p>很多人卡在同一个地方：<strong>MCP 标准到底是什么？</strong>——因为<strong>它的规范直接决定了 client 怎么写</strong>。所以这篇<strong>不写服务端</strong>，只干一件事：讲清 MCP 标准，并用一段标准库代码<strong>实现一个标准的 MCP 客户端</strong>，它能连接<strong>任意</strong> MCP server。</p>
+<h2>MCP 标准到底是什么</h2>
+<p>一句话：</p>
+<blockquote><p><strong>MCP = 基于 JSON-RPC 2.0 的协议</strong>：它规定&quot;<strong>有哪些方法</strong>、<strong>消息长什么样</strong>、<strong>怎么握手与能力协商</strong>&quot;。至于 stdio / HTTP，只是承载它的<strong>传输</strong>。</p></blockquote>
+<h3>1）消息形态（JSON-RPC 2.0）</h3>
+<ul><li><strong>请求</strong>：<code>{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;method&quot;:&quot;tools/call&quot;,&quot;params&quot;:{...}}</code></li><li><strong>响应</strong>：<code>{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;result&quot;:{...}}</code>（出错则是 <code>error</code>）</li><li><strong>通知</strong>：<code>{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;notifications/initialized&quot;}</code>（<strong>没有 <code>id</code></strong>，不需要回）</li></ul>
+<h3>2）生命周期：一次握手</h3>
+<ol><li>client → <code>initialize</code>（带 <code>protocolVersion</code>、<code>capabilities</code>、<code>clientInfo</code>）；</li></ol>
+<ol><li>server → 返回它支持的 <code>capabilities</code> 与 <code>serverInfo</code>（<strong>版本不一致会协商或报错</strong>）；</li></ol>
+<ol><li>client → <code>notifications/initialized</code>（握手完成）。</li></ol>
+<p>之后才进入真正的调用。</p>
+<h3>3）能力协商（capabilities）——<strong>关键</strong></h3>
+<p>握手时双方<strong>各自声明支持什么</strong>，这决定了后面能用哪些方法：</p>
+<table><thead><tr><th>谁提供</th><th>能力</th><th>相关方法</th></tr></thead><tbody><tr><td><strong>server</strong> → client</td><td><strong>tools</strong></td><td><code>tools/list</code>、<code>tools/call</code></td></tr><tr><td></td><td><strong>resources</strong></td><td><code>resources/list</code>、<code>resources/read</code></td></tr><tr><td></td><td><strong>prompts</strong></td><td><code>prompts/list</code>、<code>prompts/get</code></td></tr><tr><td><strong>client</strong> → server</td><td>sampling</td><td><code>sampling/createMessage</code></td></tr><tr><td></td><td>roots</td><td><code>roots/list</code></td></tr></tbody></table>
+<blockquote><p><strong>client 怎么写 = 握手 → 看 server 声明了哪些 capabilities → 只调它声明支持的方法。</strong></p></blockquote>
+<h2>实现：一个标准的 MCP 客户端</h2>
+<p>传输用 <strong>stdio</strong>（把 server 当子进程拉起，读写它的 stdin/stdout），核心就一个 <code>MCPClient</code> 类：</p>
+<pre><code class="language-python">import json, subprocess
+
+class MCPClient:
+    def __init__(self, cmd):
+        # 传输：把 server 作为子进程拉起，用 stdin/stdout 收发一行行 JSON-RPC
+        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        self._id = 0
+        self.capabilities = {}
+
+    def _send(self, obj):
+        self.proc.stdin.write(json.dumps(obj) + &quot;\n&quot;); self.proc.stdin.flush()
+
+    def _request(self, method, params=None):
+        self._id += 1
+        msg = {&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;id&quot;: self._id, &quot;method&quot;: method}
+        if params is not None: msg[&quot;params&quot;] = params
+        self._send(msg)
+        while True:
+            resp = json.loads(self.proc.stdout.readline())
+            if resp.get(&quot;id&quot;) == self._id and (&quot;result&quot; in resp or &quot;error&quot; in resp):
+                if &quot;error&quot; in resp: raise RuntimeError(resp[&quot;error&quot;])
+                return resp[&quot;result&quot;]
+
+    def _notify(self, method, params=None):
+        msg = {&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: method}       # 通知：没有 id
+        if params is not None: msg[&quot;params&quot;] = params
+        self._send(msg)
+
+    def initialize(self, protocol_version=&quot;2024-11-05&quot;):
+        result = self._request(&quot;initialize&quot;, {
+            &quot;protocolVersion&quot;: protocol_version,
+            &quot;capabilities&quot;: {},                           # 本客户端不额外提供能力
+            &quot;clientInfo&quot;: {&quot;name&quot;: &quot;mini-mcp-client&quot;, &quot;version&quot;: &quot;0.1&quot;},
+        })
+        self.capabilities = result.get(&quot;capabilities&quot;, {})
+        self._notify(&quot;notifications/initialized&quot;)         # 握手完成
+        return result
+
+    def list_tools(self):
+        return self._request(&quot;tools/list&quot;).get(&quot;tools&quot;, [])
+
+    def call_tool(self, name, arguments):
+        return self._request(&quot;tools/call&quot;, {&quot;name&quot;: name, &quot;arguments&quot;: arguments})</code></pre>
+<p><strong>它做了什么</strong>（对着上面的标准）：</p>
+<ol><li><strong>传输</strong>：spawn 子进程 + 管道收发；</li></ol>
+<ol><li><strong>握手</strong>：<code>initialize</code> → 拿 <code>capabilities</code> → <code>notifications/initialized</code>；</li></ol>
+<ol><li><strong>调用</strong>：<code>tools/list</code> 发现工具 → <code>tools/call</code> 执行。</li></ol>
+<h2>跑起来（连任意 server）</h2>
+<pre><code class="language-bash"># 连一个现成的 stdio MCP server（这里用姊妹仓库的示例）
+python client.py python3 ../mcp-demo/server.py</code></pre>
+<pre><code>handshake ok, serverInfo = {&#39;name&#39;: &#39;cat-mcp&#39;, &#39;version&#39;: &#39;0.1&#39;}
+server capabilities = [&#39;tools&#39;]
+tools = [&#39;cat&#39;]
+call cat -&gt; {&#39;content&#39;: [{&#39;type&#39;: &#39;text&#39;, &#39;text&#39;: &#39;your-hostname&#39;}]}</code></pre>
+<p><strong>注意：这里没有&quot;我们的服务端&quot;</strong>——client 只认&quot;<strong>一个能满足 MCP 标准的 server</strong>&quot;。换成任何 stdio MCP server，同一份 client 都能接。</p>
+<h2>几个容易踩的点</h2>
+<ol><li><strong>通知没有 <code>id</code></strong>：<code>notifications/initialized</code> 这类<strong>不用回</strong>；别把通知当请求等响应。</li></ol>
+<ol><li><strong>响应靠 <code>id</code> 匹配</strong>：并发请求时按 <code>id</code> 对上；本示例串行最简单。</li></ol>
+<ol><li><strong>只调声明的方法</strong>：server 没声明 <code>resources</code>，就别调 <code>resources/list</code>。</li></ol>
+<ol><li><strong><code>protocolVersion</code> 要协商</strong>：握手时对不上会报错，别硬写死。</li></ol>
+<ol><li><strong>服务端会主动发消息</strong>（进度、日志、sampling 请求）：真实 client 要<strong>分流处理</strong>，本示例为简洁只跳过。</li></ol>
+<h2>一句话收尾</h2>
+<p><strong>MCP 标准 = JSON-RPC 2.0 + 一组约定方法 + 握手/能力协商</strong>。搞懂它，<strong>client 就是三步：握手 → 读 capabilities → 调对应方法</strong>——和具体是 stdio 还是 HTTP 无关。</p>
+<p>下一篇《用 30 行看懂 MCP》换到<strong>服务端</strong>视角：同样 30 行，把工具&quot;挂&quot;到 MCP 上。</p>
+<blockquote><p>📦 完整可运行代码：<strong><a href="https://github.com/zishuowang696/mcp-client">github.com/zishuowang696/mcp-client</a></strong></p><p>💬 有问题或建议？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696/mcp-client/issues">提 Issue</a>。</p></blockquote>
+<p><em>（本文中英双语；本系列记录从 0 构建 Agent 的过程。）</em></p>', '---
+title: "手写一个标准的 MCP 客户端（不用自己写服务端）"
+date: 2026-10-08
+tags: ["mcp", "ai-agent", "协议", "客户端", "教程"]
+summary: "MCP 标准决定了 client 怎么写。这篇不写服务端，只用 40 行标准库实现一个标准的 MCP 客户端：握手 → 读 capabilities → tools/list → tools/call，可连接任意 MCP server。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+上一篇《从 0 构建一个 AI Agent》讲了 Agent 的循环；这一篇进入 **MCP**。
+
+很多人卡在同一个地方：**MCP 标准到底是什么？**——因为**它的规范直接决定了 client 怎么写**。所以这篇**不写服务端**，只干一件事：讲清 MCP 标准，并用一段标准库代码**实现一个标准的 MCP 客户端**，它能连接**任意** MCP server。
+
+## MCP 标准到底是什么
+
+一句话：
+
+> **MCP = 基于 JSON-RPC 2.0 的协议**：它规定"**有哪些方法**、**消息长什么样**、**怎么握手与能力协商**"。至于 stdio / HTTP，只是承载它的**传输**。
+
+### 1）消息形态（JSON-RPC 2.0）
+
+- **请求**：`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{...}}`
+- **响应**：`{"jsonrpc":"2.0","id":1,"result":{...}}`（出错则是 `error`）
+- **通知**：`{"jsonrpc":"2.0","method":"notifications/initialized"}`（**没有 `id`**，不需要回）
+
+### 2）生命周期：一次握手
+
+1. client → `initialize`（带 `protocolVersion`、`capabilities`、`clientInfo`）；
+2. server → 返回它支持的 `capabilities` 与 `serverInfo`（**版本不一致会协商或报错**）；
+3. client → `notifications/initialized`（握手完成）。
+
+之后才进入真正的调用。
+
+### 3）能力协商（capabilities）——**关键**
+
+握手时双方**各自声明支持什么**，这决定了后面能用哪些方法：
+
+| 谁提供 | 能力 | 相关方法 |
+| --- | --- | --- |
+| **server** → client | **tools** | `tools/list`、`tools/call` |
+| | **resources** | `resources/list`、`resources/read` |
+| | **prompts** | `prompts/list`、`prompts/get` |
+| **client** → server | sampling | `sampling/createMessage` |
+| | roots | `roots/list` |
+
+> **client 怎么写 = 握手 → 看 server 声明了哪些 capabilities → 只调它声明支持的方法。**
+
+## 实现：一个标准的 MCP 客户端
+
+传输用 **stdio**（把 server 当子进程拉起，读写它的 stdin/stdout），核心就一个 `MCPClient` 类：
+
+```python
+import json, subprocess
+
+class MCPClient:
+    def __init__(self, cmd):
+        # 传输：把 server 作为子进程拉起，用 stdin/stdout 收发一行行 JSON-RPC
+        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        self._id = 0
+        self.capabilities = {}
+
+    def _send(self, obj):
+        self.proc.stdin.write(json.dumps(obj) + "\n"); self.proc.stdin.flush()
+
+    def _request(self, method, params=None):
+        self._id += 1
+        msg = {"jsonrpc": "2.0", "id": self._id, "method": method}
+        if params is not None: msg["params"] = params
+        self._send(msg)
+        while True:
+            resp = json.loads(self.proc.stdout.readline())
+            if resp.get("id") == self._id and ("result" in resp or "error" in resp):
+                if "error" in resp: raise RuntimeError(resp["error"])
+                return resp["result"]
+
+    def _notify(self, method, params=None):
+        msg = {"jsonrpc": "2.0", "method": method}       # 通知：没有 id
+        if params is not None: msg["params"] = params
+        self._send(msg)
+
+    def initialize(self, protocol_version="2024-11-05"):
+        result = self._request("initialize", {
+            "protocolVersion": protocol_version,
+            "capabilities": {},                           # 本客户端不额外提供能力
+            "clientInfo": {"name": "mini-mcp-client", "version": "0.1"},
+        })
+        self.capabilities = result.get("capabilities", {})
+        self._notify("notifications/initialized")         # 握手完成
+        return result
+
+    def list_tools(self):
+        return self._request("tools/list").get("tools", [])
+
+    def call_tool(self, name, arguments):
+        return self._request("tools/call", {"name": name, "arguments": arguments})
+```
+
+**它做了什么**（对着上面的标准）：
+1. **传输**：spawn 子进程 + 管道收发；
+2. **握手**：`initialize` → 拿 `capabilities` → `notifications/initialized`；
+3. **调用**：`tools/list` 发现工具 → `tools/call` 执行。
+
+## 跑起来（连任意 server）
+
+```bash
+# 连一个现成的 stdio MCP server（这里用姊妹仓库的示例）
+python client.py python3 ../mcp-demo/server.py
+```
+
+```
+handshake ok, serverInfo = {''name'': ''cat-mcp'', ''version'': ''0.1''}
+server capabilities = [''tools'']
+tools = [''cat'']
+call cat -> {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
+```
+
+**注意：这里没有"我们的服务端"**——client 只认"**一个能满足 MCP 标准的 server**"。换成任何 stdio MCP server，同一份 client 都能接。
+
+## 几个容易踩的点
+
+1. **通知没有 `id`**：`notifications/initialized` 这类**不用回**；别把通知当请求等响应。
+2. **响应靠 `id` 匹配**：并发请求时按 `id` 对上；本示例串行最简单。
+3. **只调声明的方法**：server 没声明 `resources`，就别调 `resources/list`。
+4. **`protocolVersion` 要协商**：握手时对不上会报错，别硬写死。
+5. **服务端会主动发消息**（进度、日志、sampling 请求）：真实 client 要**分流处理**，本示例为简洁只跳过。
+
+## 一句话收尾
+
+**MCP 标准 = JSON-RPC 2.0 + 一组约定方法 + 握手/能力协商**。搞懂它，**client 就是三步：握手 → 读 capabilities → 调对应方法**——和具体是 stdio 还是 HTTP 无关。
+
+下一篇《用 30 行看懂 MCP》换到**服务端**视角：同样 30 行，把工具"挂"到 MCP 上。
+
+> 📦 完整可运行代码：**[github.com/zishuowang696/mcp-client](https://github.com/zishuowang696/mcp-client)**
+>
+> 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-client/issues)。
+
+*（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
+', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T02:22:38.112Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
+
+Most people get stuck on the same question: **what exactly is the MCP standard?** — because **the spec directly decides how the client is written**. So this post writes **no server**. It does one thing: explain the MCP standard, then implement a **standard MCP client** in stdlib code that can connect to **any** MCP server.
+
+## What the MCP standard actually is
+
+In one line:
+
+> **MCP = a JSON-RPC 2.0 protocol**: it defines *which methods exist*, *what messages look like*, and *how the handshake and capability negotiation work*. stdio / HTTP are just the **transport** beneath it.
+
+### 1) Message shapes (JSON-RPC 2.0)
+
+- **Request**: `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{...}}`
+- **Response**: `{"jsonrpc":"2.0","id":1,"result":{...}}` (or `error`)
+- **Notification**: `{"jsonrpc":"2.0","method":"notifications/initialized"}` (**no `id`**, no reply expected)
+
+### 2) Lifecycle: one handshake
+
+1. client → `initialize` (with `protocolVersion`, `capabilities`, `clientInfo`);
+2. server → returns its `capabilities` and `serverInfo` (**version mismatch is negotiated or errors**);
+3. client → `notifications/initialized` (handshake done).
+
+Only then do real calls begin.
+
+### 3) Capability negotiation — **the key**
+
+During the handshake both sides **declare what they support**, which decides which methods you may call:
+
+| Provided by | Capability | Methods |
+| --- | --- | --- |
+| **server** → client | **tools** | `tools/list`, `tools/call` |
+| | **resources** | `resources/list`, `resources/read` |
+| | **prompts** | `prompts/list`, `prompts/get` |
+| **client** → server | sampling | `sampling/createMessage` |
+| | roots | `roots/list` |
+
+> **How to write a client = handshake → read the server''s capabilities → call only the methods it declared.**
+
+## Implementation: a standard MCP client
+
+Transport is **stdio** (launch the server as a child, read/write its stdin/stdout). The core is one `MCPClient` class:
+
+```python
+import json, subprocess
+
+class MCPClient:
+    def __init__(self, cmd):
+        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        self._id = 0
+        self.capabilities = {}
+
+    def _send(self, obj):
+        self.proc.stdin.write(json.dumps(obj) + "\n"); self.proc.stdin.flush()
+
+    def _request(self, method, params=None):
+        self._id += 1
+        msg = {"jsonrpc": "2.0", "id": self._id, "method": method}
+        if params is not None: msg["params"] = params
+        self._send(msg)
+        while True:
+            resp = json.loads(self.proc.stdout.readline())
+            if resp.get("id") == self._id and ("result" in resp or "error" in resp):
+                if "error" in resp: raise RuntimeError(resp["error"])
+                return resp["result"]
+
+    def _notify(self, method, params=None):
+        msg = {"jsonrpc": "2.0", "method": method}       # notification: no id
+        if params is not None: msg["params"] = params
+        self._send(msg)
+
+    def initialize(self, protocol_version="2024-11-05"):
+        result = self._request("initialize", {
+            "protocolVersion": protocol_version,
+            "capabilities": {},
+            "clientInfo": {"name": "mini-mcp-client", "version": "0.1"},
+        })
+        self.capabilities = result.get("capabilities", {})
+        self._notify("notifications/initialized")
+        return result
+
+    def list_tools(self):
+        return self._request("tools/list").get("tools", [])
+
+    def call_tool(self, name, arguments):
+        return self._request("tools/call", {"name": name, "arguments": arguments})
+```
+
+**What it does** (mapped to the standard):
+1. **Transport**: spawn a child + pipe I/O;
+2. **Handshake**: `initialize` → get `capabilities` → `notifications/initialized`;
+3. **Calls**: `tools/list` to discover tools → `tools/call` to run one.
+
+## Run it (against any server)
+
+```bash
+python client.py python3 ../mcp-demo/server.py
+```
+
+```
+handshake ok, serverInfo = {''name'': ''cat-mcp'', ''version'': ''0.1''}
+server capabilities = [''tools'']
+tools = [''cat'']
+call cat -> {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
+```
+
+**Note: there is no "our server" here** — the client only expects "a server that satisfies the MCP standard". Point it at any stdio MCP server and the same client works.
+
+## Common pitfalls
+
+1. **Notifications have no `id`**: don''t wait for a reply to `notifications/initialized`.
+2. **Match responses by `id`**: correlate by `id` (this example is serial for simplicity).
+3. **Call only declared methods**: if the server declares no `resources`, don''t call `resources/list`.
+4. **Negotiate `protocolVersion`**: a mismatch errors; don''t hardcode blindly.
+5. **Servers send messages proactively** (progress, logs, sampling requests): a real client dispatches them; this example just skips them.
+
+## In one line
+
+**MCP = JSON-RPC 2.0 + a set of defined methods + handshake/capability negotiation.** Understand that, and **a client is three steps: handshake → read capabilities → call the right methods** — independent of stdio vs HTTP.
+
+The next post switches to the **server** side: also 30 lines, exposing a tool over MCP.
+
+> 📦 Complete runnable code: **[github.com/zishuowang696/mcp-client](https://github.com/zishuowang696/mcp-client)**
+>
+> 💬 Questions or feedback? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696/mcp-client/issues) on GitHub.
+', '<p>The previous post covered the agent loop; now we enter <strong>MCP</strong>.</p>
+<p>Most people get stuck on the same question: <strong>what exactly is the MCP standard?</strong> — because <strong>the spec directly decides how the client is written</strong>. So this post writes <strong>no server</strong>. It does one thing: explain the MCP standard, then implement a <strong>standard MCP client</strong> in stdlib code that can connect to <strong>any</strong> MCP server.</p>
+<h2>What the MCP standard actually is</h2>
+<p>In one line:</p>
+<blockquote><p><strong>MCP = a JSON-RPC 2.0 protocol</strong>: it defines <em>which methods exist</em>, <em>what messages look like</em>, and <em>how the handshake and capability negotiation work</em>. stdio / HTTP are just the <strong>transport</strong> beneath it.</p></blockquote>
+<h3>1) Message shapes (JSON-RPC 2.0)</h3>
+<ul><li><strong>Request</strong>: <code>{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;method&quot;:&quot;tools/call&quot;,&quot;params&quot;:{...}}</code></li><li><strong>Response</strong>: <code>{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;result&quot;:{...}}</code> (or <code>error</code>)</li><li><strong>Notification</strong>: <code>{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;notifications/initialized&quot;}</code> (<strong>no <code>id</code></strong>, no reply expected)</li></ul>
+<h3>2) Lifecycle: one handshake</h3>
+<ol><li>client → <code>initialize</code> (with <code>protocolVersion</code>, <code>capabilities</code>, <code>clientInfo</code>);</li></ol>
+<ol><li>server → returns its <code>capabilities</code> and <code>serverInfo</code> (<strong>version mismatch is negotiated or errors</strong>);</li></ol>
+<ol><li>client → <code>notifications/initialized</code> (handshake done).</li></ol>
+<p>Only then do real calls begin.</p>
+<h3>3) Capability negotiation — <strong>the key</strong></h3>
+<p>During the handshake both sides <strong>declare what they support</strong>, which decides which methods you may call:</p>
+<table><thead><tr><th>Provided by</th><th>Capability</th><th>Methods</th></tr></thead><tbody><tr><td><strong>server</strong> → client</td><td><strong>tools</strong></td><td><code>tools/list</code>, <code>tools/call</code></td></tr><tr><td></td><td><strong>resources</strong></td><td><code>resources/list</code>, <code>resources/read</code></td></tr><tr><td></td><td><strong>prompts</strong></td><td><code>prompts/list</code>, <code>prompts/get</code></td></tr><tr><td><strong>client</strong> → server</td><td>sampling</td><td><code>sampling/createMessage</code></td></tr><tr><td></td><td>roots</td><td><code>roots/list</code></td></tr></tbody></table>
+<blockquote><p><strong>How to write a client = handshake → read the server&#39;s capabilities → call only the methods it declared.</strong></p></blockquote>
+<h2>Implementation: a standard MCP client</h2>
+<p>Transport is <strong>stdio</strong> (launch the server as a child, read/write its stdin/stdout). The core is one <code>MCPClient</code> class:</p>
+<pre><code class="language-python">import json, subprocess
+
+class MCPClient:
+    def __init__(self, cmd):
+        self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        self._id = 0
+        self.capabilities = {}
+
+    def _send(self, obj):
+        self.proc.stdin.write(json.dumps(obj) + &quot;\n&quot;); self.proc.stdin.flush()
+
+    def _request(self, method, params=None):
+        self._id += 1
+        msg = {&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;id&quot;: self._id, &quot;method&quot;: method}
+        if params is not None: msg[&quot;params&quot;] = params
+        self._send(msg)
+        while True:
+            resp = json.loads(self.proc.stdout.readline())
+            if resp.get(&quot;id&quot;) == self._id and (&quot;result&quot; in resp or &quot;error&quot; in resp):
+                if &quot;error&quot; in resp: raise RuntimeError(resp[&quot;error&quot;])
+                return resp[&quot;result&quot;]
+
+    def _notify(self, method, params=None):
+        msg = {&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: method}       # notification: no id
+        if params is not None: msg[&quot;params&quot;] = params
+        self._send(msg)
+
+    def initialize(self, protocol_version=&quot;2024-11-05&quot;):
+        result = self._request(&quot;initialize&quot;, {
+            &quot;protocolVersion&quot;: protocol_version,
+            &quot;capabilities&quot;: {},
+            &quot;clientInfo&quot;: {&quot;name&quot;: &quot;mini-mcp-client&quot;, &quot;version&quot;: &quot;0.1&quot;},
+        })
+        self.capabilities = result.get(&quot;capabilities&quot;, {})
+        self._notify(&quot;notifications/initialized&quot;)
+        return result
+
+    def list_tools(self):
+        return self._request(&quot;tools/list&quot;).get(&quot;tools&quot;, [])
+
+    def call_tool(self, name, arguments):
+        return self._request(&quot;tools/call&quot;, {&quot;name&quot;: name, &quot;arguments&quot;: arguments})</code></pre>
+<p><strong>What it does</strong> (mapped to the standard):</p>
+<ol><li><strong>Transport</strong>: spawn a child + pipe I/O;</li></ol>
+<ol><li><strong>Handshake</strong>: <code>initialize</code> → get <code>capabilities</code> → <code>notifications/initialized</code>;</li></ol>
+<ol><li><strong>Calls</strong>: <code>tools/list</code> to discover tools → <code>tools/call</code> to run one.</li></ol>
+<h2>Run it (against any server)</h2>
+<pre><code class="language-bash">python client.py python3 ../mcp-demo/server.py</code></pre>
+<pre><code>handshake ok, serverInfo = {&#39;name&#39;: &#39;cat-mcp&#39;, &#39;version&#39;: &#39;0.1&#39;}
+server capabilities = [&#39;tools&#39;]
+tools = [&#39;cat&#39;]
+call cat -&gt; {&#39;content&#39;: [{&#39;type&#39;: &#39;text&#39;, &#39;text&#39;: &#39;your-hostname&#39;}]}</code></pre>
+<p><strong>Note: there is no &quot;our server&quot; here</strong> — the client only expects &quot;a server that satisfies the MCP standard&quot;. Point it at any stdio MCP server and the same client works.</p>
+<h2>Common pitfalls</h2>
+<ol><li><strong>Notifications have no <code>id</code></strong>: don&#39;t wait for a reply to <code>notifications/initialized</code>.</li></ol>
+<ol><li><strong>Match responses by <code>id</code></strong>: correlate by <code>id</code> (this example is serial for simplicity).</li></ol>
+<ol><li><strong>Call only declared methods</strong>: if the server declares no <code>resources</code>, don&#39;t call <code>resources/list</code>.</li></ol>
+<ol><li><strong>Negotiate <code>protocolVersion</code></strong>: a mismatch errors; don&#39;t hardcode blindly.</li></ol>
+<ol><li><strong>Servers send messages proactively</strong> (progress, logs, sampling requests): a real client dispatches them; this example just skips them.</li></ol>
+<h2>In one line</h2>
+<p><strong>MCP = JSON-RPC 2.0 + a set of defined methods + handshake/capability negotiation.</strong> Understand that, and <strong>a client is three steps: handshake → read capabilities → call the right methods</strong> — independent of stdio vs HTTP.</p>
+<p>The next post switches to the <strong>server</strong> side: also 30 lines, exposing a tool over MCP.</p>
+<blockquote><p>📦 Complete runnable code: <strong><a href="https://github.com/zishuowang696/mcp-client">github.com/zishuowang696/mcp-client</a></strong></p><p>💬 Questions or feedback? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696/mcp-client/issues">open an Issue</a> on GitHub.</p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('mcp') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'write-an-mcp-client' AND t.name = 'mcp'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'write-an-mcp-client' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('协议') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'write-an-mcp-client' AND t.name = '协议'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('客户端') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'write-an-mcp-client' AND t.name = '客户端'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('教程') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'write-an-mcp-client' AND t.name = '教程'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('yocto-recipe-hello', 'Yocto 第一个 BitBake recipe：meta- 层里的 Hello World', '手把手创建自定义 layer 与最小 recipe，并在 QEMU 镜像里安装自己编译的程序，理解 SRC_URI / S / do_compile。', '<p>Yocto 用 <strong>recipe</strong>（<code>.bb</code>）描述“怎么把一个源码变成安装包”。这篇用一个最小示例走通整条链路：自建 layer → recipe → 编译 → 进入镜像。</p>
@@ -3499,7 +3951,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:12:34.890Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:22:38.113Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -3847,7 +4299,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-11T02:12:34.892Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-11T02:22:38.114Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -4098,5 +4550,5 @@ date: 2026-09-01
 - **邮箱**：[wangbing1087@qq.com](mailto:wangbing1087@qq.com)
 
 > 描述清你的**场景 / 硬件 / 目标**，我会尽快回复。
-', '2026-09-01', '2026-10-11T02:12:34.893Z')
+', '2026-09-01', '2026-10-11T02:22:38.115Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;

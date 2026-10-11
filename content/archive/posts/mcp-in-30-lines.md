@@ -7,7 +7,7 @@ series: "从 0 构建 AI Agent"
 published: true
 ---
 
-上一篇文章里，我们的 `cat` 工具是**硬编码**在 Agent 代码里的：
+在《从 0 构建一个 AI Agent》里，我们的 `cat` 工具是**硬编码**在 Agent 代码里的：
 
 ```python
 # 工具写死在你的程序里
