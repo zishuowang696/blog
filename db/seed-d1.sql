@@ -116,7 +116,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:42:15.502Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:46:08.426Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -460,7 +460,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-from-scratch/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:42:15.503Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:46:08.429Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
 **The essence of an agent is a single loop:**
 
@@ -840,7 +840,7 @@ journalctl -u agent -f      # 看日志
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-on-jetson/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:42:15.505Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
+', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:46:08.435Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
 
 So the right approach: **get it running on x86 first, then move it to the device as-is** — the business code usually doesn''t change at all.
 
@@ -1123,7 +1123,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:42:15.506Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:46:08.438Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1406,7 +1406,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:42:15.507Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:46:08.444Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1647,7 +1647,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:42:15.508Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:46:08.445Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1964,7 +1964,7 @@ python client.py
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:42:15.509Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
+', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:46:08.446Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
 
 ```python
 # the tool lives inside your program
@@ -2304,7 +2304,7 @@ published: true
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:42:15.510Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
+', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:46:08.448Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
 
 > **Why does MCP use pipes (stdio) instead of sockets?**
 
@@ -2428,6 +2428,242 @@ INSERT INTO post_tags (post_id, tag_id)
 INSERT INTO tags (name) VALUES ('教程') ON CONFLICT(name) DO NOTHING;
 INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-stdio-vs-socket' AND t.name = '教程'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('memory-is-profit', '内存就是利润：嵌入式里『选语言』其实是个成本决策', '做路由器这些年我最深的体会：RAM 就是 BOM，BOM 就是利润。所以『用 Python 还是 C/Rust』从来不是技术偏好，而是一笔成本账——开发人力 vs 每台物料。', '<p>做路由器很多年，我最深的体会之一：</p>
+<blockquote><p><strong>在硬件产品里，RAM 就是 BOM，BOM 就是利润。</strong></p></blockquote>
+<p>所以&quot;用 Python 还是用 C / Rust&quot;这件事，从来不是<strong>技术偏好</strong>，而是一笔<strong>成本账</strong>。可惜大多数讨论都停在&quot;哪个语言好&quot;，没人算钱。</p>
+<h2>一笔账：128 / 256 / 512 的差价 × 出货量</h2>
+<p>拿最常见的档位说（数字是<strong>示意</strong>，别抠精确价）：</p>
+<table><thead><tr><th>内存档</th><th>每颗 DRAM 差价（示意）</th></tr></thead><tbody><tr><td>128 → 256MB</td><td>约 <strong>$0.3 ~ $1</strong></td></tr><tr><td>256 → 512MB</td><td>约 <strong>$0.5 ~ $1.5</strong></td></tr></tbody></table>
+<p>单台看着很小，<strong>乘上出货量</strong>就吓人：</p>
+<blockquote><p><strong>10 万台 × $0.5 = $50,000</strong></p></blockquote>
+<p>而&quot;用 Python 省下的开发人力&quot;，撑死也就几万刀。<strong>出货量一大，物料省下的钱就超过人力省下的钱。</strong> 这就是硬件公司的算法。</p>
+<h2>内存还不只是钱</h2>
+<p>对 7×24 的设备，内存还是：</p>
+<ul><li><strong>功耗 / 散热 / 体积</strong>（更小内存 → 更省电 → 更小电源/散热）；</li><li><strong>可靠性</strong>（内存越紧，越容易 OOM / 抖动——对出货设备都是隐患）。</li></ul>
+<p><strong>省内存 = 省电、省热、省故障。</strong></p>
+<h2>所以&quot;Python 的开发效率&quot;要这么算</h2>
+<p>Python 省的是<strong>人力 / 时间</strong>，多花的是<strong>每台设备的物料</strong>：</p>
+<table><thead><tr><th></th><th>Python</th><th>C / Go / Rust</th></tr></thead><tbody><tr><td>开发人力</td><td>✅ 少</td><td>❌ 多</td></tr><tr><td>单机内存</td><td>❌ 贵（解释器常驻几十 MB）</td><td>✅ 省</td></tr><tr><td>出货量大时谁赢</td><td>—</td><td>✅ <strong>物料 &gt; 人力</strong></td></tr></tbody></table>
+<p><strong>判断轴</strong>：不是&quot;哪个语言好&quot;，而是——</p>
+<blockquote><p><strong>&quot;出货量 × 单机内存差价&quot; vs &quot;开发人力&quot;。</strong></p></blockquote>
+<h2>从这条轴推出的结论</h2>
+<table><thead><tr><th>场景</th><th>谁赢</th><th>为什么</th></tr></thead><tbody><tr><td><strong>大批量出货硬件</strong>（路由/消费设备）</td><td><strong>C / Go / Rust</strong></td><td>物料 &gt; 人力</td></tr><tr><td><strong>小批量 / 高复杂度 / 内部工具 / 云</strong></td><td><strong>Python</strong></td><td>人力 &gt; 物料</td></tr><tr><td><strong>原型 / 胶水 / 工具链</strong></td><td><strong>Python</strong></td><td>快，且不进出货 BOM</td></tr></tbody></table>
+<p>所以现实里从来是<strong>分层</strong>：<strong>紧内存设备用 C/Go/Rust，Python 放上游编排 / 工具链 / 非出货设备</strong>——它没被淘汰，只是<strong>站错了位置</strong>。</p>
+<h2>那 Rust 呢？理想，但理想还没到手</h2>
+<p>Rust 的卖点正是<strong>&quot;两全&quot;</strong>：像现代语言一样<strong>安全、省心</strong>，运行时又<strong>接近 C</strong>——理论上它同时吃&quot;开发效率&quot;和&quot;低内存&quot;。</p>
+<p>但要诚实：<strong>Rust 当下的开发效率还没追上 Python</strong>（尤其原型 / 胶水），学习曲线也在。所以 <strong>&quot;Rust = 两全&quot;是方向，不是当下。</strong> 对紧内存设备，C/Rust 是现实解；对能上几十 MB 的档，Python 依然香。</p>
+<h2>收尾</h2>
+<p>工程师<strong>不只要会写代码，还要会算账</strong>：</p>
+<blockquote><p>一台设备多 128MB 内存 = 多少颗 DRAM = 多少美元 → × 出货量 = 你的利润。</p></blockquote>
+<p><strong>内存就是钱。选语言，就是花钱的方式。</strong></p>
+<blockquote><p>💬 你们的产品里，内存是怎么算进成本的？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696">提 Issue</a> 聊聊。</p></blockquote>
+<p><em>（本文中英双语。）</em></p>', '---
+title: "内存就是利润：嵌入式里『选语言』其实是个成本决策"
+date: 2026-10-11
+tags: ["嵌入式", "内存", "成本", "rust", "工程效率"]
+summary: "做路由器这些年我最深的体会：RAM 就是 BOM，BOM 就是利润。所以『用 Python 还是 C/Rust』从来不是技术偏好，而是一笔成本账——开发人力 vs 每台物料。"
+published: true
+---
+
+做路由器很多年，我最深的体会之一：
+
+> **在硬件产品里，RAM 就是 BOM，BOM 就是利润。**
+
+所以"用 Python 还是用 C / Rust"这件事，从来不是**技术偏好**，而是一笔**成本账**。可惜大多数讨论都停在"哪个语言好"，没人算钱。
+
+## 一笔账：128 / 256 / 512 的差价 × 出货量
+
+拿最常见的档位说（数字是**示意**，别抠精确价）：
+
+| 内存档 | 每颗 DRAM 差价（示意） |
+| --- | --- |
+| 128 → 256MB | 约 **$0.3 ~ $1** |
+| 256 → 512MB | 约 **$0.5 ~ $1.5** |
+
+单台看着很小，**乘上出货量**就吓人：
+
+> **10 万台 × $0.5 = $50,000**
+
+而"用 Python 省下的开发人力"，撑死也就几万刀。**出货量一大，物料省下的钱就超过人力省下的钱。** 这就是硬件公司的算法。
+
+## 内存还不只是钱
+
+对 7×24 的设备，内存还是：
+
+- **功耗 / 散热 / 体积**（更小内存 → 更省电 → 更小电源/散热）；
+- **可靠性**（内存越紧，越容易 OOM / 抖动——对出货设备都是隐患）。
+
+**省内存 = 省电、省热、省故障。**
+
+## 所以"Python 的开发效率"要这么算
+
+Python 省的是**人力 / 时间**，多花的是**每台设备的物料**：
+
+| | Python | C / Go / Rust |
+| --- | --- | --- |
+| 开发人力 | ✅ 少 | ❌ 多 |
+| 单机内存 | ❌ 贵（解释器常驻几十 MB） | ✅ 省 |
+| 出货量大时谁赢 | — | ✅ **物料 > 人力** |
+
+**判断轴**：不是"哪个语言好"，而是——
+
+> **"出货量 × 单机内存差价" vs "开发人力"。**
+
+## 从这条轴推出的结论
+
+| 场景 | 谁赢 | 为什么 |
+| --- | --- | --- |
+| **大批量出货硬件**（路由/消费设备） | **C / Go / Rust** | 物料 > 人力 |
+| **小批量 / 高复杂度 / 内部工具 / 云** | **Python** | 人力 > 物料 |
+| **原型 / 胶水 / 工具链** | **Python** | 快，且不进出货 BOM |
+
+所以现实里从来是**分层**：**紧内存设备用 C/Go/Rust，Python 放上游编排 / 工具链 / 非出货设备**——它没被淘汰，只是**站错了位置**。
+
+## 那 Rust 呢？理想，但理想还没到手
+
+Rust 的卖点正是**"两全"**：像现代语言一样**安全、省心**，运行时又**接近 C**——理论上它同时吃"开发效率"和"低内存"。
+
+但要诚实：**Rust 当下的开发效率还没追上 Python**（尤其原型 / 胶水），学习曲线也在。所以 **"Rust = 两全"是方向，不是当下。** 对紧内存设备，C/Rust 是现实解；对能上几十 MB 的档，Python 依然香。
+
+## 收尾
+
+工程师**不只要会写代码，还要会算账**：
+
+> 一台设备多 128MB 内存 = 多少颗 DRAM = 多少美元 → × 出货量 = 你的利润。
+
+**内存就是钱。选语言，就是花钱的方式。**
+
+> 💬 你们的产品里，内存是怎么算进成本的？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
+
+*（本文中英双语。）*
+', '', 1, '2026-10-11', '2026-10-11T02:46:08.449Z', 'Memory is profit: choosing a language in embedded is really a cost decision', 'After years of building routers, my deepest lesson: RAM is BOM, BOM is profit. So ''Python vs C/Rust'' was never a technical preference — it''s a cost calculation: dev labor vs per-unit material.', 'After many years building routers, one of my deepest lessons:
+
+> **In hardware products, RAM is BOM, and BOM is profit.**
+
+So "Python or C / Rust" was never a **technical preference** — it''s a **cost calculation**. Yet most discussions stop at "which language is better" and never do the math.
+
+## The math: the delta of 128 / 256 / 512 × shipment volume
+
+Using common tiers (numbers are **illustrative**, don''t nitpick the exact price):
+
+| Memory tier | DRAM delta per unit (illustrative) |
+| --- | --- |
+| 128 → 256MB | about **$0.3 – $1** |
+| 256 → 512MB | about **$0.5 – $1.5** |
+
+Tiny per unit — until you **multiply by volume**:
+
+> **100,000 units × $0.5 = $50,000**
+
+Meanwhile, "the dev labor Python saves" is a few tens of thousands at most. **At volume, the material saved outweighs the labor saved.** That''s how hardware companies do the math.
+
+## Memory isn''t just money
+
+For 24/7 devices, memory is also:
+
+- **Power / thermals / size** (smaller memory → less power → smaller PSU/cooling);
+- **Reliability** (tighter memory → more OOM / jitter — a hazard on shipped devices).
+
+**Less memory = less power, less heat, fewer failures.**
+
+## So "Python''s dev efficiency" has to be counted this way
+
+Python saves **labor / time**; it costs **per-unit material**:
+
+| | Python | C / Go / Rust |
+| --- | --- | --- |
+| Dev labor | ✅ less | ❌ more |
+| Per-unit memory | ❌ costly (interpreter ~tens of MB) | ✅ lean |
+| Winner at volume | — | ✅ **material > labor** |
+
+**The axis** is not "which language is better", but:
+
+> **"volume × per-unit memory delta" vs "dev labor".**
+
+## What that axis implies
+
+| Scenario | Winner | Why |
+| --- | --- | --- |
+| **High-volume shipped hardware** (routers/consumer) | **C / Go / Rust** | material > labor |
+| **Low-volume / high-complexity / internal tools / cloud** | **Python** | labor > material |
+| **Prototypes / glue / tooling** | **Python** | fast, and not in the shipped BOM |
+
+So in reality it''s always **layered**: **tight-memory devices in C/Go/Rust, Python upstream for orchestration / tooling / non-shipped devices** — Python isn''t obsolete, it was just **standing in the wrong place**.
+
+## What about Rust? An ideal — not yet in hand
+
+Rust''s pitch is exactly "**both at once**": as **safe and easy** as a modern language, with a runtime **close to C** — in theory it eats both "dev efficiency" and "low memory".
+
+But be honest: **Rust''s dev efficiency hasn''t caught up with Python yet** (especially prototypes / glue), and there''s a learning curve. So "**Rust = both**" is the **direction**, not the present. For tight-memory devices, C/Rust are the real answer; where tens of MB are affordable, Python still wins.
+
+## Closing
+
+Engineers **should not only write code, but do the math**:
+
+> One device with 128MB more memory = how many DRAM chips = how many dollars → × volume = your profit.
+
+**Memory is money. Choosing a language is how you spend it.**
+
+> 💬 How does memory factor into cost in your product? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696) to talk.
+
+*（Bilingual post.）*
+', '<p>After many years building routers, one of my deepest lessons:</p>
+<blockquote><p><strong>In hardware products, RAM is BOM, and BOM is profit.</strong></p></blockquote>
+<p>So &quot;Python or C / Rust&quot; was never a <strong>technical preference</strong> — it&#39;s a <strong>cost calculation</strong>. Yet most discussions stop at &quot;which language is better&quot; and never do the math.</p>
+<h2>The math: the delta of 128 / 256 / 512 × shipment volume</h2>
+<p>Using common tiers (numbers are <strong>illustrative</strong>, don&#39;t nitpick the exact price):</p>
+<table><thead><tr><th>Memory tier</th><th>DRAM delta per unit (illustrative)</th></tr></thead><tbody><tr><td>128 → 256MB</td><td>about <strong>$0.3 – $1</strong></td></tr><tr><td>256 → 512MB</td><td>about <strong>$0.5 – $1.5</strong></td></tr></tbody></table>
+<p>Tiny per unit — until you <strong>multiply by volume</strong>:</p>
+<blockquote><p><strong>100,000 units × $0.5 = $50,000</strong></p></blockquote>
+<p>Meanwhile, &quot;the dev labor Python saves&quot; is a few tens of thousands at most. <strong>At volume, the material saved outweighs the labor saved.</strong> That&#39;s how hardware companies do the math.</p>
+<h2>Memory isn&#39;t just money</h2>
+<p>For 24/7 devices, memory is also:</p>
+<ul><li><strong>Power / thermals / size</strong> (smaller memory → less power → smaller PSU/cooling);</li><li><strong>Reliability</strong> (tighter memory → more OOM / jitter — a hazard on shipped devices).</li></ul>
+<p><strong>Less memory = less power, less heat, fewer failures.</strong></p>
+<h2>So &quot;Python&#39;s dev efficiency&quot; has to be counted this way</h2>
+<p>Python saves <strong>labor / time</strong>; it costs <strong>per-unit material</strong>:</p>
+<table><thead><tr><th></th><th>Python</th><th>C / Go / Rust</th></tr></thead><tbody><tr><td>Dev labor</td><td>✅ less</td><td>❌ more</td></tr><tr><td>Per-unit memory</td><td>❌ costly (interpreter ~tens of MB)</td><td>✅ lean</td></tr><tr><td>Winner at volume</td><td>—</td><td>✅ <strong>material &gt; labor</strong></td></tr></tbody></table>
+<p><strong>The axis</strong> is not &quot;which language is better&quot;, but:</p>
+<blockquote><p><strong>&quot;volume × per-unit memory delta&quot; vs &quot;dev labor&quot;.</strong></p></blockquote>
+<h2>What that axis implies</h2>
+<table><thead><tr><th>Scenario</th><th>Winner</th><th>Why</th></tr></thead><tbody><tr><td><strong>High-volume shipped hardware</strong> (routers/consumer)</td><td><strong>C / Go / Rust</strong></td><td>material &gt; labor</td></tr><tr><td><strong>Low-volume / high-complexity / internal tools / cloud</strong></td><td><strong>Python</strong></td><td>labor &gt; material</td></tr><tr><td><strong>Prototypes / glue / tooling</strong></td><td><strong>Python</strong></td><td>fast, and not in the shipped BOM</td></tr></tbody></table>
+<p>So in reality it&#39;s always <strong>layered</strong>: <strong>tight-memory devices in C/Go/Rust, Python upstream for orchestration / tooling / non-shipped devices</strong> — Python isn&#39;t obsolete, it was just <strong>standing in the wrong place</strong>.</p>
+<h2>What about Rust? An ideal — not yet in hand</h2>
+<p>Rust&#39;s pitch is exactly &quot;<strong>both at once</strong>&quot;: as <strong>safe and easy</strong> as a modern language, with a runtime <strong>close to C</strong> — in theory it eats both &quot;dev efficiency&quot; and &quot;low memory&quot;.</p>
+<p>But be honest: <strong>Rust&#39;s dev efficiency hasn&#39;t caught up with Python yet</strong> (especially prototypes / glue), and there&#39;s a learning curve. So &quot;<strong>Rust = both</strong>&quot; is the <strong>direction</strong>, not the present. For tight-memory devices, C/Rust are the real answer; where tens of MB are affordable, Python still wins.</p>
+<h2>Closing</h2>
+<p>Engineers <strong>should not only write code, but do the math</strong>:</p>
+<blockquote><p>One device with 128MB more memory = how many DRAM chips = how many dollars → × volume = your profit.</p></blockquote>
+<p><strong>Memory is money. Choosing a language is how you spend it.</strong></p>
+<blockquote><p>💬 How does memory factor into cost in your product? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696">open an Issue</a> to talk.</p></blockquote>
+<p><em>（Bilingual post.）</em></p>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('嵌入式') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'memory-is-profit' AND t.name = '嵌入式'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('内存') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'memory-is-profit' AND t.name = '内存'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('成本') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'memory-is-profit' AND t.name = '成本'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('rust') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'memory-is-profit' AND t.name = 'rust'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('工程效率') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'memory-is-profit' AND t.name = '工程效率'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('multi-source-download', '多源分段下载：什么时候多连接有用，什么时候没用（aria2 实测）', '同一个大文件，用多镜像、多连接分段下载到底能快多少？实测单连接、curl 多连接、aria2 多源分段，并给出判断瓶颈与正确配置的方法。', '<p>下载一个大文件很慢时，先别急着&quot;多加连接&quot;。慢有两种完全不同的原因：</p>
@@ -2579,7 +2815,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:42:15.512Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:46:08.451Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -2838,7 +3074,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:42:15.512Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:46:08.453Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -3056,7 +3292,7 @@ Rust 是理想，但**理想不该丢，也不该硬塞**——**留住它，落
 > 💬 你觉得这条路对么？你也看好 Rust 吗？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
 
 *（本文中英双语。）*
-', '', 1, '2026-10-11', '2026-10-11T02:42:15.513Z', 'Should a small embedded company take Rust seriously? A veteran''s take', 'Disclaimer: I''m not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it''s the trend. A veteran/learner''s view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline.', '**Disclaimer: I''m not a Rust expert.** I''ve spent 15+ years in embedded C/C++, I''m still learning Rust, and I''ve never actually gotten it adopted on a team. But **I''m increasingly convinced it''s the trend.**
+', '', 1, '2026-10-11', '2026-10-11T02:46:08.454Z', 'Should a small embedded company take Rust seriously? A veteran''s take', 'Disclaimer: I''m not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it''s the trend. A veteran/learner''s view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline.', '**Disclaimer: I''m not a Rust expert.** I''ve spent 15+ years in embedded C/C++, I''m still learning Rust, and I''ve never actually gotten it adopted on a team. But **I''m increasingly convinced it''s the trend.**
 
 So this isn''t a practitioner''s write-up — it''s **a veteran/learner''s thoughts**. One thing I do know: **in a small company, whether Rust is technically right is one question; whether you can get it adopted is another.**
 
@@ -3252,7 +3488,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:42:15.514Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:46:08.457Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -3456,7 +3692,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:42:15.527Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:46:08.458Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -3816,7 +4052,7 @@ call cat -> {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-client/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T02:42:15.529Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
+', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T02:46:08.459Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
 
 Most people get stuck on the same question: **what exactly is the MCP standard?** — because **the spec directly decides how the client is written**. So this post writes **no server**. It does one thing: explain the MCP standard, then implement a **standard MCP client** in stdlib code that can connect to **any** MCP server.
 
@@ -4195,7 +4431,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:42:15.530Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:46:08.465Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -4543,7 +4779,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-11T02:42:15.530Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-11T02:46:08.468Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -4794,5 +5030,5 @@ date: 2026-09-01
 - **邮箱**：[wangbing1087@qq.com](mailto:wangbing1087@qq.com)
 
 > 描述清你的**场景 / 硬件 / 目标**，我会尽快回复。
-', '2026-09-01', '2026-10-11T02:42:15.531Z')
+', '2026-09-01', '2026-10-11T02:46:08.469Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
