@@ -3,7 +3,7 @@ title: "MCP in 30 lines: it's just standardized function calling"
 summary: "MCP isn't magic: it's a JSON-RPC protocol that turns last post's hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client."
 ---
 
-In the previous post, our `cat` tool was **hardcoded** inside the agent:
+In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
 
 ```python
 # the tool lives inside your program
