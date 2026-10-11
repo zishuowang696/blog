@@ -1,11 +1,11 @@
 ---
-title: "Pushing Rust in a small embedded company: benefits, necessity, reality, and how"
-summary: "In a small company you shouldn't 'push' Rust — you should 'plant' it: incremental, new modules, real pain, let results speak. Benefits, necessity, the real difficulties, and a practical playbook — plus my take on whether safety should come from constraints or discipline."
+title: "Should a small embedded company take Rust seriously? A veteran's take"
+summary: "Disclaimer: I'm not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it's the trend. A veteran/learner's view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline."
 ---
 
-I've spent over a decade in embedded and I like Rust. But I also know: **in a small company, whether Rust is technically right is one question; whether you can actually get it adopted is another.**
+**Disclaimer: I'm not a Rust expert.** I've spent 15+ years in embedded C/C++, I'm still learning Rust, and I've never actually gotten it adopted on a team. But **I'm increasingly convinced it's the trend.**
 
-This post isn't about syntax. It's about **how to keep Rust alive in a resource-tight, understaffed, deadline-pressured embedded team** — and why I think it's worth it.
+So this isn't a practitioner's write-up — it's **a veteran/learner's thoughts**. One thing I do know: **in a small company, whether Rust is technically right is one question; whether you can get it adopted is another.**
 
 ## Bottom line: don't "push", "plant"
 
@@ -74,6 +74,6 @@ On pushing Rust in a small embedded company, my conclusion is one line:
 
 Rust is an ideal — but **an ideal shouldn't be dropped, nor shoved down throats** — **keep it, land it in your own hands.**
 
-> 💬 Where does your team get stuck on Rust? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696) to talk.
+> 💬 Do you think this road is right? Are you bullish on Rust too? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696) to talk.
 
 *（Bilingual post.）*

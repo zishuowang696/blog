@@ -116,7 +116,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:39:06.817Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:42:15.502Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -460,7 +460,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-from-scratch/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:39:06.818Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:42:15.503Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
 **The essence of an agent is a single loop:**
 
@@ -840,7 +840,7 @@ journalctl -u agent -f      # 看日志
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-on-jetson/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:39:06.819Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
+', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:42:15.505Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
 
 So the right approach: **get it running on x86 first, then move it to the device as-is** — the business code usually doesn''t change at all.
 
@@ -1123,7 +1123,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:39:06.820Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:42:15.506Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1406,7 +1406,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:39:06.821Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:42:15.507Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1647,7 +1647,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:39:06.822Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:42:15.508Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1964,7 +1964,7 @@ python client.py
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:39:06.823Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
+', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:42:15.509Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
 
 ```python
 # the tool lives inside your program
@@ -2304,7 +2304,7 @@ published: true
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:39:06.824Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
+', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:42:15.510Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
 
 > **Why does MCP use pipes (stdio) instead of sockets?**
 
@@ -2579,7 +2579,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:39:06.825Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:42:15.512Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -2838,7 +2838,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:39:06.825Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:42:15.512Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -2944,8 +2944,8 @@ INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'openwrt-imagebuilder-quickstart' AND t.name = '固件编译'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
-  VALUES ('rust-in-small-embedded-company', '在嵌入式小公司推 Rust：优点、必要性、现实困难与解法', '小公司推 Rust 不该『推』，该『种』：用增量、新模块、真痛点，拿结果说话。附优点、必要性、现实困难，以及一套可操作的落地法——也是我对『安全该靠约束还是自律』的思考。', '<p>我做了十几年嵌入式，喜欢 Rust。但我也知道：<strong>在一个小公司里推 Rust，技术对不对是一回事，推不推得动是另一回事。</strong></p>
-<p>这篇不讲语法，只讲<strong>怎么在一个资源紧、人少、交付压力大的嵌入式团队里，让 Rust 活下来</strong>——以及我为什么觉得它值得。</p>
+  VALUES ('rust-in-small-embedded-company', '嵌入式小公司要不要认真看 Rust：一个老兵的思考', '先声明：我不是 Rust 老手——我做了十几年 C/C++，Rust 还在学。但我越来越确信它是趋势。这是一份『老兵 / 学习者』的思考：优点、必要性、现实困难与打法，也是我对『安全该靠约束还是自律』的理解。', '<p><strong>先声明：我不是 Rust 老手。</strong> 我做了十几年嵌入式 C/C++，Rust 我还在学，也没在团队里真正把它推成过。但我<strong>越来越确信它是趋势</strong>。</p>
+<p>所以这篇不是实战总结，是<strong>一个嵌入式老兵 / 学习者的思考</strong>。有一点我很清楚：<strong>在小公司里推 Rust，技术对不对是一回事，推不推得动是另一回事。</strong></p>
 <h2>先说结论：别&quot;推&quot;，要&quot;种&quot;</h2>
 <p><strong>把&quot;推 Rust&quot;当运动打，必输；当种子种，才有戏。</strong></p>
 <ul><li>不搞&quot;全量替换/技术革命&quot;——那会瞬间树敌、还伤交付；</li><li>只在<strong>新模块 / 新服务 / 工具</strong>上落子（增量、边界清晰、低风险）；</li><li>拿一个<strong>团队真痛点</strong>开刀，<strong>用结果说话</strong>，而不是用道理吵架。</li></ul>
@@ -2973,18 +2973,18 @@ INSERT INTO posts (slug, title, summary, content_html, source_md, series, publis
 <p>在嵌入式小公司推 Rust，我的结论就一句：</p>
 <blockquote><p><strong>别推，种。选一个小而真的痛点，用增量落一子，拿结果说话。</strong></p></blockquote>
 <p>Rust 是理想，但<strong>理想不该丢，也不该硬塞</strong>——<strong>留住它，落地在你手里。</strong></p>
-<blockquote><p>💬 你们团队推 Rust 卡在哪？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696">提 Issue</a> 聊聊。</p></blockquote>
+<blockquote><p>💬 你觉得这条路对么？你也看好 Rust 吗？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696">提 Issue</a> 聊聊。</p></blockquote>
 <p><em>（本文中英双语。）</em></p>', '---
-title: "在嵌入式小公司推 Rust：优点、必要性、现实困难与解法"
+title: "嵌入式小公司要不要认真看 Rust：一个老兵的思考"
 date: 2026-10-11
 tags: ["rust", "嵌入式", "工程效率", "团队", "思考"]
-summary: "小公司推 Rust 不该『推』，该『种』：用增量、新模块、真痛点，拿结果说话。附优点、必要性、现实困难，以及一套可操作的落地法——也是我对『安全该靠约束还是自律』的思考。"
+summary: "先声明：我不是 Rust 老手——我做了十几年 C/C++，Rust 还在学。但我越来越确信它是趋势。这是一份『老兵 / 学习者』的思考：优点、必要性、现实困难与打法，也是我对『安全该靠约束还是自律』的理解。"
 published: true
 ---
 
-我做了十几年嵌入式，喜欢 Rust。但我也知道：**在一个小公司里推 Rust，技术对不对是一回事，推不推得动是另一回事。**
+**先声明：我不是 Rust 老手。** 我做了十几年嵌入式 C/C++，Rust 我还在学，也没在团队里真正把它推成过。但我**越来越确信它是趋势**。
 
-这篇不讲语法，只讲**怎么在一个资源紧、人少、交付压力大的嵌入式团队里，让 Rust 活下来**——以及我为什么觉得它值得。
+所以这篇不是实战总结，是**一个嵌入式老兵 / 学习者的思考**。有一点我很清楚：**在小公司里推 Rust，技术对不对是一回事，推不推得动是另一回事。**
 
 ## 先说结论：别"推"，要"种"
 
@@ -3053,12 +3053,12 @@ published: true
 
 Rust 是理想，但**理想不该丢，也不该硬塞**——**留住它，落地在你手里。**
 
-> 💬 你们团队推 Rust 卡在哪？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
+> 💬 你觉得这条路对么？你也看好 Rust 吗？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
 
 *（本文中英双语。）*
-', '', 1, '2026-10-11', '2026-10-11T02:39:06.826Z', 'Pushing Rust in a small embedded company: benefits, necessity, reality, and how', 'In a small company you shouldn''t ''push'' Rust — you should ''plant'' it: incremental, new modules, real pain, let results speak. Benefits, necessity, the real difficulties, and a practical playbook — plus my take on whether safety should come from constraints or discipline.', 'I''ve spent over a decade in embedded and I like Rust. But I also know: **in a small company, whether Rust is technically right is one question; whether you can actually get it adopted is another.**
+', '', 1, '2026-10-11', '2026-10-11T02:42:15.513Z', 'Should a small embedded company take Rust seriously? A veteran''s take', 'Disclaimer: I''m not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it''s the trend. A veteran/learner''s view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline.', '**Disclaimer: I''m not a Rust expert.** I''ve spent 15+ years in embedded C/C++, I''m still learning Rust, and I''ve never actually gotten it adopted on a team. But **I''m increasingly convinced it''s the trend.**
 
-This post isn''t about syntax. It''s about **how to keep Rust alive in a resource-tight, understaffed, deadline-pressured embedded team** — and why I think it''s worth it.
+So this isn''t a practitioner''s write-up — it''s **a veteran/learner''s thoughts**. One thing I do know: **in a small company, whether Rust is technically right is one question; whether you can get it adopted is another.**
 
 ## Bottom line: don''t "push", "plant"
 
@@ -3127,11 +3127,11 @@ On pushing Rust in a small embedded company, my conclusion is one line:
 
 Rust is an ideal — but **an ideal shouldn''t be dropped, nor shoved down throats** — **keep it, land it in your own hands.**
 
-> 💬 Where does your team get stuck on Rust? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696) to talk.
+> 💬 Do you think this road is right? Are you bullish on Rust too? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696) to talk.
 
 *（Bilingual post.）*
-', '<p>I&#39;ve spent over a decade in embedded and I like Rust. But I also know: <strong>in a small company, whether Rust is technically right is one question; whether you can actually get it adopted is another.</strong></p>
-<p>This post isn&#39;t about syntax. It&#39;s about <strong>how to keep Rust alive in a resource-tight, understaffed, deadline-pressured embedded team</strong> — and why I think it&#39;s worth it.</p>
+', '<p><strong>Disclaimer: I&#39;m not a Rust expert.</strong> I&#39;ve spent 15+ years in embedded C/C++, I&#39;m still learning Rust, and I&#39;ve never actually gotten it adopted on a team. But <strong>I&#39;m increasingly convinced it&#39;s the trend.</strong></p>
+<p>So this isn&#39;t a practitioner&#39;s write-up — it&#39;s <strong>a veteran/learner&#39;s thoughts</strong>. One thing I do know: <strong>in a small company, whether Rust is technically right is one question; whether you can get it adopted is another.</strong></p>
 <h2>Bottom line: don&#39;t &quot;push&quot;, &quot;plant&quot;</h2>
 <p><strong>Fighting a &quot;push Rust&quot; campaign is a losing battle; planting a seed is not.</strong></p>
 <ul><li>No &quot;full rewrite / tech revolution&quot; — that instantly creates enemies and hurts delivery;</li><li>Land only on <strong>new modules / new services / tools</strong> (incremental, clean boundary, low risk);</li><li>Aim at a <strong>real team pain point</strong>, and <strong>let results speak</strong> instead of arguing with principles.</li></ul>
@@ -3159,7 +3159,7 @@ Rust is an ideal — but **an ideal shouldn''t be dropped, nor shoved down throa
 <p>On pushing Rust in a small embedded company, my conclusion is one line:</p>
 <blockquote><p><strong>Don&#39;t push — plant. Pick one small, real pain point, land one incremental step, let results speak.</strong></p></blockquote>
 <p>Rust is an ideal — but <strong>an ideal shouldn&#39;t be dropped, nor shoved down throats</strong> — <strong>keep it, land it in your own hands.</strong></p>
-<blockquote><p>💬 Where does your team get stuck on Rust? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696">open an Issue</a> to talk.</p></blockquote>
+<blockquote><p>💬 Do you think this road is right? Are you bullish on Rust too? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696">open an Issue</a> to talk.</p></blockquote>
 <p><em>（Bilingual post.）</em></p>')
   ON CONFLICT(slug) DO UPDATE SET
     title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
@@ -3252,7 +3252,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:39:06.827Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:42:15.514Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -3456,7 +3456,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:39:06.828Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:42:15.527Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -3816,7 +3816,7 @@ call cat -> {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-client/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T02:39:06.829Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
+', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T02:42:15.529Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
 
 Most people get stuck on the same question: **what exactly is the MCP standard?** — because **the spec directly decides how the client is written**. So this post writes **no server**. It does one thing: explain the MCP standard, then implement a **standard MCP client** in stdlib code that can connect to **any** MCP server.
 
@@ -4195,7 +4195,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:39:06.830Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:42:15.530Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -4543,7 +4543,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-11T02:39:06.831Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-11T02:42:15.530Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -4794,5 +4794,5 @@ date: 2026-09-01
 - **邮箱**：[wangbing1087@qq.com](mailto:wangbing1087@qq.com)
 
 > 描述清你的**场景 / 硬件 / 目标**，我会尽快回复。
-', '2026-09-01', '2026-10-11T02:39:06.831Z')
+', '2026-09-01', '2026-10-11T02:42:15.531Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
