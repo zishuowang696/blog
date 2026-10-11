@@ -95,7 +95,7 @@ published: true
 > 💬 你怎么看？Agent 算不算客户端开发？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
 
 *（本文中英双语。）*
-', '', 1, '2026-10-11', '2026-10-11T03:13:17.381Z', 'Agent development is really ''client development''', 'After a few days learning agents, my conclusion: it''s essentially ''client development + one LLM API call.'' If you''ve done Android/frontend/desktop clients, add MCP and a few LLM concepts and you can interview for agent roles directly — don''t be scared by the word ''AI''.', 'After a few days seriously learning agents, one feeling keeps growing:
+', '', 1, '2026-10-11', '2026-10-11T11:55:10.649Z', 'Agent development is really ''client development''', 'After a few days learning agents, my conclusion: it''s essentially ''client development + one LLM API call.'' If you''ve done Android/frontend/desktop clients, add MCP and a few LLM concepts and you can interview for agent roles directly — don''t be scared by the word ''AI''.', 'After a few days seriously learning agents, one feeling keeps growing:
 
 > **Agent development is really the old client development — just wired to an LLM API.**
 
@@ -326,7 +326,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T03:13:17.382Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T11:55:10.650Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -670,7 +670,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-from-scratch/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T03:13:17.383Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T11:55:10.653Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
 **The essence of an agent is a single loop:**
 
@@ -1050,7 +1050,7 @@ journalctl -u agent -f      # 看日志
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-on-jetson/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T03:13:17.384Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
+', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T11:55:10.658Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
 
 So the right approach: **get it running on x86 first, then move it to the device as-is** — the business code usually doesn''t change at all.
 
@@ -1333,7 +1333,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-11T03:13:17.385Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-11T11:55:10.660Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1470,6 +1470,332 @@ INSERT INTO post_tags (post_id, tag_id)
 INSERT INTO tags (name) VALUES ('网络') ON CONFLICT(name) DO NOTHING;
 INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'github-download-acceleration' AND t.name = '网络'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('give-blog-an-agent', '我给博客配了个 Agent：每周自动出选题', '内容运营最烦的是选题——靠感觉、还费时间。我写了个最小 Agent，跑在 GitHub Actions 上，每周自动读我已有文章、给出 5 个新选题。本质还是那个循环：问模型 → 执行工具 → 回喂结果。附可复用模板。', '<p>写博客最烦的不是写，是<strong>选题</strong>——今天写啥？靠感觉、还费时间。</p>
+<p>所以我给它配了个 <strong>Agent</strong>：每周一自动读一遍我<strong>已发布的文章</strong>（避免重复），然后<strong>给出 5 个新选题</strong>。跑在 <strong>GitHub Actions</strong> 上，<strong>免费、定时、不要服务器</strong>。</p>
+<p>本质还是那句话：<strong>Agent 就是一个循环——调用 API 问模型 → 执行工具 → 回喂结果。</strong></p>
+<h2>它到底做了什么</h2>
+<p>一个循环 + 一个工具：</p>
+<pre><code class="language-python">TOOLS = [{
+    &quot;type&quot;: &quot;function&quot;,
+    &quot;function&quot;: {
+        &quot;name&quot;: &quot;list_existing_titles&quot;,
+        &quot;description&quot;: &quot;读取博客已有的文章标题，用于避免选题重复&quot;,
+        &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {}},
+    },
+}]
+
+def run_tool(name, args):
+    if name == &quot;list_existing_titles&quot;:
+        xml = urlopen(FEED).read().decode(&quot;utf-8&quot;, &quot;ignore&quot;)   # 读站点 RSS
+        titles = re.findall(r&quot;&lt;title&gt;(.*?)&lt;/title&gt;&quot;, xml, re.S)
+        return &quot;\n&quot;.join(titles[1:])</code></pre>
+<p>模型用 DeepSeek（OpenAI 兼容），循环：</p>
+<pre><code class="language-python">def agent(user_input):
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input}]
+    while True:
+        msg = client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS).choices[0].message
+        messages.append(msg)
+        if not msg.tool_calls:
+            return msg.content                     # 不再要工具 -&gt; 给答案
+        for call in msg.tool_calls:                # 执行工具 -&gt; 回喂结果
+            args = json.loads(call.function.arguments or &quot;{}&quot;)
+            messages.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: call.id,
+                             &quot;content&quot;: run_tool(call.function.name, args)})</code></pre>
+<p>结果写进 <code>weekly/&lt;日期&gt;.md</code>。就这样——<strong>没有框架，就一个循环</strong>。</p>
+<h2>为什么跑在 GitHub Actions</h2>
+<p>这是我认为它最妙的一点：</p>
+<ul><li><strong>免费</strong>：public 仓库无限时长；</li><li><strong>定时</strong>：<code>on: schedule: cron</code>，每周一自动跑；</li><li><strong>免服务器</strong>：不用养机器；</li><li><strong>能上外网</strong>：runner 在<strong>美国</strong>，直达 DeepSeek / Google API；</li><li><strong>有仓库权限</strong>：能把结果<strong>提交回仓库</strong>。</li></ul>
+<pre><code class="language-yaml">on:
+  schedule: [{ cron: &#39;0 1 * * 1&#39; }]
+  workflow_dispatch: {}
+permissions: { contents: write }
+# ... pip install -&gt; python agent/topics.py -&gt; git commit weekly/</code></pre>
+<p>密钥放 <strong>Secret</strong>（<code>DEEPSEEK_API_KEY</code>），站点地址放 <strong>Variables</strong>（<code>SITE_FEED</code>/<code>SITE_BRIEF</code>）——<strong>不进代码</strong>。</p>
+<h2>它真出活了</h2>
+<p>第一次跑完，它读了站上 17 篇已发文章，回了我一段（节选）：</p>
+<blockquote><p>现有内容偏「底层构建 / 框架原理」，但 <strong>「Agent 真正跑在边缘设备上」这条主线还几乎是空白</strong>。下面 5 个选题全部落在这个交叉缺口上……</p></blockquote>
+<p>然后给了 5 个选题 + <strong>排期建议</strong>（先引流、再转化、护城河收口）。说实话，<strong>比我拍脑袋强</strong>。</p>
+<h2>我的原则：Agent 干脏活，人做判断</h2>
+<p>这也是我为什么把它做小、并且<strong>只公开框架</strong>：</p>
+<ul><li><strong>Agent 干脏活 / 半成品</strong>：选题、草稿、复盘、分发文案；</li><li><strong>人做判断与发布</strong>：选哪个、怎么写、发不发；</li><li><strong>公开架构，私有数据</strong>：框架可以开源，但<strong>数据、密钥、关键词库、商业策略</strong>留私有。</li></ul>
+<p>比如这个 Agent 我的<strong>真实 prompt、关键词库、GSC 数据</strong>都留在私有仓库——公开的只是&quot;<strong>怎么搭</strong>&quot;。</p>
+<h2>下一步</h2>
+<ul><li>加个工具<strong>读 GSC 导出</strong>（&quot;有曝光无点击&quot;的词优先选题）；</li><li>再加个&quot;<strong>草稿 Agent</strong>&quot;（出中英初稿）；</li><li>但<strong>发布永远留给人</strong>。</li></ul>
+<blockquote><p>📦 可复用模板（去掉私料）：<strong><a href="https://github.com/zishuowang696/weekly-topics-agent">github.com/zishuowang696/weekly-topics-agent</a></strong></p><p>💬 有什么想让它干的活？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696/weekly-topics-agent/issues">提 Issue</a>。</p></blockquote>
+<p><em>（本文中英双语；本系列记录从 0 构建 Agent 的过程。）</em></p>', '---
+title: "我给博客配了个 Agent：每周自动出选题"
+date: 2026-10-11
+tags: ["ai-agent", "自动化", "github-actions", "内容运营", "教程"]
+summary: "内容运营最烦的是选题——靠感觉、还费时间。我写了个最小 Agent，跑在 GitHub Actions 上，每周自动读我已有文章、给出 5 个新选题。本质还是那个循环：问模型 → 执行工具 → 回喂结果。附可复用模板。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+写博客最烦的不是写，是**选题**——今天写啥？靠感觉、还费时间。
+
+所以我给它配了个 **Agent**：每周一自动读一遍我**已发布的文章**（避免重复），然后**给出 5 个新选题**。跑在 **GitHub Actions** 上，**免费、定时、不要服务器**。
+
+本质还是那句话：**Agent 就是一个循环——调用 API 问模型 → 执行工具 → 回喂结果。**
+
+## 它到底做了什么
+
+一个循环 + 一个工具：
+
+```python
+TOOLS = [{
+    "type": "function",
+    "function": {
+        "name": "list_existing_titles",
+        "description": "读取博客已有的文章标题，用于避免选题重复",
+        "parameters": {"type": "object", "properties": {}},
+    },
+}]
+
+def run_tool(name, args):
+    if name == "list_existing_titles":
+        xml = urlopen(FEED).read().decode("utf-8", "ignore")   # 读站点 RSS
+        titles = re.findall(r"<title>(.*?)</title>", xml, re.S)
+        return "\n".join(titles[1:])
+```
+
+模型用 DeepSeek（OpenAI 兼容），循环：
+
+```python
+def agent(user_input):
+    messages = [{"role": "user", "content": user_input}]
+    while True:
+        msg = client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS).choices[0].message
+        messages.append(msg)
+        if not msg.tool_calls:
+            return msg.content                     # 不再要工具 -> 给答案
+        for call in msg.tool_calls:                # 执行工具 -> 回喂结果
+            args = json.loads(call.function.arguments or "{}")
+            messages.append({"role": "tool", "tool_call_id": call.id,
+                             "content": run_tool(call.function.name, args)})
+```
+
+结果写进 `weekly/<日期>.md`。就这样——**没有框架，就一个循环**。
+
+## 为什么跑在 GitHub Actions
+
+这是我认为它最妙的一点：
+
+- **免费**：public 仓库无限时长；
+- **定时**：`on: schedule: cron`，每周一自动跑；
+- **免服务器**：不用养机器；
+- **能上外网**：runner 在**美国**，直达 DeepSeek / Google API；
+- **有仓库权限**：能把结果**提交回仓库**。
+
+```yaml
+on:
+  schedule: [{ cron: ''0 1 * * 1'' }]
+  workflow_dispatch: {}
+permissions: { contents: write }
+# ... pip install -> python agent/topics.py -> git commit weekly/
+```
+
+密钥放 **Secret**（`DEEPSEEK_API_KEY`），站点地址放 **Variables**（`SITE_FEED`/`SITE_BRIEF`）——**不进代码**。
+
+## 它真出活了
+
+第一次跑完，它读了站上 17 篇已发文章，回了我一段（节选）：
+
+> 现有内容偏「底层构建 / 框架原理」，但 **「Agent 真正跑在边缘设备上」这条主线还几乎是空白**。下面 5 个选题全部落在这个交叉缺口上……
+
+然后给了 5 个选题 + **排期建议**（先引流、再转化、护城河收口）。说实话，**比我拍脑袋强**。
+
+## 我的原则：Agent 干脏活，人做判断
+
+这也是我为什么把它做小、并且**只公开框架**：
+
+- **Agent 干脏活 / 半成品**：选题、草稿、复盘、分发文案；
+- **人做判断与发布**：选哪个、怎么写、发不发；
+- **公开架构，私有数据**：框架可以开源，但**数据、密钥、关键词库、商业策略**留私有。
+
+比如这个 Agent 我的**真实 prompt、关键词库、GSC 数据**都留在私有仓库——公开的只是"**怎么搭**"。
+
+## 下一步
+
+- 加个工具**读 GSC 导出**（"有曝光无点击"的词优先选题）；
+- 再加个"**草稿 Agent**"（出中英初稿）；
+- 但**发布永远留给人**。
+
+> 📦 可复用模板（去掉私料）：**[github.com/zishuowang696/weekly-topics-agent](https://github.com/zishuowang696/weekly-topics-agent)**
+>
+> 💬 有什么想让它干的活？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/weekly-topics-agent/issues)。
+
+*（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
+', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T11:55:10.661Z', 'I gave my blog an agent: auto topic ideas every week', 'The annoying part of running a blog isn''t writing — it''s choosing topics. So I wrote a minimal agent that runs on GitHub Actions, reads my existing posts weekly, and proposes 5 new topics. It''s still just the loop: ask the model → run the tool → feed the result back. Reusable template included.', 'The annoying part of running a blog isn''t writing — it''s **picking topics**. What do I write today? It''s guesswork, and it eats time.
+
+So I gave it an **agent**: every Monday it reads my **published posts** (to avoid repeats) and proposes **5 new topics**. It runs on **GitHub Actions** — **free, scheduled, no server**.
+
+And the essence never changes: **an agent is a loop — call the API to ask the model → run the tool → feed the result back.**
+
+## What it actually does
+
+One loop, one tool:
+
+```python
+TOOLS = [{
+    "type": "function",
+    "function": {
+        "name": "list_existing_titles",
+        "description": "read existing post titles to avoid duplicates",
+        "parameters": {"type": "object", "properties": {}},
+    },
+}]
+
+def run_tool(name, args):
+    if name == "list_existing_titles":
+        xml = urlopen(FEED).read().decode("utf-8", "ignore")   # read the site RSS
+        titles = re.findall(r"<title>(.*?)</title>", xml, re.S)
+        return "\n".join(titles[1:])
+```
+
+Model is DeepSeek (OpenAI-compatible). The loop:
+
+```python
+def agent(user_input):
+    messages = [{"role": "user", "content": user_input}]
+    while True:
+        msg = client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS).choices[0].message
+        messages.append(msg)
+        if not msg.tool_calls:
+            return msg.content                     # no more tools -> answer
+        for call in msg.tool_calls:                # run the tool -> feed it back
+            args = json.loads(call.function.arguments or "{}")
+            messages.append({"role": "tool", "tool_call_id": call.id,
+                             "content": run_tool(call.function.name, args)})
+```
+
+Output goes to `weekly/<date>.md`. That''s it — **no framework, just a loop.**
+
+## Why GitHub Actions
+
+To me this is the neat part:
+
+- **Free**: public repo, unlimited minutes;
+- **Scheduled**: `on: schedule: cron`, runs weekly;
+- **No server**: nothing to host;
+- **Internet access**: runners are in the **US**, reaching DeepSeek / Google APIs directly;
+- **Repo access**: it can **commit the result back**.
+
+```yaml
+on:
+  schedule: [{ cron: ''0 1 * * 1'' }]
+  workflow_dispatch: {}
+permissions: { contents: write }
+# ... pip install -> python agent/topics.py -> git commit weekly/
+```
+
+Secrets go in **Secrets** (`DEEPSEEK_API_KEY`); site config in **Variables** (`SITE_FEED`/`SITE_BRIEF`) — **never in code**.
+
+## It actually delivered
+
+On its first run it read 17 published posts and replied (excerpt):
+
+> The existing content is mostly low-level build / framework internals, but **"running an agent on an edge device" is almost a blank spot.** The 5 topics below all land in that gap…
+
+Then it gave 5 topics plus a **scheduling plan** (lead-gen → conversion → moat). Honestly, **better than my gut**.
+
+## My principle: the agent does the dirty work, the human judges
+
+That''s also why I kept it small and **open-sourced only the framework**:
+
+- **Agent does the dirty / half-done work**: topics, drafts, retros, distribution copy;
+- **Human judges and publishes**: which one, how to write, whether to ship;
+- **Open architecture, private data**: the framework is open; but **data, keys, keyword lists, business strategy** stay private.
+
+For instance, my **real prompt, keyword list, and GSC data** live in a private repo — what''s public is only *how it''s built*.
+
+## Next
+
+- Add a tool to **read a GSC export** (topics with impressions but no clicks first);
+- Add a "**draft agent**" (first-pass drafts);
+- But **publishing always stays with the human**.
+
+> 📦 Reusable template (private bits removed): **[github.com/zishuowang696/weekly-topics-agent](https://github.com/zishuowang696/weekly-topics-agent)**
+>
+> 💬 What would you have it do? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696/weekly-topics-agent/issues) on GitHub.
+', '<p>The annoying part of running a blog isn&#39;t writing — it&#39;s <strong>picking topics</strong>. What do I write today? It&#39;s guesswork, and it eats time.</p>
+<p>So I gave it an <strong>agent</strong>: every Monday it reads my <strong>published posts</strong> (to avoid repeats) and proposes <strong>5 new topics</strong>. It runs on <strong>GitHub Actions</strong> — <strong>free, scheduled, no server</strong>.</p>
+<p>And the essence never changes: <strong>an agent is a loop — call the API to ask the model → run the tool → feed the result back.</strong></p>
+<h2>What it actually does</h2>
+<p>One loop, one tool:</p>
+<pre><code class="language-python">TOOLS = [{
+    &quot;type&quot;: &quot;function&quot;,
+    &quot;function&quot;: {
+        &quot;name&quot;: &quot;list_existing_titles&quot;,
+        &quot;description&quot;: &quot;read existing post titles to avoid duplicates&quot;,
+        &quot;parameters&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {}},
+    },
+}]
+
+def run_tool(name, args):
+    if name == &quot;list_existing_titles&quot;:
+        xml = urlopen(FEED).read().decode(&quot;utf-8&quot;, &quot;ignore&quot;)   # read the site RSS
+        titles = re.findall(r&quot;&lt;title&gt;(.*?)&lt;/title&gt;&quot;, xml, re.S)
+        return &quot;\n&quot;.join(titles[1:])</code></pre>
+<p>Model is DeepSeek (OpenAI-compatible). The loop:</p>
+<pre><code class="language-python">def agent(user_input):
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_input}]
+    while True:
+        msg = client.chat.completions.create(model=MODEL, messages=messages, tools=TOOLS).choices[0].message
+        messages.append(msg)
+        if not msg.tool_calls:
+            return msg.content                     # no more tools -&gt; answer
+        for call in msg.tool_calls:                # run the tool -&gt; feed it back
+            args = json.loads(call.function.arguments or &quot;{}&quot;)
+            messages.append({&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: call.id,
+                             &quot;content&quot;: run_tool(call.function.name, args)})</code></pre>
+<p>Output goes to <code>weekly/&lt;date&gt;.md</code>. That&#39;s it — <strong>no framework, just a loop.</strong></p>
+<h2>Why GitHub Actions</h2>
+<p>To me this is the neat part:</p>
+<ul><li><strong>Free</strong>: public repo, unlimited minutes;</li><li><strong>Scheduled</strong>: <code>on: schedule: cron</code>, runs weekly;</li><li><strong>No server</strong>: nothing to host;</li><li><strong>Internet access</strong>: runners are in the <strong>US</strong>, reaching DeepSeek / Google APIs directly;</li><li><strong>Repo access</strong>: it can <strong>commit the result back</strong>.</li></ul>
+<pre><code class="language-yaml">on:
+  schedule: [{ cron: &#39;0 1 * * 1&#39; }]
+  workflow_dispatch: {}
+permissions: { contents: write }
+# ... pip install -&gt; python agent/topics.py -&gt; git commit weekly/</code></pre>
+<p>Secrets go in <strong>Secrets</strong> (<code>DEEPSEEK_API_KEY</code>); site config in <strong>Variables</strong> (<code>SITE_FEED</code>/<code>SITE_BRIEF</code>) — <strong>never in code</strong>.</p>
+<h2>It actually delivered</h2>
+<p>On its first run it read 17 published posts and replied (excerpt):</p>
+<blockquote><p>The existing content is mostly low-level build / framework internals, but <strong>&quot;running an agent on an edge device&quot; is almost a blank spot.</strong> The 5 topics below all land in that gap…</p></blockquote>
+<p>Then it gave 5 topics plus a <strong>scheduling plan</strong> (lead-gen → conversion → moat). Honestly, <strong>better than my gut</strong>.</p>
+<h2>My principle: the agent does the dirty work, the human judges</h2>
+<p>That&#39;s also why I kept it small and <strong>open-sourced only the framework</strong>:</p>
+<ul><li><strong>Agent does the dirty / half-done work</strong>: topics, drafts, retros, distribution copy;</li><li><strong>Human judges and publishes</strong>: which one, how to write, whether to ship;</li><li><strong>Open architecture, private data</strong>: the framework is open; but <strong>data, keys, keyword lists, business strategy</strong> stay private.</li></ul>
+<p>For instance, my <strong>real prompt, keyword list, and GSC data</strong> live in a private repo — what&#39;s public is only <em>how it&#39;s built</em>.</p>
+<h2>Next</h2>
+<ul><li>Add a tool to <strong>read a GSC export</strong> (topics with impressions but no clicks first);</li><li>Add a &quot;<strong>draft agent</strong>&quot; (first-pass drafts);</li><li>But <strong>publishing always stays with the human</strong>.</li></ul>
+<blockquote><p>📦 Reusable template (private bits removed): <strong><a href="https://github.com/zishuowang696/weekly-topics-agent">github.com/zishuowang696/weekly-topics-agent</a></strong></p><p>💬 What would you have it do? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696/weekly-topics-agent/issues">open an Issue</a> on GitHub.</p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'give-blog-an-agent' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('自动化') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'give-blog-an-agent' AND t.name = '自动化'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('github-actions') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'give-blog-an-agent' AND t.name = 'github-actions'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('内容运营') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'give-blog-an-agent' AND t.name = '内容运营'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('教程') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'give-blog-an-agent' AND t.name = '教程'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('jetson-build-rust-llvm-optee', '为什么编个 Jetson 镜像，Yocto 会顺手编出 Rust 和 LLVM？', '一次构建长时间卡在 llvm-native / rust-native。用 bitbake -g 反向追依赖，根因是 Tegra 启动链里的 OP-TEE / EKS 需要 python3-cryptography，而它现在是 Rust 写的。', '<p>在维护 Jetson 发行版（<code>embedai</code>）时，CI 里最慢的从来不是我的应用，也不是内核，而是两个我&quot;根本没用到&quot;的东西：<strong><code>llvm-native</code> 和 <code>rust-native</code></strong>。</p>
@@ -1616,7 +1942,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T03:13:17.386Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T11:55:10.669Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1857,7 +2183,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T03:13:17.387Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T11:55:10.671Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -2174,7 +2500,7 @@ python client.py
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T03:13:17.388Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
+', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T11:55:10.672Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
 
 ```python
 # the tool lives inside your program
@@ -2514,7 +2840,7 @@ published: true
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T03:13:17.389Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
+', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T11:55:10.673Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
 
 > **Why does MCP use pipes (stdio) instead of sockets?**
 
@@ -2748,7 +3074,7 @@ Rust 的卖点正是**"两全"**：像现代语言一样**安全、省心**，�
 > 💬 你们的产品里，内存是怎么算进成本的？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
 
 *（本文中英双语。）*
-', '', 1, '2026-10-11', '2026-10-11T03:13:17.390Z', 'Memory is profit: choosing a language in embedded is really a cost decision', 'After years of building routers, my deepest lesson: RAM is BOM, BOM is profit. So ''Python vs C/Rust'' was never a technical preference — it''s a cost calculation: dev labor vs per-unit material.', 'After many years building routers, one of my deepest lessons:
+', '', 1, '2026-10-11', '2026-10-11T11:55:10.675Z', 'Memory is profit: choosing a language in embedded is really a cost decision', 'After years of building routers, my deepest lesson: RAM is BOM, BOM is profit. So ''Python vs C/Rust'' was never a technical preference — it''s a cost calculation: dev labor vs per-unit material.', 'After many years building routers, one of my deepest lessons:
 
 > **In hardware products, RAM is BOM, and BOM is profit.**
 
@@ -3025,7 +3351,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-11T03:13:17.391Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-11T11:55:10.676Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -3284,7 +3610,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T03:13:17.392Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T11:55:10.679Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -3502,7 +3828,7 @@ Rust 是理想，但**理想不该丢，也不该硬塞**——**留住它，落
 > 💬 你觉得这条路对么？你也看好 Rust 吗？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
 
 *（本文中英双语。）*
-', '', 1, '2026-10-11', '2026-10-11T03:13:17.393Z', 'Should a small embedded company take Rust seriously? A veteran''s take', 'Disclaimer: I''m not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it''s the trend. A veteran/learner''s view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline.', '**Disclaimer: I''m not a Rust expert.** I''ve spent 15+ years in embedded C/C++, I''m still learning Rust, and I''ve never actually gotten it adopted on a team. But **I''m increasingly convinced it''s the trend.**
+', '', 1, '2026-10-11', '2026-10-11T11:55:10.682Z', 'Should a small embedded company take Rust seriously? A veteran''s take', 'Disclaimer: I''m not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it''s the trend. A veteran/learner''s view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline.', '**Disclaimer: I''m not a Rust expert.** I''ve spent 15+ years in embedded C/C++, I''m still learning Rust, and I''ve never actually gotten it adopted on a team. But **I''m increasingly convinced it''s the trend.**
 
 So this isn''t a practitioner''s write-up — it''s **a veteran/learner''s thoughts**. One thing I do know: **in a small company, whether Rust is technically right is one question; whether you can get it adopted is another.**
 
@@ -3698,7 +4024,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T03:13:17.395Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T11:55:10.684Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -3902,7 +4228,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T03:13:17.396Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T11:55:10.685Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -4262,7 +4588,7 @@ call cat -> {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-client/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T03:13:17.397Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
+', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T11:55:10.693Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
 
 Most people get stuck on the same question: **what exactly is the MCP standard?** — because **the spec directly decides how the client is written**. So this post writes **no server**. It does one thing: explain the MCP standard, then implement a **standard MCP client** in stdlib code that can connect to **any** MCP server.
 
@@ -4641,7 +4967,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T03:13:17.398Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T11:55:10.694Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -4989,7 +5315,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-11T03:13:17.399Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-11T11:55:10.695Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -5204,7 +5530,7 @@ INSERT INTO pages (slug, title, content_html, source_md, created_at, updated_at)
 <h2>服务</h2>
 <ul><li><strong>嵌入式 / 边缘 AI / AI Agent</strong> 的定制开发、系统集成与咨询；</li><li>性能调优、BSP / 驱动、模型部署（TensorRT / 边缘推理）；</li><li>技术方案评估与落地陪跑。</li></ul>
 <h2>联系我</h2>
-<ul><li><strong>站内评论</strong>：在任意文章下方留言（注册即可，我会看到）；</li><li><strong>邮箱</strong>：<a href="mailto:wangbing1087@qq.com">wangbing1087@qq.com</a></li></ul>
+<ul><li><strong>站内评论</strong>：在任意文章下方留言（注册即可，我会看到）；</li><li><strong>邮箱</strong>：<a href="mailto:zishuowang696@gmail.com">zishuowang696@gmail.com</a></li></ul>
 <blockquote><p>描述清你的<strong>场景 / 硬件 / 目标</strong>，我会尽快回复。</p></blockquote>', '---
 title: "关于本站"
 date: 2026-09-01
@@ -5237,8 +5563,8 @@ date: 2026-09-01
 ## 联系我
 
 - **站内评论**：在任意文章下方留言（注册即可，我会看到）；
-- **邮箱**：[wangbing1087@qq.com](mailto:wangbing1087@qq.com)
+- **邮箱**：[zishuowang696@gmail.com](mailto:zishuowang696@gmail.com)
 
 > 描述清你的**场景 / 硬件 / 目标**，我会尽快回复。
-', '2026-09-01', '2026-10-11T03:13:17.400Z')
+', '2026-09-01', '2026-10-11T11:55:10.696Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
