@@ -116,7 +116,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-08T23:30:40.386Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:12:34.874Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -460,7 +460,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-from-scratch/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-08T23:30:40.387Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:12:34.875Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
 **The essence of an agent is a single loop:**
 
@@ -695,6 +695,310 @@ INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'build-ai-agent-from-scratch' AND t.name = 'deepseek'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('deploy-agent-on-jetson', '把 AI Agent 部署到 Jetson Orin：从 x86 到边缘', '部署到边缘，Agent 的本质没变——还是那个循环。变的只是运行环境和性能约束。先在 x86 跑通，再原样搬到 Jetson：接云端 API 或跑本地 llama.cpp，同一套代码。', '<p>先说结论：<strong>把 Agent 搬到 Jetson，本质没变</strong>——还是那个循环&quot;<strong>调用 API 问模型 → 执行工具 → 回喂结果</strong>&quot;。变的只有两样东西：<strong>运行环境</strong>（aarch64 / CUDA / 统一内存）和<strong>性能约束</strong>（算力 / 功耗）。</p>
+<p>所以正确姿势是：<strong>先在 x86 上跑通，再把它原样搬到设备上</strong>——业务代码通常一行都不用改。</p>
+<h2>先有一个 Agent</h2>
+<p>如果你还没看过，先读<a href="/posts/build-ai-agent-from-scratch">《从 0 构建一个 AI Agent》</a>：一个循环 + 一个 <code>cat</code> 工具，20 行。本文就在它基础上部署到 Jetson。</p>
+<h2>Jetson 环境准备（要点）</h2>
+<p>以 <strong>Jetson Orin + JetPack 6.x（Ubuntu 22.04, aarch64）</strong> 为例：</p>
+<pre><code class="language-bash"># 确认平台
+uname -m                 # aarch64
+python3 --version        # 3.10
+sudo nvpmodel -m 0       # 满血模式（按需）
+tegrastats               # 看温度 / 功耗 / 内存</code></pre>
+<p><strong>关键坑</strong>：Jetson 是 <strong>aarch64</strong>，很多 pip 包要能在设备上编译（如 <code>cryptography</code>）；先确认 <code>pip install</code> 能过。</p>
+<h2>跑法 A：边缘执行 + 云端大脑（先跑通）</h2>
+<p>Agent 跑在 Jetson 上，<strong>模型仍在云端</strong>（DeepSeek）。这是最快跑通的方式：</p>
+<pre><code class="language-bash">pip install openai
+export DEEPSEEK_API_KEY=&quot;sk-...&quot;
+python agent.py &quot;看一下 /etc/hostname 和 /proc/meminfo&quot;</code></pre>
+<p>适合&quot;边缘负责执行、云端负责思考&quot;。缺点：<strong>依赖网络</strong>。</p>
+<h2>跑法 B：本地模型（离线 / 低延迟 / 隐私）</h2>
+<p>用 <strong>llama.cpp</strong> 在 Jetson 上跑本地 LLM，再让 Agent 指过去——因为 llama.cpp 提供 <strong>OpenAI 兼容接口</strong>，<strong>循环零改动</strong>：</p>
+<pre><code class="language-bash"># 1) 编译（aarch64 + CUDA；Orin 算力 8.7）
+git clone https://github.com/ggerganov/llama.cpp &amp;&amp; cd llama.cpp
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=87
+cmake --build build --config Release -j
+
+# 2) 起本地服务（小模型示例，按需换）
+./build/bin/llama-server -m models/qwen2.5-1.5b-instruct-q4_k_m.gguf \
+    -c 2048 --host 0.0.0.0 --port 8080
+
+# 3) 让 Agent 指过去
+export LLM_BASE_URL=&quot;http://localhost:8080/v1&quot;
+export LLM_MODEL=&quot;local&quot;
+python agent.py &quot;看一下 /proc/meminfo 还剩多少内存&quot;</code></pre>
+<p><strong>只有 <code>LLM_BASE_URL</code> 变了，Agent 循环一个字没动</strong>——这就是&quot;模型可换、循环不变&quot;。</p>
+<blockquote><p>想要更高吞吐/更低延迟，可上 <strong>TensorRT-LLM</strong>（同样是 OpenAI 兼容层），另开一篇讲。</p></blockquote>
+<h2>让它开机自启</h2>
+<p>边缘设备要&quot;上电即用&quot;，用 systemd 托管：</p>
+<pre><code class="language-bash">sudo cp agent.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now agent
+journalctl -u agent -f      # 看日志</code></pre>
+<h2>部署到边缘的 5 个坑</h2>
+<ol><li><strong>架构</strong>：aarch64，pip 包能否装/编，先验证；</li></ol>
+<ol><li><strong>CUDA 算力</strong>：Orin = <strong>8.7</strong>，<code>-DCMAKE_CUDA_ARCHITECTURES=87</code> 写错就白编；</li></ol>
+<ol><li><strong>内存</strong>：统一内存，<code>llama-server -c</code> 上下文别开太大（OOM 头号原因）；</li></ol>
+<ol><li><strong>功耗/散热</strong>：<code>nvpmodel</code> + <code>tegrastats</code>，边缘常年 7×24；</li></ol>
+<ol><li><strong>自启与日志</strong>：systemd + <code>journalctl</code>，别靠手动 <code>nohup</code>。</li></ol>
+<h2>一句话收尾</h2>
+<p><strong>Agent 的本质是一个循环——问模型、执行工具、回喂结果。</strong> 到边缘也一样；边缘的价值在于<strong>本地、离线、低延迟、隐私</strong>，而这只是换了 <code>LLM_BASE_URL</code>。</p>
+<blockquote><p>📦 完整可运行代码：<strong><a href="https://github.com/zishuowang696/agent-on-jetson">github.com/zishuowang696/agent-on-jetson</a></strong></p><p>💬 有问题或建议？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696/agent-on-jetson/issues">提 Issue</a>。</p></blockquote>
+<p><em>（本文中英双语；本系列记录从 0 构建 Agent 的过程。）</em></p>', '---
+title: "把 AI Agent 部署到 Jetson Orin：从 x86 到边缘"
+date: 2026-10-10
+tags: ["jetson", "ai-agent", "边缘ai", "部署", "教程"]
+summary: "部署到边缘，Agent 的本质没变——还是那个循环。变的只是运行环境和性能约束。先在 x86 跑通，再原样搬到 Jetson：接云端 API 或跑本地 llama.cpp，同一套代码。"
+series: "从 0 构建 AI Agent"
+published: false
+---
+
+先说结论：**把 Agent 搬到 Jetson，本质没变**——还是那个循环"**调用 API 问模型 → 执行工具 → 回喂结果**"。变的只有两样东西：**运行环境**（aarch64 / CUDA / 统一内存）和**性能约束**（算力 / 功耗）。
+
+所以正确姿势是：**先在 x86 上跑通，再把它原样搬到设备上**——业务代码通常一行都不用改。
+
+## 先有一个 Agent
+
+如果你还没看过，先读[《从 0 构建一个 AI Agent》](/posts/build-ai-agent-from-scratch)：一个循环 + 一个 `cat` 工具，20 行。本文就在它基础上部署到 Jetson。
+
+## Jetson 环境准备（要点）
+
+以 **Jetson Orin + JetPack 6.x（Ubuntu 22.04, aarch64）** 为例：
+
+```bash
+# 确认平台
+uname -m                 # aarch64
+python3 --version        # 3.10
+sudo nvpmodel -m 0       # 满血模式（按需）
+tegrastats               # 看温度 / 功耗 / 内存
+```
+
+**关键坑**：Jetson 是 **aarch64**，很多 pip 包要能在设备上编译（如 `cryptography`）；先确认 `pip install` 能过。
+
+## 跑法 A：边缘执行 + 云端大脑（先跑通）
+
+Agent 跑在 Jetson 上，**模型仍在云端**（DeepSeek）。这是最快跑通的方式：
+
+```bash
+pip install openai
+export DEEPSEEK_API_KEY="sk-..."
+python agent.py "看一下 /etc/hostname 和 /proc/meminfo"
+```
+
+适合"边缘负责执行、云端负责思考"。缺点：**依赖网络**。
+
+## 跑法 B：本地模型（离线 / 低延迟 / 隐私）
+
+用 **llama.cpp** 在 Jetson 上跑本地 LLM，再让 Agent 指过去——因为 llama.cpp 提供 **OpenAI 兼容接口**，**循环零改动**：
+
+```bash
+# 1) 编译（aarch64 + CUDA；Orin 算力 8.7）
+git clone https://github.com/ggerganov/llama.cpp && cd llama.cpp
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=87
+cmake --build build --config Release -j
+
+# 2) 起本地服务（小模型示例，按需换）
+./build/bin/llama-server -m models/qwen2.5-1.5b-instruct-q4_k_m.gguf \
+    -c 2048 --host 0.0.0.0 --port 8080
+
+# 3) 让 Agent 指过去
+export LLM_BASE_URL="http://localhost:8080/v1"
+export LLM_MODEL="local"
+python agent.py "看一下 /proc/meminfo 还剩多少内存"
+```
+
+**只有 `LLM_BASE_URL` 变了，Agent 循环一个字没动**——这就是"模型可换、循环不变"。
+
+> 想要更高吞吐/更低延迟，可上 **TensorRT-LLM**（同样是 OpenAI 兼容层），另开一篇讲。
+
+## 让它开机自启
+
+边缘设备要"上电即用"，用 systemd 托管：
+
+```bash
+sudo cp agent.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now agent
+journalctl -u agent -f      # 看日志
+```
+
+## 部署到边缘的 5 个坑
+
+1. **架构**：aarch64，pip 包能否装/编，先验证；
+2. **CUDA 算力**：Orin = **8.7**，`-DCMAKE_CUDA_ARCHITECTURES=87` 写错就白编；
+3. **内存**：统一内存，`llama-server -c` 上下文别开太大（OOM 头号原因）；
+4. **功耗/散热**：`nvpmodel` + `tegrastats`，边缘常年 7×24；
+5. **自启与日志**：systemd + `journalctl`，别靠手动 `nohup`。
+
+## 一句话收尾
+
+**Agent 的本质是一个循环——问模型、执行工具、回喂结果。** 到边缘也一样；边缘的价值在于**本地、离线、低延迟、隐私**，而这只是换了 `LLM_BASE_URL`。
+
+> 📦 完整可运行代码：**[github.com/zishuowang696/agent-on-jetson](https://github.com/zishuowang696/agent-on-jetson)**
+>
+> 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-on-jetson/issues)。
+
+*（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
+', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:12:34.877Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
+
+So the right approach: **get it running on x86 first, then move it to the device as-is** — the business code usually doesn''t change at all.
+
+## Start with an agent
+
+If you haven''t read it yet, start with [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch): one loop + a `cat` tool, 20 lines. This post deploys it to Jetson.
+
+## Jetson setup (the essentials)
+
+Assuming **Jetson Orin + JetPack 6.x (Ubuntu 22.04, aarch64)**:
+
+```bash
+uname -m                 # aarch64
+python3 --version        # 3.10
+sudo nvpmodel -m 0       # max performance (optional)
+tegrastats               # temp / power / memory
+```
+
+**Gotcha**: Jetson is **aarch64**, so many pip packages must compile on-device (e.g. `cryptography`). Make sure `pip install` works first.
+
+## Option A: edge execution + cloud brain (get it running)
+
+The agent runs on Jetson, the **model stays in the cloud** (DeepSeek). Fastest path:
+
+```bash
+pip install openai
+export DEEPSEEK_API_KEY="sk-..."
+python agent.py "read /etc/hostname and /proc/meminfo"
+```
+
+The edge executes, the cloud thinks. Downside: **needs network**.
+
+## Option B: local model (offline / low latency / privacy)
+
+Run a local LLM on the Jetson with **llama.cpp**, then point the agent at it — llama.cpp exposes an **OpenAI-compatible API**, so the **loop doesn''t change**:
+
+```bash
+# 1) build (aarch64 + CUDA; Orin compute capability is 8.7)
+git clone https://github.com/ggerganov/llama.cpp && cd llama.cpp
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=87
+cmake --build build --config Release -j
+
+# 2) run a local server (tiny model shown; swap as needed)
+./build/bin/llama-server -m models/qwen2.5-1.5b-instruct-q4_k_m.gguf \
+    -c 2048 --host 0.0.0.0 --port 8080
+
+# 3) point the agent at it
+export LLM_BASE_URL="http://localhost:8080/v1"
+export LLM_MODEL="local"
+python agent.py "how much memory is left?"
+```
+
+**Only `LLM_BASE_URL` changed — not a line of the loop.** That''s "swap the model, keep the loop."
+
+> For higher throughput / lower latency, use **TensorRT-LLM** (also OpenAI-compatible) — separate post.
+
+## Run it on boot
+
+Edge devices must "work on power-up". Use systemd:
+
+```bash
+sudo cp agent.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now agent
+journalctl -u agent -f      # logs
+```
+
+## 5 edge gotchas
+
+1. **Architecture**: aarch64 — verify pip packages build/install first.
+2. **CUDA capability**: Orin = **8.7**; `-DCMAKE_CUDA_ARCHITECTURES=87` or nothing runs.
+3. **Memory**: unified memory — keep `llama-server -c` modest (top cause of OOM).
+4. **Power/thermal**: `nvpmodel` + `tegrastats`; edge runs 24/7.
+5. **Autostart & logs**: systemd + `journalctl`, not `nohup`.
+
+## In one line
+
+**The essence of an agent is a loop — ask the model, run the tool, feed it back.** Same on the edge; the value there is **local, offline, low-latency, private** — and that''s just a different `LLM_BASE_URL`.
+
+> 📦 Complete runnable code: **[github.com/zishuowang696/agent-on-jetson](https://github.com/zishuowang696/agent-on-jetson)**
+>
+> 💬 Questions or feedback? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696/agent-on-jetson/issues) on GitHub.
+', '<p>Bottom line: <strong>moving an agent to Jetson doesn&#39;t change its essence</strong> — it&#39;s still the loop &quot;<strong>ask the model → run the tool → feed the result back</strong>.&quot; Only two things change: the <strong>runtime</strong> (aarch64 / CUDA / unified memory) and the <strong>constraints</strong> (compute / power).</p>
+<p>So the right approach: <strong>get it running on x86 first, then move it to the device as-is</strong> — the business code usually doesn&#39;t change at all.</p>
+<h2>Start with an agent</h2>
+<p>If you haven&#39;t read it yet, start with <a href="/en/posts/build-ai-agent-from-scratch">Building an AI agent from scratch</a>: one loop + a <code>cat</code> tool, 20 lines. This post deploys it to Jetson.</p>
+<h2>Jetson setup (the essentials)</h2>
+<p>Assuming <strong>Jetson Orin + JetPack 6.x (Ubuntu 22.04, aarch64)</strong>:</p>
+<pre><code class="language-bash">uname -m                 # aarch64
+python3 --version        # 3.10
+sudo nvpmodel -m 0       # max performance (optional)
+tegrastats               # temp / power / memory</code></pre>
+<p><strong>Gotcha</strong>: Jetson is <strong>aarch64</strong>, so many pip packages must compile on-device (e.g. <code>cryptography</code>). Make sure <code>pip install</code> works first.</p>
+<h2>Option A: edge execution + cloud brain (get it running)</h2>
+<p>The agent runs on Jetson, the <strong>model stays in the cloud</strong> (DeepSeek). Fastest path:</p>
+<pre><code class="language-bash">pip install openai
+export DEEPSEEK_API_KEY=&quot;sk-...&quot;
+python agent.py &quot;read /etc/hostname and /proc/meminfo&quot;</code></pre>
+<p>The edge executes, the cloud thinks. Downside: <strong>needs network</strong>.</p>
+<h2>Option B: local model (offline / low latency / privacy)</h2>
+<p>Run a local LLM on the Jetson with <strong>llama.cpp</strong>, then point the agent at it — llama.cpp exposes an <strong>OpenAI-compatible API</strong>, so the <strong>loop doesn&#39;t change</strong>:</p>
+<pre><code class="language-bash"># 1) build (aarch64 + CUDA; Orin compute capability is 8.7)
+git clone https://github.com/ggerganov/llama.cpp &amp;&amp; cd llama.cpp
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=87
+cmake --build build --config Release -j
+
+# 2) run a local server (tiny model shown; swap as needed)
+./build/bin/llama-server -m models/qwen2.5-1.5b-instruct-q4_k_m.gguf \
+    -c 2048 --host 0.0.0.0 --port 8080
+
+# 3) point the agent at it
+export LLM_BASE_URL=&quot;http://localhost:8080/v1&quot;
+export LLM_MODEL=&quot;local&quot;
+python agent.py &quot;how much memory is left?&quot;</code></pre>
+<p><strong>Only <code>LLM_BASE_URL</code> changed — not a line of the loop.</strong> That&#39;s &quot;swap the model, keep the loop.&quot;</p>
+<blockquote><p>For higher throughput / lower latency, use <strong>TensorRT-LLM</strong> (also OpenAI-compatible) — separate post.</p></blockquote>
+<h2>Run it on boot</h2>
+<p>Edge devices must &quot;work on power-up&quot;. Use systemd:</p>
+<pre><code class="language-bash">sudo cp agent.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now agent
+journalctl -u agent -f      # logs</code></pre>
+<h2>5 edge gotchas</h2>
+<ol><li><strong>Architecture</strong>: aarch64 — verify pip packages build/install first.</li></ol>
+<ol><li><strong>CUDA capability</strong>: Orin = <strong>8.7</strong>; <code>-DCMAKE_CUDA_ARCHITECTURES=87</code> or nothing runs.</li></ol>
+<ol><li><strong>Memory</strong>: unified memory — keep <code>llama-server -c</code> modest (top cause of OOM).</li></ol>
+<ol><li><strong>Power/thermal</strong>: <code>nvpmodel</code> + <code>tegrastats</code>; edge runs 24/7.</li></ol>
+<ol><li><strong>Autostart &amp; logs</strong>: systemd + <code>journalctl</code>, not <code>nohup</code>.</li></ol>
+<h2>In one line</h2>
+<p><strong>The essence of an agent is a loop — ask the model, run the tool, feed it back.</strong> Same on the edge; the value there is <strong>local, offline, low-latency, private</strong> — and that&#39;s just a different <code>LLM_BASE_URL</code>.</p>
+<blockquote><p>📦 Complete runnable code: <strong><a href="https://github.com/zishuowang696/agent-on-jetson">github.com/zishuowang696/agent-on-jetson</a></strong></p><p>💬 Questions or feedback? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696/agent-on-jetson/issues">open an Issue</a> on GitHub.</p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('jetson') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'deploy-agent-on-jetson' AND t.name = 'jetson'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'deploy-agent-on-jetson' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('边缘ai') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'deploy-agent-on-jetson' AND t.name = '边缘ai'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('部署') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'deploy-agent-on-jetson' AND t.name = '部署'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('教程') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'deploy-agent-on-jetson' AND t.name = '教程'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('github-download-acceleration', 'GitHub 下载加速与 CI 缓存：把受限网络下的首次构建从几天压到几十分钟', '实测 GitHub 直连与国内代理速度，并把 GitHub Actions 当下载代理：在 runner 上 fetch 全部源码，打包成 Release 分卷缓存，本地拉回后离线构建。', '<p>做嵌入式发行版，第一次构建经常慢得离谱——<strong>瓶颈几乎从来不是编译，而是下载</strong>。上游源码散落在 GitHub、kernel.org、SourceForge、huggingface……在受限网络下，随便一个源卡住就能拖掉一整天。</p>
 <p>这篇讲两件事：<strong>先测速再选路</strong>，以及<strong>把 GitHub Actions 当成下载代理</strong>，把&quot;下载&quot;和&quot;编译&quot;彻底拆开。</p>
 <blockquote><p>案例仓库：<a href="https://github.com/zishuowang696/embedai">embedai</a>（Jetson Orin Nano 的 Yocto 发行版，KAS 管理）。</p></blockquote>
@@ -819,7 +1123,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-08T23:30:40.389Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:12:34.878Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1102,7 +1406,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:30:40.390Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:12:34.879Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1343,7 +1647,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-08T23:30:40.393Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:12:34.881Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1660,7 +1964,7 @@ python client.py
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-08T23:30:40.394Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In the previous post, our `cat` tool was **hardcoded** inside the agent:
+', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:12:34.882Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In the previous post, our `cat` tool was **hardcoded** inside the agent:
 
 ```python
 # the tool lives inside your program
@@ -1890,6 +2194,242 @@ INSERT INTO post_tags (post_id, tag_id)
   SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-in-30-lines' AND t.name = '教程'
   ON CONFLICT DO NOTHING;
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('mcp-stdio-vs-socket', '为什么 MCP 大多用管道（stdio），很少用 socket', 'MCP 大部分用 stdio 不是因为管道更高明，而是因为当前的场景恰好是管道的最优解：本机、单客户端、一次性、轻量无状态。一旦变成多客户端/常驻/有状态，就该换 socket。', '<p>接着上一篇《用 30 行看懂 MCP》。很多有系统背景的人会问：</p>
+<blockquote><p><strong>MCP 为什么用管道（stdio），而不是 socket？</strong></p></blockquote>
+<p>先说结论：<strong>不是管道更高明，而是当前大多数 MCP 场景，恰好是管道的最优解</strong>——<strong>本机、单客户端、一次性、轻量无状态</strong>。一旦场景变成&quot;<strong>多客户端 / 常驻 / 有状态 / 很重</strong>&quot;，就该换 socket。</p>
+<h2>MCP 是协议，传输可插拔</h2>
+<p>消息格式（JSON-RPC）和&quot;用什么线传&quot;是<strong>两回事</strong>：</p>
+<table><thead><tr><th>传输</th><th>走什么</th><th>场景</th></tr></thead><tbody><tr><td><strong>stdio</strong></td><td><strong>管道</strong>（stdin/stdout）</td><td>本地 server，客户端拉起它</td></tr><tr><td><strong>HTTP / SSE（Streamable HTTP）</strong></td><td><strong>TCP socket</strong></td><td>远程 / 多客户端</td></tr></tbody></table>
+<p>同一个协议，两种接线方式。</p>
+<h2>管道 vs socket：差在&quot;语义重量&quot;</h2>
+<table><thead><tr><th>维度</th><th>管道（stdio）</th><th>本地 socket</th></tr></thead><tbody><tr><td>地址/名字</td><td>❌ 匿名</td><td>✅ 路径 / <code>127.0.0.1:port</code></td></tr><tr><td>连接语义</td><td>❌ 就是两端 fd</td><td>✅ listen/accept/connect</td></tr><tr><td>客户端数</td><td><strong>1:1</strong></td><td><strong>1:N</strong></td></tr><tr><td>生命周期</td><td>绑定父子进程</td><td>服务端可常驻</td></tr><tr><td>重连 / 鉴权</td><td>❌ / ❌</td><td>✅ / ✅</td></tr><tr><td>内核开销</td><td>极低</td><td>略高</td></tr></tbody></table>
+<p>注意：<strong>两者都&quot;本地、零网络&quot;</strong>，数据路径都是&quot;内核缓冲区 + 内存拷贝&quot;，<strong>性能非常接近</strong>——差别主要是<strong>语义</strong>，不是速度。</p>
+<h2>判据不是&quot;本机 / 远程&quot;，而是这三问</h2>
+<ol><li><strong>几个客户端？</strong> 1 个 → stdio；多个 → socket。</li></ol>
+<ol><li><strong>要常驻 / 可重连吗？</strong> 要 → socket。</li></ol>
+<ol><li><strong>有状态吗？很重吗？</strong> 有 / 重 → socket。</li></ol>
+<blockquote><p>有个常见误区：<strong>&quot;服务应该无状态&quot; → 所以第 3 条可以忽略？</strong> 不。<strong>无状态免掉的是&quot;状态&quot;，免不掉&quot;成本&quot;</strong>。即使对外完全无状态，&quot;加载一次模型 / 建一次贵连接&quot;的<strong>物理开销</strong>依然在。若每个 stdio 客户端都 fork 一份，就是<strong>把这份成本重复付出</strong>——这是<strong>资源复用</strong>问题，跟&quot;有没有状态&quot;无关。</p></blockquote>
+<h2>那为什么现状是 stdio 主导？</h2>
+<p>因为现在绝大多数 MCP 场景，<strong>恰好落在 stdio 的甜区</strong>：</p>
+<ul><li><strong>桌面 AI（Claude Desktop、Cursor…）就是&quot;拉一个本地工具&quot;</strong>——天然 1:1；</li><li><strong>工具多是无状态、轻量</strong>（读文件、查一下、跑个命令）——多份进程也无所谓；</li><li><strong>stdio 零网络面</strong>：不用端口、不用防火墙、<strong>免鉴权、免配置</strong>，跨平台最简单；</li><li><strong>安全</strong>：进程隔离，攻击面最小。</li></ul>
+<p>一句话：<strong>场景匹配</strong>，不是技术优越。</p>
+<h2>什么时候就该上 socket？</h2>
+<ul><li>多个 App / agent 想<strong>共用</strong>同一个工具服务；</li><li>服务要<strong>常驻</strong>（开机即起、崩溃重启、客户端退出不影响它）；</li><li>工具很<strong>重</strong>（比如<strong>加载了本地模型</strong>的推理 server）——不想每个客户端重复加载；</li><li>需要<strong>会话状态</strong>（多轮、连着的设备/串口、流式长连接）；</li><li>需要<strong>鉴权 / 监控 / 远程访问</strong>。</li></ul>
+<blockquote><p>MCP 规范里没有原生的 <strong>UNIX socket</strong> 传输；想要&quot;本地 socket 语义&quot;，就用 <strong>HTTP 传输绑 <code>127.0.0.1</code></strong>（= loopback TCP，本地但不暴露），或者自己走 UNIX socket。</p></blockquote>
+<h2>从边缘网关看（我的场景）</h2>
+<ul><li><strong>单一 agent 拉个轻工具</strong> → <strong>stdio</strong> 足够，最省；</li><li><strong>设备上一个常驻、贵的&quot;设备能力服务&quot;</strong>（agent、CLI、Web 都要用，尤其<strong>加载了模型</strong>那种）→ <strong>别用 stdio</strong>，用<strong>本地 socket（HTTP 绑 <code>127.0.0.1</code>）</strong>，避免&quot;每个客户端一份进程、重复加载模型&quot;。</li></ul>
+<h2>一句话收尾</h2>
+<p><strong>不是管道更好，是它正好匹配当下的大多数场景。</strong> 判断标准从来不是&quot;本机 / 远程&quot;，而是：<strong>几个客户端、要不要常驻、有没有状态 / 成本。</strong> 场景一变，就换 socket。</p>
+<blockquote><p>📦 相关代码：<strong><a href="https://github.com/zishuowang696/mcp-demo">github.com/zishuowang696/mcp-demo</a></strong></p><p>💬 有问题或建议？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696/mcp-demo/issues">提 Issue</a>。</p></blockquote>
+<p><em>（本文中英双语；本系列记录从 0 构建 Agent 的过程。）</em></p>', '---
+title: "为什么 MCP 大多用管道（stdio），很少用 socket"
+date: 2026-10-11
+tags: ["mcp", "ai-agent", "架构", "原理", "教程"]
+summary: "MCP 大部分用 stdio 不是因为管道更高明，而是因为当前的场景恰好是管道的最优解：本机、单客户端、一次性、轻量无状态。一旦变成多客户端/常驻/有状态，就该换 socket。"
+series: "从 0 构建 AI Agent"
+published: true
+---
+
+接着上一篇《用 30 行看懂 MCP》。很多有系统背景的人会问：
+
+> **MCP 为什么用管道（stdio），而不是 socket？**
+
+先说结论：**不是管道更高明，而是当前大多数 MCP 场景，恰好是管道的最优解**——**本机、单客户端、一次性、轻量无状态**。一旦场景变成"**多客户端 / 常驻 / 有状态 / 很重**"，就该换 socket。
+
+## MCP 是协议，传输可插拔
+
+消息格式（JSON-RPC）和"用什么线传"是**两回事**：
+
+| 传输 | 走什么 | 场景 |
+| --- | --- | --- |
+| **stdio** | **管道**（stdin/stdout） | 本地 server，客户端拉起它 |
+| **HTTP / SSE（Streamable HTTP）** | **TCP socket** | 远程 / 多客户端 |
+
+同一个协议，两种接线方式。
+
+## 管道 vs socket：差在"语义重量"
+
+| 维度 | 管道（stdio） | 本地 socket |
+| --- | --- | --- |
+| 地址/名字 | ❌ 匿名 | ✅ 路径 / `127.0.0.1:port` |
+| 连接语义 | ❌ 就是两端 fd | ✅ listen/accept/connect |
+| 客户端数 | **1:1** | **1:N** |
+| 生命周期 | 绑定父子进程 | 服务端可常驻 |
+| 重连 / 鉴权 | ❌ / ❌ | ✅ / ✅ |
+| 内核开销 | 极低 | 略高 |
+
+注意：**两者都"本地、零网络"**，数据路径都是"内核缓冲区 + 内存拷贝"，**性能非常接近**——差别主要是**语义**，不是速度。
+
+## 判据不是"本机 / 远程"，而是这三问
+
+1. **几个客户端？** 1 个 → stdio；多个 → socket。
+2. **要常驻 / 可重连吗？** 要 → socket。
+3. **有状态吗？很重吗？** 有 / 重 → socket。
+
+> 有个常见误区：**"服务应该无状态" → 所以第 3 条可以忽略？**
+> 不。**无状态免掉的是"状态"，免不掉"成本"**。即使对外完全无状态，"加载一次模型 / 建一次贵连接"的**物理开销**依然在。若每个 stdio 客户端都 fork 一份，就是**把这份成本重复付出**——这是**资源复用**问题，跟"有没有状态"无关。
+
+## 那为什么现状是 stdio 主导？
+
+因为现在绝大多数 MCP 场景，**恰好落在 stdio 的甜区**：
+
+- **桌面 AI（Claude Desktop、Cursor…）就是"拉一个本地工具"**——天然 1:1；
+- **工具多是无状态、轻量**（读文件、查一下、跑个命令）——多份进程也无所谓；
+- **stdio 零网络面**：不用端口、不用防火墙、**免鉴权、免配置**，跨平台最简单；
+- **安全**：进程隔离，攻击面最小。
+
+一句话：**场景匹配**，不是技术优越。
+
+## 什么时候就该上 socket？
+
+- 多个 App / agent 想**共用**同一个工具服务；
+- 服务要**常驻**（开机即起、崩溃重启、客户端退出不影响它）；
+- 工具很**重**（比如**加载了本地模型**的推理 server）——不想每个客户端重复加载；
+- 需要**会话状态**（多轮、连着的设备/串口、流式长连接）；
+- 需要**鉴权 / 监控 / 远程访问**。
+
+> MCP 规范里没有原生的 **UNIX socket** 传输；想要"本地 socket 语义"，就用 **HTTP 传输绑 `127.0.0.1`**（= loopback TCP，本地但不暴露），或者自己走 UNIX socket。
+
+## 从边缘网关看（我的场景）
+
+- **单一 agent 拉个轻工具** → **stdio** 足够，最省；
+- **设备上一个常驻、贵的"设备能力服务"**（agent、CLI、Web 都要用，尤其**加载了模型**那种）→ **别用 stdio**，用**本地 socket（HTTP 绑 `127.0.0.1`）**，避免"每个客户端一份进程、重复加载模型"。
+
+## 一句话收尾
+
+**不是管道更好，是它正好匹配当下的大多数场景。** 判断标准从来不是"本机 / 远程"，而是：**几个客户端、要不要常驻、有没有状态 / 成本。** 场景一变，就换 socket。
+
+> 📦 相关代码：**[github.com/zishuowang696/mcp-demo](https://github.com/zishuowang696/mcp-demo)**
+>
+> 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
+
+*（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
+', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:12:34.883Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
+
+> **Why does MCP use pipes (stdio) instead of sockets?**
+
+Bottom line: **it''s not that pipes are superior — it''s that most current MCP scenarios happen to be the sweet spot for pipes**: **local, single client, one-shot, light and stateless**. Once it becomes "**multi-client / always-on / stateful / heavy**", switch to a socket.
+
+## MCP is a protocol; the transport is pluggable
+
+The message format (JSON-RPC) and "which wire carries it" are **two different things**:
+
+| Transport | Over | Scenario |
+| --- | --- | --- |
+| **stdio** | **pipe** (stdin/stdout) | local server the client launches |
+| **HTTP / SSE (Streamable HTTP)** | **TCP socket** | remote / multi-client |
+
+Same protocol, two ways to wire it.
+
+## Pipe vs socket: the difference is semantic weight
+
+| | Pipe (stdio) | Local socket |
+| --- | --- | --- |
+| Address/name | ❌ anonymous | ✅ path / `127.0.0.1:port` |
+| Connection semantics | ❌ just two fds | ✅ listen/accept/connect |
+| Clients | **1:1** | **1:N** |
+| Lifetime | tied to parent/child | server can be always-on |
+| Reconnect / auth | ❌ / ❌ | ✅ / ✅ |
+| Kernel overhead | minimal | slightly more |
+
+Note: **both are local, zero-network**; the data path is "kernel buffer + memory copy" in both, so **performance is very close** — the difference is **semantics**, not speed.
+
+## The test isn''t "local vs remote" — it''s these three questions
+
+1. **How many clients?** 1 → stdio; many → socket.
+2. **Always-on / reconnectable?** yes → socket.
+3. **Stateful? Heavy?** either → socket.
+
+> A common mistake: "services should be stateless, so #3 can be ignored?"
+> No. **Statelessness removes *state*, not *cost*.** Even a fully stateless service still pays the physical cost of "loading a model once / opening an expensive connection." If every stdio client forks its own copy, you **pay that cost repeatedly** — a **resource-reuse** problem, unrelated to whether it has state.
+
+## So why is stdio dominant today?
+
+Because most MCP scenarios land squarely in stdio''s sweet spot:
+
+- **Desktop AI (Claude Desktop, Cursor…)** is literally "launch one local tool" — inherently 1:1;
+- **Tools are mostly stateless and light** (read a file, look something up, run a command) — multiple processes are fine;
+- **stdio has zero network surface**: no ports, no firewall, **no auth, no config**, simplest cross-platform;
+- **Secure**: process isolation, minimal attack surface.
+
+In one line: **the scenario matches** — not superiority.
+
+## When should you use a socket?
+
+- Multiple apps/agents want to **share** one tool service;
+- The service must be **always-on** (start on boot, restart on crash, independent of clients);
+- The tool is **heavy** (e.g. a **local model** inference server) — you don''t want to load it per client;
+- You need **session state** (multi-turn, a held device/serial handle, streaming);
+- You need **auth / monitoring / remote access**.
+
+> MCP has no native **UNIX socket** transport; for "local socket semantics", use the **HTTP transport bound to `127.0.0.1`** (= loopback TCP, local but not exposed), or roll your own over a UNIX socket.
+
+## From an edge-gateway view (my case)
+
+- **A single agent launching a light tool** → **stdio** is enough, and cheapest;
+- **An always-on, expensive "device capability service"** (used by agent, CLI, and web; especially one that **loads a model**) → **don''t use stdio**; use a **local socket (HTTP bound to `127.0.0.1`)** to avoid "one process per client, reloading the model each time".
+
+## In one line
+
+**It''s not that pipes are better — they just match most scenarios today.** The test was never "local vs remote", but: **how many clients, always-on or not, stateful/costly or not.** Change the scenario, change to a socket.
+
+> 📦 Related code: **[github.com/zishuowang696/mcp-demo](https://github.com/zishuowang696/mcp-demo)**
+>
+> 💬 Questions or feedback? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696/mcp-demo/issues) on GitHub.
+', '<p>Following up on the previous post <a href="/en/posts/mcp-in-30-lines">MCP in 30 lines</a>. Systems people often ask:</p>
+<blockquote><p><strong>Why does MCP use pipes (stdio) instead of sockets?</strong></p></blockquote>
+<p>Bottom line: <strong>it&#39;s not that pipes are superior — it&#39;s that most current MCP scenarios happen to be the sweet spot for pipes</strong>: <strong>local, single client, one-shot, light and stateless</strong>. Once it becomes &quot;<strong>multi-client / always-on / stateful / heavy</strong>&quot;, switch to a socket.</p>
+<h2>MCP is a protocol; the transport is pluggable</h2>
+<p>The message format (JSON-RPC) and &quot;which wire carries it&quot; are <strong>two different things</strong>:</p>
+<table><thead><tr><th>Transport</th><th>Over</th><th>Scenario</th></tr></thead><tbody><tr><td><strong>stdio</strong></td><td><strong>pipe</strong> (stdin/stdout)</td><td>local server the client launches</td></tr><tr><td><strong>HTTP / SSE (Streamable HTTP)</strong></td><td><strong>TCP socket</strong></td><td>remote / multi-client</td></tr></tbody></table>
+<p>Same protocol, two ways to wire it.</p>
+<h2>Pipe vs socket: the difference is semantic weight</h2>
+<table><thead><tr><th></th><th>Pipe (stdio)</th><th>Local socket</th></tr></thead><tbody><tr><td>Address/name</td><td>❌ anonymous</td><td>✅ path / <code>127.0.0.1:port</code></td></tr><tr><td>Connection semantics</td><td>❌ just two fds</td><td>✅ listen/accept/connect</td></tr><tr><td>Clients</td><td><strong>1:1</strong></td><td><strong>1:N</strong></td></tr><tr><td>Lifetime</td><td>tied to parent/child</td><td>server can be always-on</td></tr><tr><td>Reconnect / auth</td><td>❌ / ❌</td><td>✅ / ✅</td></tr><tr><td>Kernel overhead</td><td>minimal</td><td>slightly more</td></tr></tbody></table>
+<p>Note: <strong>both are local, zero-network</strong>; the data path is &quot;kernel buffer + memory copy&quot; in both, so <strong>performance is very close</strong> — the difference is <strong>semantics</strong>, not speed.</p>
+<h2>The test isn&#39;t &quot;local vs remote&quot; — it&#39;s these three questions</h2>
+<ol><li><strong>How many clients?</strong> 1 → stdio; many → socket.</li></ol>
+<ol><li><strong>Always-on / reconnectable?</strong> yes → socket.</li></ol>
+<ol><li><strong>Stateful? Heavy?</strong> either → socket.</li></ol>
+<blockquote><p>A common mistake: &quot;services should be stateless, so #3 can be ignored?&quot; No. **Statelessness removes <em>state</em>, not <em>cost</em>.<strong> Even a fully stateless service still pays the physical cost of &quot;loading a model once / opening an expensive connection.&quot; If every stdio client forks its own copy, you </strong>pay that cost repeatedly<strong> — a </strong>resource-reuse** problem, unrelated to whether it has state.</p></blockquote>
+<h2>So why is stdio dominant today?</h2>
+<p>Because most MCP scenarios land squarely in stdio&#39;s sweet spot:</p>
+<ul><li><strong>Desktop AI (Claude Desktop, Cursor…)</strong> is literally &quot;launch one local tool&quot; — inherently 1:1;</li><li><strong>Tools are mostly stateless and light</strong> (read a file, look something up, run a command) — multiple processes are fine;</li><li><strong>stdio has zero network surface</strong>: no ports, no firewall, <strong>no auth, no config</strong>, simplest cross-platform;</li><li><strong>Secure</strong>: process isolation, minimal attack surface.</li></ul>
+<p>In one line: <strong>the scenario matches</strong> — not superiority.</p>
+<h2>When should you use a socket?</h2>
+<ul><li>Multiple apps/agents want to <strong>share</strong> one tool service;</li><li>The service must be <strong>always-on</strong> (start on boot, restart on crash, independent of clients);</li><li>The tool is <strong>heavy</strong> (e.g. a <strong>local model</strong> inference server) — you don&#39;t want to load it per client;</li><li>You need <strong>session state</strong> (multi-turn, a held device/serial handle, streaming);</li><li>You need <strong>auth / monitoring / remote access</strong>.</li></ul>
+<blockquote><p>MCP has no native <strong>UNIX socket</strong> transport; for &quot;local socket semantics&quot;, use the <strong>HTTP transport bound to <code>127.0.0.1</code></strong> (= loopback TCP, local but not exposed), or roll your own over a UNIX socket.</p></blockquote>
+<h2>From an edge-gateway view (my case)</h2>
+<ul><li><strong>A single agent launching a light tool</strong> → <strong>stdio</strong> is enough, and cheapest;</li><li><strong>An always-on, expensive &quot;device capability service&quot;</strong> (used by agent, CLI, and web; especially one that <strong>loads a model</strong>) → <strong>don&#39;t use stdio</strong>; use a <strong>local socket (HTTP bound to <code>127.0.0.1</code>)</strong> to avoid &quot;one process per client, reloading the model each time&quot;.</li></ul>
+<h2>In one line</h2>
+<p><strong>It&#39;s not that pipes are better — they just match most scenarios today.</strong> The test was never &quot;local vs remote&quot;, but: <strong>how many clients, always-on or not, stateful/costly or not.</strong> Change the scenario, change to a socket.</p>
+<blockquote><p>📦 Related code: <strong><a href="https://github.com/zishuowang696/mcp-demo">github.com/zishuowang696/mcp-demo</a></strong></p><p>💬 Questions or feedback? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696/mcp-demo/issues">open an Issue</a> on GitHub.</p></blockquote>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('mcp') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-stdio-vs-socket' AND t.name = 'mcp'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-stdio-vs-socket' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('架构') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-stdio-vs-socket' AND t.name = '架构'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('原理') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-stdio-vs-socket' AND t.name = '原理'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('教程') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'mcp-stdio-vs-socket' AND t.name = '教程'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('multi-source-download', '多源分段下载：什么时候多连接有用，什么时候没用（aria2 实测）', '同一个大文件，用多镜像、多连接分段下载到底能快多少？实测单连接、curl 多连接、aria2 多源分段，并给出判断瓶颈与正确配置的方法。', '<p>下载一个大文件很慢时，先别急着&quot;多加连接&quot;。慢有两种完全不同的原因：</p>
 <ul><li><strong>单连接被限速</strong>（服务器/代理对每个连接限速）→ 多连接有用；</li><li><strong>总带宽到顶</strong>（你的线路就那么大）→ 多连接没用。</li></ul>
 <p>分不清这两者，就容易白折腾。下面用真实数据讲清楚，并给出 <code>aria2</code> 的多源分段用法。</p>
@@ -2039,7 +2579,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-08T23:30:40.395Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-11T02:12:34.885Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -2298,7 +2838,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-08T23:30:40.396Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:12:34.886Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -2468,7 +3008,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-08T23:30:40.397Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:12:34.887Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -2672,7 +3212,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-08T23:30:40.397Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:12:34.889Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -2959,7 +3499,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-08T23:30:40.398Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:12:34.890Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -3307,7 +3847,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-08T23:30:40.399Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-11T02:12:34.892Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -3519,7 +4059,11 @@ INSERT INTO pages (slug, title, content_html, source_md, created_at, updated_at)
 <h2>技术栈</h2>
 <p>本站本身也是一次“轻量嵌入式网站”的练习：</p>
 <ul><li><strong>Bun</strong> 运行时</li><li><strong>Hono</strong> Web 框架（SSR 输出 HTML）</li><li><strong>htmx</strong> 做局部片段交互</li><li><strong>SQLite</strong> 单文件数据库</li><li>Markdown 写内容，启动时渲染入库</li></ul>
-<blockquote><p>注册账号即可在文章下评论；想协作/指正也欢迎留言。</p></blockquote>', '---
+<h2>服务</h2>
+<ul><li><strong>嵌入式 / 边缘 AI / AI Agent</strong> 的定制开发、系统集成与咨询；</li><li>性能调优、BSP / 驱动、模型部署（TensorRT / 边缘推理）；</li><li>技术方案评估与落地陪跑。</li></ul>
+<h2>联系我</h2>
+<ul><li><strong>站内评论</strong>：在任意文章下方留言（注册即可，我会看到）；</li><li><strong>邮箱</strong>：<a href="mailto:wangbing1087@qq.com">wangbing1087@qq.com</a></li></ul>
+<blockquote><p>描述清你的<strong>场景 / 硬件 / 目标</strong>，我会尽快回复。</p></blockquote>', '---
 title: "关于本站"
 date: 2026-09-01
 ---
@@ -3542,6 +4086,17 @@ date: 2026-09-01
 - **SQLite** 单文件数据库
 - Markdown 写内容，启动时渲染入库
 
-> 注册账号即可在文章下评论；想协作/指正也欢迎留言。
-', '2026-09-01', '2026-10-08T23:30:40.399Z')
+## 服务
+
+- **嵌入式 / 边缘 AI / AI Agent** 的定制开发、系统集成与咨询；
+- 性能调优、BSP / 驱动、模型部署（TensorRT / 边缘推理）；
+- 技术方案评估与落地陪跑。
+
+## 联系我
+
+- **站内评论**：在任意文章下方留言（注册即可，我会看到）；
+- **邮箱**：[wangbing1087@qq.com](mailto:wangbing1087@qq.com)
+
+> 描述清你的**场景 / 硬件 / 目标**，我会尽快回复。
+', '2026-09-01', '2026-10-11T02:12:34.893Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
