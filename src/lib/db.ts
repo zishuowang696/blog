@@ -223,9 +223,11 @@ async function syncTags(postId: number, tags: string[]): Promise<void> {
   }
 }
 
-export async function listAllPostsMeta(): Promise<PostMeta[]> {
+export async function listAllPostsMeta(opts: { includeUnpublished?: boolean } = {}): Promise<PostMeta[]> {
+  const where = opts.includeUnpublished ? '' : 'WHERE posts.published = 1'
   const rows = await useEngine().all(
     `SELECT posts.slug, posts.title, posts.published, posts.created_at, ${rowTags()} FROM posts
+     ${where}
      ORDER BY posts.created_at DESC, posts.id DESC`,
   )
   return rows.map((r) => {
