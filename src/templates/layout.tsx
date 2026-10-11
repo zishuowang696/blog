@@ -105,6 +105,7 @@ export function Layout({ title, description, active, user, lang, path, query, pr
         <link rel="alternate" hreflang="zh-CN" href={zhUrl} />
         <link rel="alternate" hreflang="en" href={enUrl} />
         <link rel="alternate" hreflang="x-default" href={zhUrl} />
+        <link rel="alternate" type="application/rss+xml" title={SITE_NAME} href={langHref(lang, '/feed.xml')} />
         <meta name="msvalidate.01" content="A6BA56FB366CE57CB2410A2B115268A6" />
         <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:type" content={ogType ?? 'website'} />
@@ -161,6 +162,7 @@ export function Layout({ title, description, active, user, lang, path, query, pr
               </div>
               <div>
                 <h4>{lang === 'zh' ? '更多' : 'More'}</h4>
+                <a href={langHref(lang, '/feed.xml')}>RSS</a>
                 <a href={langHref(lang, '/sitemap.xml')}>Sitemap</a>
                 <a href={langHref(lang, '/llms.txt')}>llms.txt</a>
                 <a href="https://github.com/zishuowang696" target="_blank" rel="noopener">GitHub</a>
