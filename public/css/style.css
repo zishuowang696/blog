@@ -214,6 +214,12 @@ button.linkish.danger:hover { color: #e5484d; }
 .cta-band { display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 26px 32px; }
 .cta-band h2 { margin: 0 0 6px; font-size: 1.25rem; letter-spacing: -0.2px; }
 .cta-band p { margin: 0; color: var(--fg-muted); }
+.subscribe-band { display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 32px; }
+.subscribe-band h2 { margin: 0 0 6px; font-size: 1.25rem; letter-spacing: -0.2px; }
+.subscribe-band p { margin: 0; color: var(--fg-muted); }
+.subscribe-form { display: flex; gap: 10px; flex-wrap: wrap; }
+.subscribe-form input { padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--fg); font: inherit; min-width: 220px; }
+.subscribe-form input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .band-title { font-size: 1.05rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 0 0 16px; }
 .series-list { display: flex; flex-direction: column; gap: 12px; }
 .series-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); transition: border-color 0.15s ease, transform 0.15s ease; }
