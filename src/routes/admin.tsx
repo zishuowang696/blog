@@ -120,7 +120,7 @@ async function renderEditor(
 adminRoutes.get('/', async (c) => {
   const gate = await adminOnly(c)
   if (gate) return gate
-  const body = <AdminListView rows={await listAllPostsMeta()} />
+  const body = <AdminListView rows={await listAllPostsMeta({ includeUnpublished: true })} />
   return c.html(await renderHtml(c, { title: '控制台', active: 'console', body }))
 })
 
