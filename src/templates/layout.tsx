@@ -10,8 +10,9 @@ export type NavKey = 'home' | 'tags' | 'series' | 'about' | 'console' | ''
 
 const LOGO_MARK = (
   <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
-    <path d="M16 3 28 10v12L16 29 4 22V10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
-    <circle cx="16" cy="16" r="3.2" fill="currentColor" />
+    <path d="M16 4.75 25.25 10.1v11.8L16 27.25 6.75 21.9V10.1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    <circle cx="16" cy="16" r="3" fill="currentColor" />
+    <path d="M16 13V10M13.6 17.5l-3.4 2M18.4 17.5l3.4 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
   </svg>
 )
 
