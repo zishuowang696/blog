@@ -242,6 +242,25 @@ export async function listAllPostsMeta(opts: { includeUnpublished?: boolean } = 
   })
 }
 
+export async function listRecentPosts(
+  limit = 20,
+  lang: Lang = 'zh',
+): Promise<{ slug: string; title: string; summary: string; date: string }[]> {
+  const rows = await useEngine().all(
+    `SELECT posts.slug AS slug, ${pickField('title', 'title_en', lang)} AS title,
+            ${pickField('summary', 'summary_en', lang)} AS summary, posts.created_at AS created_at
+     FROM posts
+     WHERE posts.published = 1
+     ORDER BY posts.created_at DESC, posts.id DESC
+     LIMIT ?`,
+    [limit],
+  )
+  return rows.map((r) => {
+    const rr = r as unknown as { slug: string; title: string; summary: string; created_at: string }
+    return { slug: rr.slug, title: rr.title, summary: rr.summary ?? '', date: rr.created_at.slice(0, 10) }
+  })
+}
+
 export async function savePage(input: PageInput): Promise<Page> {
   const e = useEngine()
   const contentHtml = renderMarkdown(input.body)

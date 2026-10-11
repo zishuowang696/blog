@@ -3,6 +3,7 @@ import { accessLogger, securityHeaders } from './middleware/http.ts'
 import { adminRoutes } from './routes/admin.tsx'
 import { authRoutes } from './routes/auth.tsx'
 import { commentRoutes } from './routes/comments.tsx'
+import { feedRoutes } from './routes/feed.ts'
 import { homeRoutes } from './routes/home.tsx'
 import { langRoutes } from './routes/lang.tsx'
 import { postRoutes } from './routes/posts.tsx'
@@ -19,7 +20,7 @@ export const app = new Hono()
 app.use('*', accessLogger, securityHeaders)
 
 // 根级文件不区分大小写：/Sitemap.xml、/ROBOTS.TXT 等 301 跳到小写规范地址
-const ROOT_FILES = new Set(['/sitemap.xml', '/robots.txt', '/llms.txt'])
+const ROOT_FILES = new Set(['/sitemap.xml', '/robots.txt', '/llms.txt', '/feed.xml'])
 app.use('*', async (c, next) => {
   const path = c.req.path
   const lower = path.toLowerCase()
@@ -38,6 +39,7 @@ app.route('/', pageRoutes)
 app.route('/search', searchRoutes)
 app.route('/', authRoutes)
 app.route('/', commentRoutes)
+app.route('/', feedRoutes)
 
 app.route('/en', homeRoutes)
 app.route('/en/posts', postRoutes)
@@ -47,6 +49,7 @@ app.route('/en', pageRoutes)
 app.route('/en/search', searchRoutes)
 app.route('/en', authRoutes)
 app.route('/en', commentRoutes)
+app.route('/en', feedRoutes)
 
 app.route('/lang', langRoutes)
 app.route('/', sitemapRoutes)
