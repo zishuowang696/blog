@@ -32,6 +32,9 @@ export function HomeView({
           <a class="btn" href={langHref(lang, '/tags')}>
             {t(lang, 'nav.tags')}
           </a>
+          <a class="btn ghost" href={langHref(lang, '/feed.xml')}>
+            {lang === 'zh' ? '订阅（RSS）' : 'Subscribe (RSS)'}
+          </a>
           <a class="btn ghost" href={langHref(lang, '/about')}>
             {t(lang, 'nav.about')}
           </a>
