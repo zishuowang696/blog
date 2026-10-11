@@ -1,5 +1,215 @@
 -- 由 src/scripts/d1-seed.ts 生成：D1 首灌种子（posts/pages/tags/post_tags）
 INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
+  VALUES ('agent-is-client-development', 'Agent 开发，其实就是『客户端开发』', '学了几天 Agent，我的结论是：它本质就是『客户端开发 + 一次大模型 API 调用』。做过 Android/前端/桌面客户端的，补上 MCP 和大模型概念，就能直接面试 Agent 岗位——别被『AI』两个字吓退。', '<p>这几天认真学了 Agent，冒出一个越来越强的感觉：</p>
+<blockquote><p><strong>Agent 开发，其实就是以前的客户端开发——只是多接了一个大模型的 API。</strong></p></blockquote>
+<p>看着是&quot;AI&quot;，拆开看，全是你干过的事。</p>
+<h2>把 Agent 拆开看</h2>
+<table><thead><tr><th>Agent 里的概念</th><th>其实是什么（客户端视角）</th></tr></thead><tbody><tr><td>LLM API 调用</td><td><strong>调一个后端接口</strong>（HTTP + JSON）</td></tr><tr><td>那个&quot;循环&quot;（问模型 → 执行工具 → 回喂）</td><td><strong>事件循环 / 状态机</strong>（带状态的请求-响应）</td></tr><tr><td>Function Calling / Tools</td><td><strong>接口集成</strong>：调接口、处理返回、重试</td></tr><tr><td>MCP（client / server）</td><td><strong>RPC / 网络层</strong>：客户端连服务端</td></tr><tr><td>Memory / 会话</td><td><strong>本地状态 / 缓存</strong></td></tr><tr><td>Prompt</td><td><strong>配置 / 协议约定</strong></td></tr><tr><td>流式输出</td><td><strong>流式响应 / 增量渲染</strong>（你早写过）</td></tr></tbody></table>
+<p><strong>没有一个是新物种。</strong> 全是客户端工程的老朋友，换了个名字。</p>
+<h2>所以谁最容易转</h2>
+<ul><li><strong>Android / iOS / 桌面客户端</strong>：主循环、状态管理、网络、并发——全是你的本行；</li><li><strong>前端</strong>：请求-响应、状态、渲染、异步——同理。</li></ul>
+<p>他们要补的只有<strong>两样新东西</strong>：</p>
+<ol><li><strong>MCP</strong>（一个协议，看《手写一个标准的 MCP 客户端》就够）；</li></ol>
+<ol><li><strong>大模型的基本概念</strong>（token、上下文、temperature、function calling）。</li></ol>
+<p><strong>就这些。</strong> 补完，简历上写&quot;做过 Agent&quot;，一点不虚。</p>
+<h2>但也别说得太简单（诚实）</h2>
+<p>有几样是<strong>真的新</strong>，客户端的经验覆盖不到：</p>
+<ul><li><strong>不确定性</strong>：模型不是确定性 API——同样输入，输出会变、会错、会&quot;一本正经胡说&quot;；</li><li><strong>Prompt / 上下文工程</strong>：怎么措辞、给什么上下文，直接影响结果；</li><li><strong>评测</strong>：怎么证明&quot;改完更好了&quot;（这块最像新领域）；</li><li><strong>成本 / 延迟 / token</strong>：调模型是要钱、有延迟的；</li><li><strong>安全</strong>：<strong>工具会真的执行</strong>（删文件、发请求）——副作用远大于&quot;调个只读接口&quot;。</li></ul>
+<p>但这些是<strong>增量</strong>，不是<strong>从零</strong>。你做客户端踩过的坑，换个场景还在。</p>
+<h2>给转岗者的最短路径（一两周）</h2>
+<ol><li>跑通一个最小 Agent（《从 0 构建一个 AI Agent》）；</li></ol>
+<ol><li>搞懂 <strong>MCP</strong>（client + server，手写一遍）；</li></ol>
+<ol><li>理解 <strong>function calling / token / 上下文</strong>；</li></ol>
+<ol><li>做一个小项目（比如&quot;能读系统状态的助手&quot;）放 GitHub；</li></ol>
+<ol><li><strong>去面试</strong>。</li></ol>
+<h2>一句话收尾</h2>
+<p><strong>Agent 不是一个新物种，是&quot;老的客户端开发 + 一个新的（不确定的）大脑&quot;。</strong></p>
+<p>做过 Android、前端的兄弟，<strong>别被&quot;AI&quot;两个字吓退</strong>——你缺的不是能力，是&quot;做过一次&quot;的经历，而那个，<strong>一两周就有了</strong>。</p>
+<blockquote><p>💬 你怎么看？Agent 算不算客户端开发？<strong>在下方评论</strong>，或到 GitHub <a href="https://github.com/zishuowang696">提 Issue</a> 聊聊。</p></blockquote>
+<p><em>（本文中英双语。）</em></p>', '---
+title: "Agent 开发，其实就是『客户端开发』"
+date: 2026-10-11
+tags: ["ai-agent", "客户端开发", "转岗", "mcp", "职业"]
+summary: "学了几天 Agent，我的结论是：它本质就是『客户端开发 + 一次大模型 API 调用』。做过 Android/前端/桌面客户端的，补上 MCP 和大模型概念，就能直接面试 Agent 岗位——别被『AI』两个字吓退。"
+published: true
+---
+
+这几天认真学了 Agent，冒出一个越来越强的感觉：
+
+> **Agent 开发，其实就是以前的客户端开发——只是多接了一个大模型的 API。**
+
+看着是"AI"，拆开看，全是你干过的事。
+
+## 把 Agent 拆开看
+
+| Agent 里的概念 | 其实是什么（客户端视角） |
+| --- | --- |
+| LLM API 调用 | **调一个后端接口**（HTTP + JSON） |
+| 那个"循环"（问模型 → 执行工具 → 回喂） | **事件循环 / 状态机**（带状态的请求-响应） |
+| Function Calling / Tools | **接口集成**：调接口、处理返回、重试 |
+| MCP（client / server） | **RPC / 网络层**：客户端连服务端 |
+| Memory / 会话 | **本地状态 / 缓存** |
+| Prompt | **配置 / 协议约定** |
+| 流式输出 | **流式响应 / 增量渲染**（你早写过） |
+
+**没有一个是新物种。** 全是客户端工程的老朋友，换了个名字。
+
+## 所以谁最容易转
+
+- **Android / iOS / 桌面客户端**：主循环、状态管理、网络、并发——全是你的本行；
+- **前端**：请求-响应、状态、渲染、异步——同理。
+
+他们要补的只有**两样新东西**：
+
+1. **MCP**（一个协议，看《手写一个标准的 MCP 客户端》就够）；
+2. **大模型的基本概念**（token、上下文、temperature、function calling）。
+
+**就这些。** 补完，简历上写"做过 Agent"，一点不虚。
+
+## 但也别说得太简单（诚实）
+
+有几样是**真的新**，客户端的经验覆盖不到：
+
+- **不确定性**：模型不是确定性 API——同样输入，输出会变、会错、会"一本正经胡说"；
+- **Prompt / 上下文工程**：怎么措辞、给什么上下文，直接影响结果；
+- **评测**：怎么证明"改完更好了"（这块最像新领域）；
+- **成本 / 延迟 / token**：调模型是要钱、有延迟的；
+- **安全**：**工具会真的执行**（删文件、发请求）——副作用远大于"调个只读接口"。
+
+但这些是**增量**，不是**从零**。你做客户端踩过的坑，换个场景还在。
+
+## 给转岗者的最短路径（一两周）
+
+1. 跑通一个最小 Agent（《从 0 构建一个 AI Agent》）；
+2. 搞懂 **MCP**（client + server，手写一遍）；
+3. 理解 **function calling / token / 上下文**；
+4. 做一个小项目（比如"能读系统状态的助手"）放 GitHub；
+5. **去面试**。
+
+## 一句话收尾
+
+**Agent 不是一个新物种，是"老的客户端开发 + 一个新的（不确定的）大脑"。**
+
+做过 Android、前端的兄弟，**别被"AI"两个字吓退**——你缺的不是能力，是"做过一次"的经历，而那个，**一两周就有了**。
+
+> 💬 你怎么看？Agent 算不算客户端开发？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
+
+*（本文中英双语。）*
+', '', 1, '2026-10-11', '2026-10-11T03:13:17.381Z', 'Agent development is really ''client development''', 'After a few days learning agents, my conclusion: it''s essentially ''client development + one LLM API call.'' If you''ve done Android/frontend/desktop clients, add MCP and a few LLM concepts and you can interview for agent roles directly — don''t be scared by the word ''AI''.', 'After a few days seriously learning agents, one feeling keeps growing:
+
+> **Agent development is really the old client development — just wired to an LLM API.**
+
+It looks like "AI", but pull it apart and it''s all work you''ve done.
+
+## Take an agent apart
+
+| Concept in agents | What it really is (client view) |
+| --- | --- |
+| LLM API call | **Calling a backend API** (HTTP + JSON) |
+| The "loop" (ask model → run tool → feed back) | **Event loop / state machine** (stateful request-response) |
+| Function calling / Tools | **API integration**: call, handle response, retry |
+| MCP (client / server) | **RPC / network layer**: client talks to server |
+| Memory / session | **Local state / cache** |
+| Prompt | **Config / protocol convention** |
+| Streaming output | **Streaming response / incremental render** (you''ve written this) |
+
+**None of it is a new species.** They''re all old friends of client engineering, renamed.
+
+## So who can switch most easily
+
+- **Android / iOS / desktop clients**: main loop, state management, networking, concurrency — all your daily work;
+- **Frontend**: request-response, state, rendering, async — same idea.
+
+They only need to add **two new things**:
+
+1. **MCP** (a protocol — see "Write a standard MCP client" and you''re set);
+2. **Basic LLM concepts** (token, context, temperature, function calling).
+
+**That''s it.** After that, putting "built agents" on your résumé isn''t a stretch at all.
+
+## But don''t oversimplify (honestly)
+
+A few things are **genuinely new** and outside client experience:
+
+- **Non-determinism**: the model isn''t a deterministic API — same input, different output, wrong answers, confident nonsense;
+- **Prompt / context engineering**: wording and context directly change results;
+- **Evaluation**: proving "it''s better now" (the most new-feeling part);
+- **Cost / latency / tokens**: calling a model costs money and time;
+- **Safety**: **tools really execute** (delete files, send requests) — far bigger blast radius than a read-only API.
+
+But these are **additions**, not starting from zero. The traps you hit in client work are still there, just in a new setting.
+
+## The shortest path for switchers (a week or two)
+
+1. Get a minimal agent running ("Build an AI agent from scratch");
+2. Understand **MCP** (client + server, write it once);
+3. Get **function calling / tokens / context**;
+4. Build one small project (e.g. an assistant that reads system state) and put it on GitHub;
+5. **Go interview.**
+
+## In one line
+
+**An agent isn''t a new species — it''s "old client development + a new (non-deterministic) brain."**
+
+Android and frontend folks: **don''t be scared off by the word ''AI''** — what you lack isn''t ability, it''s the "done it once" experience, and that takes **a week or two.**
+
+> 💬 What do you think — is an agent just client development? **Leave a comment below**, or [open an Issue](https://github.com/zishuowang696) to talk.
+
+*（Bilingual post.）*
+', '<p>After a few days seriously learning agents, one feeling keeps growing:</p>
+<blockquote><p><strong>Agent development is really the old client development — just wired to an LLM API.</strong></p></blockquote>
+<p>It looks like &quot;AI&quot;, but pull it apart and it&#39;s all work you&#39;ve done.</p>
+<h2>Take an agent apart</h2>
+<table><thead><tr><th>Concept in agents</th><th>What it really is (client view)</th></tr></thead><tbody><tr><td>LLM API call</td><td><strong>Calling a backend API</strong> (HTTP + JSON)</td></tr><tr><td>The &quot;loop&quot; (ask model → run tool → feed back)</td><td><strong>Event loop / state machine</strong> (stateful request-response)</td></tr><tr><td>Function calling / Tools</td><td><strong>API integration</strong>: call, handle response, retry</td></tr><tr><td>MCP (client / server)</td><td><strong>RPC / network layer</strong>: client talks to server</td></tr><tr><td>Memory / session</td><td><strong>Local state / cache</strong></td></tr><tr><td>Prompt</td><td><strong>Config / protocol convention</strong></td></tr><tr><td>Streaming output</td><td><strong>Streaming response / incremental render</strong> (you&#39;ve written this)</td></tr></tbody></table>
+<p><strong>None of it is a new species.</strong> They&#39;re all old friends of client engineering, renamed.</p>
+<h2>So who can switch most easily</h2>
+<ul><li><strong>Android / iOS / desktop clients</strong>: main loop, state management, networking, concurrency — all your daily work;</li><li><strong>Frontend</strong>: request-response, state, rendering, async — same idea.</li></ul>
+<p>They only need to add <strong>two new things</strong>:</p>
+<ol><li><strong>MCP</strong> (a protocol — see &quot;Write a standard MCP client&quot; and you&#39;re set);</li></ol>
+<ol><li><strong>Basic LLM concepts</strong> (token, context, temperature, function calling).</li></ol>
+<p><strong>That&#39;s it.</strong> After that, putting &quot;built agents&quot; on your résumé isn&#39;t a stretch at all.</p>
+<h2>But don&#39;t oversimplify (honestly)</h2>
+<p>A few things are <strong>genuinely new</strong> and outside client experience:</p>
+<ul><li><strong>Non-determinism</strong>: the model isn&#39;t a deterministic API — same input, different output, wrong answers, confident nonsense;</li><li><strong>Prompt / context engineering</strong>: wording and context directly change results;</li><li><strong>Evaluation</strong>: proving &quot;it&#39;s better now&quot; (the most new-feeling part);</li><li><strong>Cost / latency / tokens</strong>: calling a model costs money and time;</li><li><strong>Safety</strong>: <strong>tools really execute</strong> (delete files, send requests) — far bigger blast radius than a read-only API.</li></ul>
+<p>But these are <strong>additions</strong>, not starting from zero. The traps you hit in client work are still there, just in a new setting.</p>
+<h2>The shortest path for switchers (a week or two)</h2>
+<ol><li>Get a minimal agent running (&quot;Build an AI agent from scratch&quot;);</li></ol>
+<ol><li>Understand <strong>MCP</strong> (client + server, write it once);</li></ol>
+<ol><li>Get <strong>function calling / tokens / context</strong>;</li></ol>
+<ol><li>Build one small project (e.g. an assistant that reads system state) and put it on GitHub;</li></ol>
+<ol><li><strong>Go interview.</strong></li></ol>
+<h2>In one line</h2>
+<p><strong>An agent isn&#39;t a new species — it&#39;s &quot;old client development + a new (non-deterministic) brain.&quot;</strong></p>
+<p>Android and frontend folks: <strong>don&#39;t be scared off by the word &#39;AI&#39;</strong> — what you lack isn&#39;t ability, it&#39;s the &quot;done it once&quot; experience, and that takes <strong>a week or two.</strong></p>
+<blockquote><p>💬 What do you think — is an agent just client development? <strong>Leave a comment below</strong>, or <a href="https://github.com/zishuowang696">open an Issue</a> to talk.</p></blockquote>
+<p><em>（Bilingual post.）</em></p>')
+  ON CONFLICT(slug) DO UPDATE SET
+    title = excluded.title, summary = excluded.summary, content_html = excluded.content_html,
+    source_md = excluded.source_md, series = excluded.series, published = excluded.published,
+    created_at = excluded.created_at, updated_at = excluded.updated_at,
+    title_en = excluded.title_en, summary_en = excluded.summary_en,
+    body_en = excluded.body_en, content_html_en = excluded.content_html_en;
+INSERT INTO tags (name) VALUES ('ai-agent') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-is-client-development' AND t.name = 'ai-agent'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('客户端开发') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-is-client-development' AND t.name = '客户端开发'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('转岗') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-is-client-development' AND t.name = '转岗'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('mcp') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-is-client-development' AND t.name = 'mcp'
+  ON CONFLICT DO NOTHING;
+INSERT INTO tags (name) VALUES ('职业') ON CONFLICT(name) DO NOTHING;
+INSERT INTO post_tags (post_id, tag_id)
+  SELECT p.id, t.id FROM posts p, tags t WHERE p.slug = 'agent-is-client-development' AND t.name = '职业'
+  ON CONFLICT DO NOTHING;
+INSERT INTO posts (slug, title, summary, content_html, source_md, series, published, created_at, updated_at, title_en, summary_en, body_en, content_html_en)
   VALUES ('ai-gateway-architecture', '边缘 AI 网关架构拆解：OpenWrt + Jetson 各司其职', '为什么一台路由器 + 一块 Jetson 就是最务实的边缘 AI 网关：转发平面放 OpenWrt，推理平面放 Tegra，用 vlan 与容器串起来。', '<p>很多人把“边缘 AI 网关”想成一个巨大的盒子。实际落地，<strong>一台 OpenWrt 路由器负责转发/策略，一块 Jetson 负责推理</strong>，两者用 VLAN 连起来，往往比单机大盒子更便宜、更易维护。</p>
 <h2>1. 分工：转发平面与推理平面分离</h2>
 <table><thead><tr><th>设备</th><th>角色</th><th>关键能力</th></tr></thead><tbody><tr><td>OpenWrt 路由器</td><td>转发平面</td><td>NAT、防火墙、QoS、pppoe/4G 拨号</td></tr><tr><td>Jetson Orin</td><td>推理平面</td><td>TensorRT、多路解码、模型常驻</td></tr><tr><td>可选 NUC/小主机</td><td>编排平面</td><td>K8s/K3s 或 docker compose</td></tr></tbody></table>
@@ -116,7 +326,7 @@ uci commit qos
 ## 小结
 
 把“网络”和“算力”解耦成两个平面，配合 VLAN 与容器，是我目前验证下来最稳的边缘 AI 网关形态。后续文章会分别深入 OpenWrt QoS 细节与 Jetson 的 TensorRT 多路推理优化。
-', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T02:46:08.426Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
+', 'AI 网关实战', 1, '2026-09-01', '2026-10-11T03:13:17.382Z', 'Edge AI Gateway Architecture: OpenWrt + Jetson, Each in Its Lane', 'Why one router plus one Jetson is the most pragmatic edge AI gateway: OpenWrt owns the forwarding plane, Tegra owns inference, wired together with VLANs and containers.', 'Many people picture an "edge AI gateway" as one giant box. In practice, **one OpenWrt router handling forwarding/policy plus one Jetson handling inference**, connected over VLAN, is often cheaper and easier to maintain than a single big device.
 
 ## 1. Division of labor: forwarding plane vs inference plane
 
@@ -460,7 +670,7 @@ print(agent("读一下 /etc/hostname 里的内容"))
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-from-scratch/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T02:46:08.429Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
+', '从 0 构建 AI Agent', 1, '2026-09-30', '2026-10-11T03:13:17.383Z', 'Building an AI agent from scratch: it''s just a loop', 'Strip away the frameworks and an agent is just a loop: call the API to ask the model → run the tool → feed the result back. One complete runnable example, using DeepSeek.', 'New agent frameworks appear every month, which makes it easy to assume there''s something deep inside. **There isn''t.**
 
 **The essence of an agent is a single loop:**
 
@@ -840,7 +1050,7 @@ journalctl -u agent -f      # 看日志
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/agent-on-jetson/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T02:46:08.435Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
+', '从 0 构建 AI Agent', 0, '2026-10-10', '2026-10-11T03:13:17.384Z', 'Deploy an AI Agent on Jetson Orin: from x86 to the edge', 'Shipping an agent to the edge doesn''t change its essence — it''s still the loop. Only the runtime and constraints change. Get it running on x86, then move it to Jetson as-is: cloud API or a local llama.cpp, same code.', 'Bottom line: **moving an agent to Jetson doesn''t change its essence** — it''s still the loop "**ask the model → run the tool → feed the result back**." Only two things change: the **runtime** (aarch64 / CUDA / unified memory) and the **constraints** (compute / power).
 
 So the right approach: **get it running on x86 first, then move it to the device as-is** — the business code usually doesn''t change at all.
 
@@ -1123,7 +1333,7 @@ BB_NO_NETWORK="1" kas build kas.yml
 - 任何第三方代理都**不要用于敏感内容**，且必须校验哈希。
 
 相关脚本与文档都在 [embedai](https://github.com/zishuowang696/embedai)：`scripts/speedtest-github.sh`、`scripts/pull-dl-cache.sh`、`docs/10-github-mirrors.md`。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:46:08.438Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
+', '工程效率', 1, '2026-09-14', '2026-10-11T03:13:17.385Z', 'GitHub Download Acceleration and CI Caching: From Days to Minutes Behind a Restricted Network', 'Measured GitHub direct vs. China proxies, then used GitHub Actions as a download proxy: fetch all sources on a runner, store them as split Release assets, pull locally and build offline.', 'Building an embedded distribution, the first build is often absurdly slow — and **the bottleneck is almost never compiling, it''s downloading**. Upstream sources are scattered across GitHub, kernel.org, SourceForge, huggingface… behind a restricted network, one stuck host can eat a whole day.
 
 This post covers two things: **measure before choosing a route**, and **using GitHub Actions as a download proxy** to fully separate "download" from "compile".
 
@@ -1406,7 +1616,7 @@ USE_PREBUILT_OPTEE = "1"
 - **代价是一次性的**：sstate 缓存命中后，后续与 CI 都不会再编——这也是"**必须把 sstate 攒满**"的真正意义。
 
 > 下次你的 Yocto 构建莫名卡在 `llvm-native`，别急着怪硬件——先顺着依赖图问一句：**是谁把它拉进来的？** 答案往往在一个你没想到的角落（这次是：OP-TEE 的密钥库镜像）。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:46:08.444Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T03:13:17.386Z', 'Why a Jetson Image Build Silently Compiles Rust and LLVM', 'A build kept stalling on llvm-native and rust-native. Tracing reverse dependencies with bitbake -g led to Tegra''s OP-TEE / EKS boot chain needing python3-cryptography — which is written in Rust.', 'While maintaining a Jetson distro (`embedai`), the slowest parts of CI were never my apps or the kernel. They were two things I never asked for: **`llvm-native` and `rust-native`**.
 
 This is a write-up of the investigation: **from "why is LLVM in my build log?" all the way back to Tegra''s boot chain.**
 
@@ -1647,7 +1857,7 @@ gst-launch-1.0 v4l2src ! videoconvert ! nvvideoconvert ! \
 | 刷系统 | jetson-flash / SDK Manager | L4T + 驱动 |
 | 推理 | l4t-tensorrt 容器 | 不污染 host |
 | 部署 | Docker + systemd | 边缘常驻服务 |
-', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T02:46:08.445Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
+', 'AI 网关实战', 1, '2026-08-15', '2026-10-11T03:13:17.387Z', 'Containerized TensorRT on Jetson Orin: From Cross-Compile to Flashing', 'Run TensorRT inference in JetPack containers on NVIDIA Jetson Orin and deploy it as an edge AI gateway, including jetson-flash essentials.', 'The "embedded" story of NVIDIA''s Tegra platform is different from routers: the highlight is the on-board GPU, which makes it great for pushing model inference to the edge. This post clarifies the three layers from unboxing an Orin to running your first TensorRT program.
 
 > Assumptions: Jetson Orin Nano 8 GB, host Ubuntu 22.04 x86_64, target JetPack 6.0 (L4T r36.x).
 
@@ -1964,7 +2174,7 @@ python client.py
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T02:46:08.446Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
+', '从 0 构建 AI Agent', 1, '2026-10-09', '2026-10-11T03:13:17.388Z', 'MCP in 30 lines: it''s just standardized function calling', 'MCP isn''t magic: it''s a JSON-RPC protocol that turns last post''s hardcoded cat tool into a standalone process any LLM app can use. 30 lines of runnable server + client.', 'In [Building an AI agent from scratch](/en/posts/build-ai-agent-from-scratch), our `cat` tool was **hardcoded** inside the agent:
 
 ```python
 # the tool lives inside your program
@@ -2304,7 +2514,7 @@ published: true
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-demo/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T02:46:08.448Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
+', '从 0 构建 AI Agent', 1, '2026-10-11', '2026-10-11T03:13:17.389Z', 'Why does MCP mostly use pipes (stdio), rarely sockets?', 'MCP mostly uses stdio not because pipes are superior, but because most current scenarios are the sweet spot for pipes: local, single client, one-shot, light and stateless. Once it becomes multi-client/always-on/stateful, switch to a socket.', 'Following up on the previous post [MCP in 30 lines](/en/posts/mcp-in-30-lines). Systems people often ask:
 
 > **Why does MCP use pipes (stdio) instead of sockets?**
 
@@ -2538,7 +2748,7 @@ Rust 的卖点正是**"两全"**：像现代语言一样**安全、省心**，�
 > 💬 你们的产品里，内存是怎么算进成本的？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
 
 *（本文中英双语。）*
-', '', 1, '2026-10-11', '2026-10-11T02:46:08.449Z', 'Memory is profit: choosing a language in embedded is really a cost decision', 'After years of building routers, my deepest lesson: RAM is BOM, BOM is profit. So ''Python vs C/Rust'' was never a technical preference — it''s a cost calculation: dev labor vs per-unit material.', 'After many years building routers, one of my deepest lessons:
+', '', 1, '2026-10-11', '2026-10-11T03:13:17.390Z', 'Memory is profit: choosing a language in embedded is really a cost decision', 'After years of building routers, my deepest lesson: RAM is BOM, BOM is profit. So ''Python vs C/Rust'' was never a technical preference — it''s a cost calculation: dev labor vs per-unit material.', 'After many years building routers, one of my deepest lessons:
 
 > **In hardware products, RAM is BOM, and BOM is profit.**
 
@@ -2815,7 +3025,7 @@ aria2c --checksum=sha-256=<hex> ...
 2. 被限速/多镜像 → 用 `aria2 -x -s` 多源分段。
 3. 带宽到顶 → 换更快线路，而不是加连接。
 4. 永远校验哈希。
-', '工程效率', 1, '2026-09-14', '2026-10-11T02:46:08.451Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
+', '工程效率', 1, '2026-09-14', '2026-10-11T03:13:17.391Z', 'Multi-Source Segmented Downloads: When More Connections Help (and When They Don''t)', 'How much faster is a large download with multiple mirrors and connections? Measured single connection, parallel curl, and aria2 multi-source — plus how to find the real bottleneck.', 'When a big download is slow, don''t just "add more connections". There are two completely different causes:
 
 - **Per-connection throttling** (the server/proxy rate-limits each connection) → more connections help;
 - **Link saturation** (your pipe is simply maxed out) → more connections don''t help.
@@ -3074,7 +3284,7 @@ ssh root@192.168.1.1 "opkg install /tmp/mypackage_1.0_1_x86_64.ipk"
 | 日常装软件 | opkg 在线安装 |
 
 下一篇会讲源码编译时如何用 `menuconfig` 裁剪内核。
-', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T02:46:08.453Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
+', 'OpenWrt 编译入门', 1, '2026-07-10', '2026-10-11T03:13:17.392Z', 'OpenWrt ImageBuilder: Custom Firmware in a Few Commands', 'Add packages and repack an official firmware image with the OpenWrt ImageBuilder in minutes, without compiling the whole source tree.', 'The most common question when starting with OpenWrt is: "I don''t want to build the entire source tree just to add a couple of packages." The official **ImageBuilder** exists exactly for that: it only repackages, it does not recompile the kernel.
 
 > Assumptions: host Ubuntu 22.04 / Debian 12, target **x86_64**, OpenWrt **23.05.5**.
 
@@ -3292,7 +3502,7 @@ Rust 是理想，但**理想不该丢，也不该硬塞**——**留住它，落
 > 💬 你觉得这条路对么？你也看好 Rust 吗？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696) 聊聊。
 
 *（本文中英双语。）*
-', '', 1, '2026-10-11', '2026-10-11T02:46:08.454Z', 'Should a small embedded company take Rust seriously? A veteran''s take', 'Disclaimer: I''m not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it''s the trend. A veteran/learner''s view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline.', '**Disclaimer: I''m not a Rust expert.** I''ve spent 15+ years in embedded C/C++, I''m still learning Rust, and I''ve never actually gotten it adopted on a team. But **I''m increasingly convinced it''s the trend.**
+', '', 1, '2026-10-11', '2026-10-11T03:13:17.393Z', 'Should a small embedded company take Rust seriously? A veteran''s take', 'Disclaimer: I''m not a Rust expert — 15+ years of embedded C/C++, still learning Rust, yet increasingly convinced it''s the trend. A veteran/learner''s view: benefits, necessity, real difficulties, a playbook, and my take on whether safety should come from constraints or discipline.', '**Disclaimer: I''m not a Rust expert.** I''ve spent 15+ years in embedded C/C++, I''m still learning Rust, and I''ve never actually gotten it adopted on a team. But **I''m increasingly convinced it''s the trend.**
 
 So this isn''t a practitioner''s write-up — it''s **a veteran/learner''s thoughts**. One thing I do know: **in a small company, whether Rust is technically right is one question; whether you can get it adopted is another.**
 
@@ -3488,7 +3698,7 @@ published: true
 ## 五、一句话总结
 
 **别把 sstate 当 SDK 用，也别指望 SDK 能改构建。** 想清楚你是"编应用"还是"改发行版"，再决定装哪个：应用开发者要 `SDK`，系统开发者要 `eSDK`，而 `sstate` 永远只是背后那个让构建变快的缓存。
-', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T02:46:08.457Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
+', 'AI 网关实战', 1, '2026-09-28', '2026-10-11T03:13:17.395Z', 'sstate vs SDK vs eSDK: the three most-confused things in Yocto', 'sstate is a cache for the build machine, SDK is a toolchain for developers, eSDK packs both for offline system development. Here''s how they differ and which one you want.', 'Three words come up constantly in Yocto — **sstate, SDK, eSDK** — and they get mixed up all the time. They are three different things. One line to tell them apart:
 
 > **`sstate` is a cache for the build machine; `SDK` is a toolchain for developers; `eSDK` packs both so system developers can work offline.**
 
@@ -3692,7 +3902,7 @@ bmaptool copy   img.ext4 /dev/sdX           # 只写非空块（快、可校验�
 - **检测**：`du`（物理）vs `ls`/`stat`（逻辑），或 `filefrag -v`、`bmaptool create`；
 - **压缩**：`zstd` 最省事，`tar --sparse` / `zstd --sparse` 更快，`bmaptool` 最专业；
 - **发布**：**只发压缩产物 + `.bmap`**，别发裸稀疏 `.ext4`。
-', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T02:46:08.458Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
+', 'AI 网关实战', 1, '2026-09-29', '2026-10-11T03:13:17.396Z', 'Sparse images: why your 14GB image is really 1GB', 'Yocto ext4 images can be tens of GB yet fail to upload because of a 2GiB per-file limit — because most of the file is holes. How to detect sparse files, compress them, and ship them the right way.', 'If you build embedded images, you have probably seen this: the build produces a **14GB `.ext4`**, but uploading it hits a **2GiB per-file limit** — and you know full well there isn''t that much *stuff* inside.
 
 That''s a **sparse file**: **large logical size, small physical footprint**. Here''s how to **detect**, **compress**, and **ship** it.
 
@@ -4052,7 +4262,7 @@ call cat -> {''content'': [{''type'': ''text'', ''text'': ''your-hostname''}]}
 > 💬 有问题或建议？**在下方评论**，或到 GitHub [提 Issue](https://github.com/zishuowang696/mcp-client/issues)。
 
 *（本文中英双语；本系列记录从 0 构建 Agent 的过程。）*
-', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T02:46:08.459Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
+', '从 0 构建 AI Agent', 1, '2026-10-08', '2026-10-11T03:13:17.397Z', 'Write a standard MCP client by hand (no server needed)', 'The MCP spec decides how the client is written. No server here — just 40 lines of stdlib for a standard MCP client: handshake → read capabilities → tools/list → tools/call. Works with any MCP server.', 'The previous post covered the agent loop; now we enter **MCP**.
 
 Most people get stuck on the same question: **what exactly is the MCP standard?** — because **the spec directly decides how the client is written**. So this post writes **no server**. It does one thing: explain the MCP standard, then implement a **standard MCP client** in stdlib code that can connect to **any** MCP server.
 
@@ -4431,7 +4641,7 @@ hello from yocto
 - 需要调试变量：`bitbake -e myhello | grep ^S=`。
 
 下一篇介绍 layer 优先级与 `.bbappend` 覆盖官方 recipe。
-', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T02:46:08.465Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
+', 'Yocto 构建系统笔记', 1, '2026-08-01', '2026-10-11T03:13:17.398Z', 'Your First BitBake Recipe: Hello World in a meta- Layer', 'Create a custom layer and a minimal recipe step by step, install your compiled program into a QEMU image, and learn SRC_URI / S / do_compile.', 'Yocto uses a **recipe** (`.bb`) to describe "how source code becomes an installable package". This post walks the full path with a minimal example: build a layer → write a recipe → compile → land in an image.
 
 > Assumptions: `poky` is cloned into `~/poky` on branch `kirkstone` (LTS). Host: Ubuntu 22.04.
 
@@ -4779,7 +4989,7 @@ meta-embedai/
 - **meta-virtualization**：<https://git.yoctoproject.org/meta-virtualization>
 
 > 备忘：接 OpenWrt 系内容前，先在 <https://layers.openembedded.org> 检索，再进 `kas.yml`。
-', '', 1, '2026-09-07', '2026-10-11T02:46:08.468Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
+', '', 1, '2026-09-07', '2026-10-11T03:13:17.399Z', 'Why I Migrated Our Tegra/Jetson Yocto Distro from git submodules to KAS', 'Using the real embedai repo: why a Yocto project with many upstream layers is better served by declarative KAS than tegra-demo-distro-style submodules — one kas.yml pins versions, config is documentation, and daily work is three commands.', 'Embedded distributions drown in layers: in OpenEmbedded every feature is a separate repo, and assembling a buildable tree means aligning a pile of versions by hand. This post reviews, using the real repo [embedai](https://github.com/zishuowang696/embedai), why I migrated its Tegra/Jetson distribution from **git submodules** to [KAS](https://github.com/siemens/kas).
 
 > Context: `embedai` is a custom Yocto distribution for **Jetson Orin Nano** (`jetson-orin-nano-devkit-nvme`) — `distro: embedai`, image `embedai-image` — built on top of OE4T''s `meta-tegra` and the official `tegra-demo-distro` baseline.
 
@@ -5030,5 +5240,5 @@ date: 2026-09-01
 - **邮箱**：[wangbing1087@qq.com](mailto:wangbing1087@qq.com)
 
 > 描述清你的**场景 / 硬件 / 目标**，我会尽快回复。
-', '2026-09-01', '2026-10-11T02:46:08.469Z')
+', '2026-09-01', '2026-10-11T03:13:17.400Z')
   ON CONFLICT(slug) DO UPDATE SET title = excluded.title, content_html = excluded.content_html, source_md = excluded.source_md, updated_at = excluded.updated_at;
