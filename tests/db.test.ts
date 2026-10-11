@@ -44,9 +44,12 @@ describe('db: save/list', () => {
     expect(list.total).toBe(1)
   })
 
-  test('listAllPostsMeta 能看到草稿', async () => {
+  test('listAllPostsMeta 默认只见已发布，includeUnpublished 才含草稿', async () => {
     const metas = await db.listAllPostsMeta()
-    const beta = metas.find((m) => m.slug === 'beta-post')
+    expect(metas.map((m) => m.slug)).not.toContain('beta-post')
+
+    const all = await db.listAllPostsMeta({ includeUnpublished: true })
+    const beta = all.find((m) => m.slug === 'beta-post')
     expect(beta?.published).toBe(false)
     expect(beta?.tags).toEqual(['openwrt', 'ai网关'])
   })
