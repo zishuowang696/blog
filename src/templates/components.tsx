@@ -156,6 +156,9 @@ export function Sidebar({
           <a class="btn small ghost" href={langHref(lang, '/tags')}>
             {t(lang, 'nav.tags')}
           </a>
+          <a class="btn small ghost" href={langHref(lang, '/feed.xml')}>
+            {lang === 'zh' ? '订阅' : 'RSS'}
+          </a>
         </div>
       </div>
       {series.length > 0 ? (
