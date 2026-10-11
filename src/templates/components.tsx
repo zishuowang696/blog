@@ -1,7 +1,7 @@
 import type { JSXNode } from 'hono/jsx'
 import type { Comment, Post, PostMeta, TagCount, User } from '../lib/db.ts'
 import { langHref, t, type Lang } from '../lib/locale.ts'
-import { fmtDate, NEWSLETTER_ACTION, seriesHref, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
+import { fmtDate, seriesHref, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
 
 function seriesLabel(lang: Lang): string {
   return lang === 'zh' ? '系列' : 'Series'
@@ -203,16 +203,13 @@ export function BottomSection({ tags, lang }: { tags: TagCount[]; lang: Lang }) 
           <h2>{lang === 'zh' ? '订阅更新' : 'Subscribe'}</h2>
           <p>
             {lang === 'zh'
-              ? '留邮箱，有新文章自动发到你的邮箱；也可以订阅 RSS。'
-              : 'Get new posts by email — or subscribe via RSS.'}
+              ? '用 RSS 阅读器订阅，有新文章会自动出现。'
+              : 'Subscribe via RSS to get new posts automatically.'}
           </p>
         </div>
-        <form class="subscribe-form" action={NEWSLETTER_ACTION} method="post" target="_blank">
-          <input type="email" name="email" required placeholder={lang === 'zh' ? '你的邮箱' : 'your email'} aria-label="email" />
-          <button class="btn" type="submit">
-            {lang === 'zh' ? '订阅' : 'Subscribe'}
-          </button>
-        </form>
+        <a class="btn" href={langHref(lang, '/feed.xml')}>
+          {lang === 'zh' ? '订阅 RSS' : 'Subscribe (RSS)'}
+        </a>
       </div>
       <div class="cta-band">
         <div class="cta-text">
