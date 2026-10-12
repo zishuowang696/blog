@@ -24,7 +24,7 @@ import {
   statsTopPaths,
   type Post,
 } from '../lib/db.ts'
-import { lookupIp } from '../lib/geo.ts'
+import { isDatacenter, lookupIp } from '../lib/geo.ts'
 import { resolveLang } from '../lib/locale.ts'
 import { ForbiddenView, NotFoundView, renderHtml } from '../templates/layout.tsx'
 import {
@@ -167,6 +167,7 @@ adminRoutes.get('/stats', async (c) => {
       last: r.last,
       referers: [...new Set(r.referers.split(','))].slice(0, 3).join(', '),
       geo: g ? [g.country, g.region, g.isp].filter(Boolean).join(' / ') : '',
+      dc: g ? isDatacenter(g.isp) : false,
     }
   })
   const body = (

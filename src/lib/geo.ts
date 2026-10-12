@@ -4,6 +4,14 @@ export interface GeoInfo {
   isp: string
 }
 
+// 机房/云/托管特征词——这类 IP 多半是服务器（爬虫/扫描/VPN），不是住宅办公真人
+const DC_RE =
+  /cloud|data ?cent(er|re)|datacenter|hosting|server|idc|colocat|amazon|aws|google|azure|microsoft|alibaba|aliyun|tencent|huawei|oracle|digitalocean|linode|ovh|hetzner|vultr|contabo|leaseweb|cloudflare|fastly|akamai|rackspace|equinix|cdn/i
+
+export function isDatacenter(isp: string): boolean {
+  return DC_RE.test(isp)
+}
+
 const PRIVATE = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|0\.|::1|fc|fd|fe80)/i
 
 export async function lookupIp(ip: string): Promise<GeoInfo> {

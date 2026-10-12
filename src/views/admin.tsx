@@ -327,7 +327,7 @@ export function StatsView({
   topPaths: PathStat[]
   referers: RefererStat[]
   bySource: SourceStat[]
-  byIp: { ip: string; views: number; first: string; last: string; referers: string; geo: string }[]
+  byIp: { ip: string; views: number; first: string; last: string; referers: string; geo: string; dc: boolean }[]
   bots: { bot: string; pv: number; uv: number; last: string; ips: string }[]
   recent: RecentView[]
 }) {
@@ -454,6 +454,7 @@ export function StatsView({
             <tr>
               <th>IP</th>
               <th>归属地 / 运营商</th>
+              <th>类型</th>
               <th>次数</th>
               <th>最近(UTC)</th>
               <th>来源</th>
@@ -464,6 +465,7 @@ export function StatsView({
               <tr key={r.ip}>
                 <td>{r.ip}</td>
                 <td>{r.geo || '-'}</td>
+                <td class={r.dc ? 'dc' : 'ok-type'}>{r.dc ? '疑似机房' : '住宅/正常'}</td>
                 <td>{r.views}</td>
                 <td>{fmtTs(r.last)}</td>
                 <td>{r.referers || '-'}</td>
