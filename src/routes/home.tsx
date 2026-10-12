@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
-import { listAllPostsMeta, listPosts, listSeries, listTags } from '../lib/db.ts'
+import { listPosts, listRecentPosts, listSeries, listTags } from '../lib/db.ts'
 import { langHref, resolveLang, t } from '../lib/locale.ts'
 import { renderHtml } from '../templates/layout.tsx'
 import { SITE_NAME } from '../templates/util.ts'
@@ -25,7 +25,7 @@ homeRoutes.get('/', async (c) => {
       page={page}
       totalPages={list.totalPages}
       tags={await listTags()}
-      latest={(await listAllPostsMeta()).slice(0, 6)}
+      latest={await listRecentPosts(6, lang)}
       series={await listSeries()}
       makeHref={makeHref}
       lang={lang}

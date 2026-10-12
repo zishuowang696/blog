@@ -1,5 +1,5 @@
 import type { JSXNode } from 'hono/jsx'
-import type { Comment, Post, PostMeta, TagCount, User } from '../lib/db.ts'
+import type { Comment, Post, LatestPost, TagCount, User } from '../lib/db.ts'
 import { langHref, t, type Lang } from '../lib/locale.ts'
 import { fmtDate, seriesHref, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
 
@@ -141,7 +141,7 @@ export function Sidebar({
   series,
 }: {
   lang: Lang
-  latest: PostMeta[]
+  latest: LatestPost[]
   series: TagCount[]
 }) {
   return (

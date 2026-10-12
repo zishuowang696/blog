@@ -1,4 +1,4 @@
-import type { Post, PostMeta, TagCount } from '../lib/db.ts'
+import type { Post, LatestPost, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
 import { BottomSection, Pagination, PostList, Sidebar } from '../templates/components.tsx'
@@ -11,7 +11,7 @@ export function SeriesIndexView({
   lang,
 }: {
   series: TagCount[]
-  latest: PostMeta[]
+  latest: LatestPost[]
   tags: TagCount[]
   lang: Lang
 }) {
@@ -58,7 +58,7 @@ export function SeriesPostsView({
   page: number
   totalPages: number
   total: number
-  latest: PostMeta[]
+  latest: LatestPost[]
   tags: TagCount[]
   allSeries: TagCount[]
   makeHref: (p: number) => string

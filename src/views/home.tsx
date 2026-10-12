@@ -1,4 +1,4 @@
-import type { Post, PostMeta, TagCount } from '../lib/db.ts'
+import type { Post, LatestPost, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
 import { BottomSection, Pagination, PostList, Sidebar } from '../templates/components.tsx'
@@ -18,7 +18,7 @@ export function HomeView({
   page: number
   totalPages: number
   tags: TagCount[]
-  latest: PostMeta[]
+  latest: LatestPost[]
   series: TagCount[]
   makeHref: (p: number) => string
   lang: Lang

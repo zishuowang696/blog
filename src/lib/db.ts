@@ -242,10 +242,14 @@ export async function listAllPostsMeta(opts: { includeUnpublished?: boolean } = 
   })
 }
 
-export async function listRecentPosts(
-  limit = 20,
-  lang: Lang = 'zh',
-): Promise<{ slug: string; title: string; summary: string; date: string }[]> {
+export interface LatestPost {
+  slug: string
+  title: string
+  summary: string
+  date: string
+}
+
+export async function listRecentPosts(limit = 20, lang: Lang = 'zh'): Promise<LatestPost[]> {
   const rows = await useEngine().all(
     `SELECT posts.slug AS slug, ${pickField('title', 'title_en', lang)} AS title,
             ${pickField('summary', 'summary_en', lang)} AS summary, posts.created_at AS created_at
