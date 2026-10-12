@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { accessLogger, securityHeaders } from './middleware/http.ts'
+import { accessLogger, rateLimitSensitive, securityHeaders } from './middleware/http.ts'
 import { adminRoutes } from './routes/admin.tsx'
 import { authRoutes } from './routes/auth.tsx'
 import { commentRoutes } from './routes/comments.tsx'
@@ -17,7 +17,7 @@ import { NotFoundView, renderHtml } from './templates/layout.tsx'
 
 export const app = new Hono()
 
-app.use('*', accessLogger, securityHeaders)
+app.use('*', accessLogger, securityHeaders, rateLimitSensitive)
 
 // 根级文件不区分大小写：/Sitemap.xml、/ROBOTS.TXT 等 301 跳到小写规范地址
 const ROOT_FILES = new Set(['/sitemap.xml', '/robots.txt', '/llms.txt', '/feed.xml'])
