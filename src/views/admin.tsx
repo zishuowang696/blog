@@ -1,5 +1,5 @@
 
-import type { DayStat, PageMeta, PathStat, PostMeta, RecentView, RefererStat, StatsOverview } from '../lib/db.ts'
+import type { DayStat, PageMeta, PathStat, PostMeta, RecentView, RefererStat, SourceStat, StatsOverview } from '../lib/db.ts'
 import type { PageInput, PostInput } from '../lib/content.ts'
 import { renderMarkdown } from '../lib/md.ts'
 import { fmtDate } from '../templates/util.ts'
@@ -310,24 +310,38 @@ export function AdminPageEditorView({
 
 const fmtTs = (iso: string): string => iso.slice(0, 16).replace('T', ' ')
 
+const EXTERNAL_CATS = ['搜索引擎', '平台/社交', '外部链接']
+
 export function StatsView({
   overview,
   daily,
   topPaths,
   referers,
+  bySource,
   recent,
 }: {
   overview: StatsOverview
   daily: DayStat[]
   topPaths: PathStat[]
   referers: RefererStat[]
+  bySource: SourceStat[]
   recent: RecentView[]
 }) {
   const maxViews = Math.max(1, ...daily.map((d) => d.views))
+  const externalUv = bySource.filter((s) => EXTERNAL_CATS.includes(s.category)).reduce((n, s) => n + s.uv, 0)
+  const externalPv = bySource.filter((s) => EXTERNAL_CATS.includes(s.category)).reduce((n, s) => n + s.pv, 0)
+  const verdict =
+    externalUv === 0
+      ? '近 7 天：还没有「从外部找来」的真人读者（当前数字基本都是你自己或站内点击）。'
+      : `近 7 天：有 ${externalUv} 位真实外部读者，共 ${externalPv} 次外部来源访问。`
   return (
     <>
       <AdminNav active="stats" />
-      <p class="muted">只统计真人页面访问（已排除搜索引擎蜘蛛与扫描器），数据仅管理员可见。</p>
+      <p class="muted">
+        只统计<strong>真人</strong>页面访问（已排除搜索引擎蜘蛛、扫描器，<strong>以及你登录后的访问</strong>）；数据仅管理员可见。
+      </p>
+
+      <p class="stat-verdict">{verdict}</p>
 
       <div class="stat-cards">
         <div class="stat-card">
@@ -401,7 +415,31 @@ export function StatsView({
         </table>
       )}
 
-      <h2>来源（近 7 天）</h2>
+      <h2>来源分类（近 7 天）</h2>
+      {bySource.length === 0 ? (
+        <p class="empty">暂无。</p>
+      ) : (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>来源类型</th>
+              <th>PV</th>
+              <th>UV</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bySource.map((s) => (
+              <tr key={s.category} class={EXTERNAL_CATS.includes(s.category) ? 'is-external' : undefined}>
+                <td>{s.category}</td>
+                <td>{s.pv}</td>
+                <td>{s.uv}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <h2>来源明细（近 7 天）</h2>
       {referers.length === 0 ? (
         <p class="empty">暂无。</p>
       ) : (

@@ -12,6 +12,7 @@ import {
   listAllPostsMeta,
   savePage,
   savePost,
+  statsBySource,
   statsDaily,
   statsOverview,
   statsRecent,
@@ -133,14 +134,17 @@ adminRoutes.get('/', async (c) => {
 adminRoutes.get('/stats', async (c) => {
   const gate = await adminOnly(c)
   if (gate) return gate
-  const [overview, daily, topPaths, referers, recent] = await Promise.all([
+  const [overview, daily, topPaths, referers, bySource, recent] = await Promise.all([
     statsOverview(),
     statsDaily(14),
     statsTopPaths(7, 15),
     statsReferers(7, 10),
+    statsBySource(7),
     statsRecent(30),
   ])
-  const body = <StatsView overview={overview} daily={daily} topPaths={topPaths} referers={referers} recent={recent} />
+  const body = (
+    <StatsView overview={overview} daily={daily} topPaths={topPaths} referers={referers} bySource={bySource} recent={recent} />
+  )
   return c.html(await renderHtml(c, { title: '访问统计', active: 'console', body }))
 })
 

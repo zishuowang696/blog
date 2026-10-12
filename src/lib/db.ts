@@ -654,3 +654,24 @@ export async function statsRecent(limit = 30): Promise<RecentView[]> {
   const rows = await useEngine().all('SELECT path, referer, created_at FROM page_views ORDER BY id DESC LIMIT ?', [limit])
   return rows as unknown as RecentView[]
 }
+
+export interface SourceStat {
+  category: string
+  pv: number
+  uv: number
+}
+
+export async function statsBySource(days = 7): Promise<SourceStat[]> {
+  const rows = await useEngine().all(
+    `SELECT CASE
+       WHEN referer = '' THEN '直接访问'
+       WHEN referer LIKE '%embedai.com.cn%' THEN '站内点击'
+       WHEN referer LIKE '%google.%' OR referer LIKE '%bing.%' OR referer LIKE '%baidu.%' OR referer LIKE '%duckduckgo%' OR referer LIKE '%sogou%' OR referer LIKE '%so.com%' OR referer LIKE '%yandex%' THEN '搜索引擎'
+       WHEN referer LIKE '%zhihu%' OR referer LIKE '%juejin%' OR referer LIKE '%csdn%' OR referer LIKE '%dev.to%' OR referer LIKE '%medium%' OR referer LIKE '%reddit%' OR referer LIKE '%github%' OR referer LIKE '%weibo%' OR referer LIKE '%twitter%' OR referer LIKE '%x.com%' OR referer LIKE '%linkedin%' OR referer LIKE '%segmentfault%' OR referer LIKE '%cnblogs%' THEN '平台/社交'
+       ELSE '外部链接'
+     END AS category, COUNT(*) AS pv, COUNT(DISTINCT ip_hash) AS uv
+     FROM page_views WHERE created_at >= ? GROUP BY category ORDER BY pv DESC`,
+    [isoDaysAgo(days)],
+  )
+  return (rows as unknown as SourceStat[]).map((r) => ({ category: r.category, pv: Number(r.pv), uv: Number(r.uv) }))
+}

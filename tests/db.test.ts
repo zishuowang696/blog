@@ -150,5 +150,12 @@ describe('db: 访问统计', () => {
 
     expect((await db.statsDaily(14)).length).toBeGreaterThan(0)
     expect((await db.statsRecent(5))[0]?.path).toBe('/posts/alpha-post')
+
+    const bySource = await db.statsBySource(7)
+    const ext = bySource.find((s) => s.category === '外部链接')
+    expect(ext?.pv).toBe(1)
+    const direct = bySource.find((s) => s.category === '直接访问')
+    expect(direct?.pv).toBe(2)
+    expect(direct?.uv).toBe(2)
   })
 })

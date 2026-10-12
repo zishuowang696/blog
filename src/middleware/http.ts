@@ -72,6 +72,8 @@ export const trackViews: MiddlewareHandler = async (c, next) => {
   const lower = path.toLowerCase()
   if (SKIP_PREFIX.some((p) => lower === p || lower.startsWith(`${p}/`)) || SKIP_EXT.test(lower)) return
   if (!(c.res.headers.get('content-type') ?? '').includes('text/html')) return
+  // 已登录（通常是你自己）不计入，避免自访问污染统计
+  if (c.req.header('cookie')?.includes('sid=')) return
   const ua = c.req.header('user-agent') ?? ''
   if (!ua || BOT_RE.test(ua)) return
   try {

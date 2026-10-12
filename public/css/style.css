@@ -330,6 +330,8 @@ button.linkish.danger:hover { color: #e5484d; }
 .bar-track { background: var(--bg-soft); border-radius: 999px; height: 12px; overflow: hidden; }
 .bar-fill { display: block; height: 100%; background: var(--accent); border-radius: 999px; min-width: 2px; }
 .bar-val { text-align: right; color: var(--fg-muted); }
+.stat-verdict { background: var(--bg-soft); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: var(--radius); font-weight: 600; margin: 0 0 22px; }
+.admin-table tr.is-external td { font-weight: 600; }
 
 /* reading width for article */
 .reading { max-width: 780px; }
