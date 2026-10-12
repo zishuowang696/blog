@@ -15,6 +15,13 @@
       "when": 1788742313559,
       "tag": "0001_high_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791763764857,
+      "tag": "0002_spotty_post",
+      "breakpoints": true
     }
   ]
 }

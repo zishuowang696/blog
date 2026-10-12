@@ -12,6 +12,11 @@ import {
   listAllPostsMeta,
   savePage,
   savePost,
+  statsDaily,
+  statsOverview,
+  statsRecent,
+  statsReferers,
+  statsTopPaths,
   type Post,
 } from '../lib/db.ts'
 import { resolveLang } from '../lib/locale.ts'
@@ -22,6 +27,7 @@ import {
   AdminListView,
   AdminPageEditorView,
   AdminPagesView,
+  StatsView,
   type ImportResult,
 } from '../views/admin.tsx'
 
@@ -122,6 +128,20 @@ adminRoutes.get('/', async (c) => {
   if (gate) return gate
   const body = <AdminListView rows={await listAllPostsMeta({ includeUnpublished: true })} />
   return c.html(await renderHtml(c, { title: '控制台', active: 'console', body }))
+})
+
+adminRoutes.get('/stats', async (c) => {
+  const gate = await adminOnly(c)
+  if (gate) return gate
+  const [overview, daily, topPaths, referers, recent] = await Promise.all([
+    statsOverview(),
+    statsDaily(14),
+    statsTopPaths(7, 15),
+    statsReferers(7, 10),
+    statsRecent(30),
+  ])
+  const body = <StatsView overview={overview} daily={daily} topPaths={topPaths} referers={referers} recent={recent} />
+  return c.html(await renderHtml(c, { title: '访问统计', active: 'console', body }))
 })
 
 adminRoutes.get('/new', async (c) => {

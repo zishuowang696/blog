@@ -130,3 +130,25 @@ describe('db: 用户与会话', () => {
     await expect(db.createUser({ username: 'BOB', password_hash: 'x' })).rejects.toThrow()
   })
 })
+
+describe('db: 访问统计', () => {
+  test('记录访问并统计 PV/UV、热门页面、最近访问', async () => {
+    const before = await db.statsOverview()
+    await db.recordView({ path: '/', ipHash: 'h1', referer: 'https://x.example', ua: 'UA' })
+    await db.recordView({ path: '/', ipHash: 'h1', referer: '', ua: 'UA' })
+    await db.recordView({ path: '/posts/alpha-post', ipHash: 'h2', referer: '', ua: 'UA' })
+
+    const after = await db.statsOverview()
+    expect(after.pv).toBe(before.pv + 3)
+    expect(after.todayPv).toBe(before.todayPv + 3)
+    expect(after.uv).toBe(2)
+
+    const top = await db.statsTopPaths(7, 10)
+    const home = top.find((t) => t.path === '/')
+    expect(home?.views).toBe(2)
+    expect(home?.visitors).toBe(1)
+
+    expect((await db.statsDaily(14)).length).toBeGreaterThan(0)
+    expect((await db.statsRecent(5))[0]?.path).toBe('/posts/alpha-post')
+  })
+})

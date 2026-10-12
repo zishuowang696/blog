@@ -72,3 +72,16 @@ CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_posts_published_date ON posts(published, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_post_tags_tag ON post_tags(tag_id);
 
+-- 访问统计：仅记录真人 GET 页面（跳过机器人/静态/后台），IP 只存哈希，仅管理员可见。
+CREATE TABLE IF NOT EXISTS page_views (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  path       TEXT NOT NULL,
+  ip_hash    TEXT NOT NULL DEFAULT '',
+  referer    TEXT NOT NULL DEFAULT '',
+  ua         TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views(path);
+

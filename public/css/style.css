@@ -319,6 +319,18 @@ button.linkish.danger:hover { color: #e5484d; }
 .admin-preview h3 { font-size: 0.95rem; color: var(--fg-muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
 .editor-card h2.en-block { font-size: 1.02rem; border-top: 1px dashed var(--border); padding-top: 16px; margin: 6px 0 0; }
 
+/* 访问统计 */
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 6px 0 26px; }
+.stat-card { display: flex; flex-direction: column; gap: 4px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.stat-num { font-size: 1.7rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.stat-label { font-size: 0.82rem; color: var(--fg-muted); }
+.bars { display: flex; flex-direction: column; gap: 6px; margin-bottom: 26px; }
+.bar-row { display: grid; grid-template-columns: 52px 1fr 78px; align-items: center; gap: 10px; font-size: 0.85rem; }
+.bar-day { color: var(--fg-muted); }
+.bar-track { background: var(--bg-soft); border-radius: 999px; height: 12px; overflow: hidden; }
+.bar-fill { display: block; height: 100%; background: var(--accent); border-radius: 999px; min-width: 2px; }
+.bar-val { text-align: right; color: var(--fg-muted); }
+
 /* reading width for article */
 .reading { max-width: 780px; }
 

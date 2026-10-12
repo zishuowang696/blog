@@ -556,3 +556,101 @@ export async function getCommentById(id: number): Promise<Comment | null> {
   )
   return row ? (row as unknown as Comment) : null
 }
+
+export interface StatsOverview {
+  pv: number
+  uv: number
+  todayPv: number
+  todayUv: number
+  weekPv: number
+  weekUv: number
+}
+
+export interface DayStat {
+  day: string
+  views: number
+  visitors: number
+}
+
+export interface PathStat {
+  path: string
+  views: number
+  visitors: number
+}
+
+export interface RefererStat {
+  referer: string
+  views: number
+}
+
+export interface RecentView {
+  path: string
+  referer: string
+  created_at: string
+}
+
+function isoDaysAgo(days: number): string {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+}
+
+// 东八区当天 0 点对应的 UTC 时刻（用于「今日」统计，避免 UTC 日界错位）
+function shanghaiDayStartIso(offsetDays = 0): string {
+  const cn = new Date(Date.now() + 8 * 3600 * 1000)
+  const utcOfCnMidnight = Date.UTC(cn.getUTCFullYear(), cn.getUTCMonth(), cn.getUTCDate() + offsetDays)
+  return new Date(utcOfCnMidnight - 8 * 3600 * 1000).toISOString()
+}
+
+export async function recordView(input: { path: string; ipHash: string; referer: string; ua: string }): Promise<void> {
+  await useEngine().run('INSERT INTO page_views (path, ip_hash, referer, ua, created_at) VALUES (?, ?, ?, ?, ?)', [
+    input.path.slice(0, 300),
+    input.ipHash,
+    input.referer.slice(0, 300),
+    input.ua.slice(0, 200),
+    nowIso(),
+  ])
+}
+
+async function countRange(whereSql: string, args: (string | number)[]): Promise<{ pv: number; uv: number }> {
+  const row = await useEngine().first(`SELECT COUNT(*) AS pv, COUNT(DISTINCT ip_hash) AS uv FROM page_views ${whereSql}`, args)
+  const rr = row as unknown as { pv: number | string; uv: number | string } | null
+  return { pv: Number(rr?.pv ?? 0), uv: Number(rr?.uv ?? 0) }
+}
+
+export async function statsOverview(): Promise<StatsOverview> {
+  const total = await countRange('', [])
+  const today = await countRange('WHERE created_at >= ?', [shanghaiDayStartIso()])
+  const week = await countRange('WHERE created_at >= ?', [isoDaysAgo(7)])
+  return { pv: total.pv, uv: total.uv, todayPv: today.pv, todayUv: today.uv, weekPv: week.pv, weekUv: week.uv }
+}
+
+export async function statsDaily(days = 14): Promise<DayStat[]> {
+  const rows = await useEngine().all(
+    `SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS views, COUNT(DISTINCT ip_hash) AS visitors
+     FROM page_views WHERE created_at >= ? GROUP BY day ORDER BY day ASC`,
+    [isoDaysAgo(days)],
+  )
+  return (rows as unknown as DayStat[]).map((r) => ({ day: r.day, views: Number(r.views), visitors: Number(r.visitors) }))
+}
+
+export async function statsTopPaths(days = 7, limit = 15): Promise<PathStat[]> {
+  const rows = await useEngine().all(
+    `SELECT path, COUNT(*) AS views, COUNT(DISTINCT ip_hash) AS visitors
+     FROM page_views WHERE created_at >= ? GROUP BY path ORDER BY views DESC LIMIT ?`,
+    [isoDaysAgo(days), limit],
+  )
+  return (rows as unknown as PathStat[]).map((r) => ({ path: r.path, views: Number(r.views), visitors: Number(r.visitors) }))
+}
+
+export async function statsReferers(days = 7, limit = 10): Promise<RefererStat[]> {
+  const rows = await useEngine().all(
+    `SELECT referer, COUNT(*) AS views FROM page_views WHERE created_at >= ?
+     GROUP BY referer ORDER BY views DESC LIMIT ?`,
+    [isoDaysAgo(days), limit],
+  )
+  return (rows as unknown as RefererStat[]).map((r) => ({ referer: r.referer, views: Number(r.views) }))
+}
+
+export async function statsRecent(limit = 30): Promise<RecentView[]> {
+  const rows = await useEngine().all('SELECT path, referer, created_at FROM page_views ORDER BY id DESC LIMIT ?', [limit])
+  return rows as unknown as RecentView[]
+}

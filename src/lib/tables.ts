@@ -83,3 +83,16 @@ export const comments = sqliteTable(
   },
   (t) => [index('idx_comments_post').on(t.post_slug, t.created_at)],
 )
+
+export const pageViews = sqliteTable(
+  'page_views',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    path: text('path').notNull(),
+    ip_hash: text('ip_hash').notNull().default(''),
+    referer: text('referer').notNull().default(''),
+    ua: text('ua').notNull().default(''),
+    created_at: text('created_at').notNull(),
+  },
+  (t) => [index('idx_page_views_created').on(t.created_at), index('idx_page_views_path').on(t.path)],
+)

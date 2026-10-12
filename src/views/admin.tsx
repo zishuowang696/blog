@@ -1,10 +1,10 @@
 
-import type { PageMeta, PostMeta } from '../lib/db.ts'
+import type { DayStat, PageMeta, PathStat, PostMeta, RecentView, RefererStat, StatsOverview } from '../lib/db.ts'
 import type { PageInput, PostInput } from '../lib/content.ts'
 import { renderMarkdown } from '../lib/md.ts'
 import { fmtDate } from '../templates/util.ts'
 
-type AdminTab = 'list' | 'new' | 'import' | 'pages'
+type AdminTab = 'list' | 'new' | 'import' | 'pages' | 'stats'
 
 function AdminNav({ active }: { active: AdminTab }) {
   const tabs: { key: AdminTab; label: string; href: string }[] = [
@@ -12,6 +12,7 @@ function AdminNav({ active }: { active: AdminTab }) {
     { key: 'new', label: '写新文章', href: '/admin/new' },
     { key: 'import', label: '导入 Markdown', href: '/admin/import' },
     { key: 'pages', label: '静态页面', href: '/admin/pages' },
+    { key: 'stats', label: '访问统计', href: '/admin/stats' },
   ]
   return (
     <>
@@ -303,6 +304,148 @@ export function AdminPageEditorView({
           <div class="markdown-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(page.body) }} />
         </div>
       </section>
+    </>
+  )
+}
+
+const fmtTs = (iso: string): string => iso.slice(0, 16).replace('T', ' ')
+
+export function StatsView({
+  overview,
+  daily,
+  topPaths,
+  referers,
+  recent,
+}: {
+  overview: StatsOverview
+  daily: DayStat[]
+  topPaths: PathStat[]
+  referers: RefererStat[]
+  recent: RecentView[]
+}) {
+  const maxViews = Math.max(1, ...daily.map((d) => d.views))
+  return (
+    <>
+      <AdminNav active="stats" />
+      <p class="muted">只统计真人页面访问（已排除搜索引擎蜘蛛与扫描器），数据仅管理员可见。</p>
+
+      <div class="stat-cards">
+        <div class="stat-card">
+          <span class="stat-num">{overview.todayPv}</span>
+          <span class="stat-label">今日 PV</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{overview.todayUv}</span>
+          <span class="stat-label">今日 UV</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{overview.weekPv}</span>
+          <span class="stat-label">近 7 天 PV</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{overview.weekUv}</span>
+          <span class="stat-label">近 7 天 UV</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{overview.pv}</span>
+          <span class="stat-label">累计 PV</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">{overview.uv}</span>
+          <span class="stat-label">累计 UV</span>
+        </div>
+      </div>
+
+      <h2>近 14 天趋势</h2>
+      {daily.length === 0 ? (
+        <p class="empty">暂无访问数据。</p>
+      ) : (
+        <div class="bars">
+          {daily.map((d) => (
+            <div class="bar-row" key={d.day}>
+              <span class="bar-day">{d.day.slice(5)}</span>
+              <span class="bar-track">
+                <span class="bar-fill" style={`width:${Math.round((d.views / maxViews) * 100)}%`} />
+              </span>
+              <span class="bar-val">
+                {d.views} / {d.visitors}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h2>热门页面（近 7 天）</h2>
+      {topPaths.length === 0 ? (
+        <p class="empty">暂无。</p>
+      ) : (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>路径</th>
+              <th>PV</th>
+              <th>UV</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topPaths.map((p) => (
+              <tr key={p.path}>
+                <td>
+                  <a href={p.path}>{p.path}</a>
+                </td>
+                <td>{p.views}</td>
+                <td>{p.visitors}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <h2>来源（近 7 天）</h2>
+      {referers.length === 0 ? (
+        <p class="empty">暂无。</p>
+      ) : (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>来源</th>
+              <th>PV</th>
+            </tr>
+          </thead>
+          <tbody>
+            {referers.map((r) => (
+              <tr key={r.referer}>
+                <td>{r.referer ? <a href={r.referer} rel="noreferrer">{r.referer}</a> : '（直接 / 无来源）'}</td>
+                <td>{r.views}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <h2>最近访问</h2>
+      {recent.length === 0 ? (
+        <p class="empty">暂无。</p>
+      ) : (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>时间 (UTC)</th>
+              <th>路径</th>
+              <th>来源</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recent.map((v) => (
+              <tr key={`${v.created_at}-${v.path}`}>
+                <td>{fmtTs(v.created_at)}</td>
+                <td>{v.path}</td>
+                <td>{v.referer || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </>
   )
 }

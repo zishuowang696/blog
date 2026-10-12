@@ -1,4 +1,5 @@
 import type { MiddlewareHandler } from 'hono'
+import { recordView } from '../lib/db.ts'
 
 const safe = (s: string | undefined): string => s ?? '-'
 
@@ -46,4 +47,41 @@ export const rateLimitSensitive: MiddlewareHandler = async (c, next) => {
     for (const [k, v] of rateHits) if (now > v.reset) rateHits.delete(k)
   }
   await next()
+}
+
+const BOT_RE =
+  /bot|crawl|spider|slurp|bing|google|baidu|yandex|duckduck|facebook|externalhit|headless|python|curl|wget|okhttp|axios|go-http|java\/|libwww|monitor|uptime|nmap|masscan|scan/i
+const SKIP_PREFIX = ['/admin', '/css', '/vendor', '/lang', '/.well-known']
+const SKIP_EXT = /\.(css|js|mjs|svg|ico|png|jpe?g|gif|webp|avif|xml|txt|json|map|woff2?)$/i
+const STATS_SALT = 'embedai-stats-v1'
+
+async function hashIp(ip: string): Promise<string> {
+  const data = new TextEncoder().encode(`${STATS_SALT}|${ip}`)
+  const buf = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(buf))
+    .slice(0, 8)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+// 记录真人页面访问（仅 HTML GET，跳过机器人/静态/后台）；IP 只存哈希，仅管理员可见。
+export const trackViews: MiddlewareHandler = async (c, next) => {
+  await next()
+  if (c.req.method !== 'GET' || c.res.status !== 200) return
+  const path = c.req.path
+  const lower = path.toLowerCase()
+  if (SKIP_PREFIX.some((p) => lower === p || lower.startsWith(`${p}/`)) || SKIP_EXT.test(lower)) return
+  if (!(c.res.headers.get('content-type') ?? '').includes('text/html')) return
+  const ua = c.req.header('user-agent') ?? ''
+  if (!ua || BOT_RE.test(ua)) return
+  try {
+    await recordView({
+      path,
+      ipHash: await hashIp(clientIp(c)),
+      referer: c.req.header('referer') ?? '',
+      ua,
+    })
+  } catch {
+    // 统计失败绝不影响正常访问
+  }
 }
