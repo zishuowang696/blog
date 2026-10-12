@@ -1,6 +1,7 @@
 import type { Comment, Post, User } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
+import { localizeName } from '../lib/i18n-names.ts'
 import { withToc } from '../lib/md.ts'
 import { CommentsBox, TagLinks } from '../templates/components.tsx'
 import { fmtDate } from '../templates/util.ts'
@@ -46,7 +47,7 @@ export function PostView({
           <h1>{post.title}</h1>
           <div class="post-meta">
             <time datetime={post.created_at}>{fmtDate(post.created_at)}</time>
-            {post.series ? <span class="badge">{lang === 'zh' ? '系列' : 'Series'}: {post.series}</span> : null}
+            {post.series ? <span class="badge">{lang === 'zh' ? '系列' : 'Series'}: {localizeName(post.series, lang)}</span> : null}
             <TagLinks tags={post.tags} lang={lang} />
           </div>
         </header>
@@ -72,7 +73,7 @@ export function PostView({
       {hasSeries ? (
         <aside class="series-nav">
           <div class="side-card">
-            <h3 class="side-title">{post.series}</h3>
+            <h3 class="side-title">{localizeName(post.series, lang)}</h3>
             <ol class="chapter-list">
               {seriesPosts.map((sp) => (
                 <li class={sp.slug === post.slug ? 'on' : undefined} key={sp.slug}>

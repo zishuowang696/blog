@@ -2,6 +2,7 @@ import type { JSXNode } from 'hono/jsx'
 import type { Comment, Post, LatestPost, TagCount, User } from '../lib/db.ts'
 import { langHref, t, type Lang } from '../lib/locale.ts'
 import { fmtDate, seriesHref, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
+import { localizeName } from '../lib/i18n-names.ts'
 
 function seriesLabel(lang: Lang): string {
   return lang === 'zh' ? '系列' : 'Series'
@@ -13,7 +14,7 @@ export function TagLinks({ tags, lang }: { tags: string[]; lang: Lang }) {
     <span class="tag-list">
       {tags.map((tg) => (
         <a class="tag" href={langHref(lang, tagHref(tg))}>
-          {tg}
+          {localizeName(tg, lang)}
         </a>
       ))}
     </span>
@@ -27,7 +28,7 @@ function PostCard({ post, lang }: { post: Post; lang: Lang }) {
         <time datetime={post.created_at}>{fmtDate(post.created_at)}</time>
         {post.series ? (
           <span class="badge" title={`${seriesLabel(lang)}: ${post.series}`}>
-            {post.series}
+            {localizeName(post.series, lang)}
           </span>
         ) : null}
       </header>
@@ -127,7 +128,7 @@ export function TagCloud({ tags, lang }: { tags: TagCount[]; lang?: Lang }) {
     <p class="tag-cloud">
       {tags.map((tg) => (
         <a class="tag chip" href={langHref(l, tagHref(tg.name))}>
-          {tg.name}
+          {localizeName(tg.name, l)}
           <span class="count">{tg.count}</span>
         </a>
       ))}
@@ -168,7 +169,7 @@ export function Sidebar({
             {series.slice(0, 8).map((s) => (
               <li key={s.name}>
                 <a href={langHref(lang, seriesHref(s.name))}>
-                  {s.name}
+                  {localizeName(s.name, lang)}
                   <span class="d">{t(lang, 'series.count', { n: s.count })}</span>
                 </a>
               </li>

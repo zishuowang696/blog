@@ -1,6 +1,7 @@
 import type { Post, LatestPost, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
+import { localizeName } from '../lib/i18n-names.ts'
 import { BottomSection, Pagination, PostList, Sidebar } from '../templates/components.tsx'
 import { seriesHref } from '../templates/util.ts'
 
@@ -28,7 +29,7 @@ export function SeriesIndexView({
           ) : (
             series.map((s) => (
               <a class="series-item" href={langHref(lang, seriesHref(s.name))}>
-                <span class="series-name">{s.name}</span>
+                <span class="series-name">{localizeName(s.name, lang)}</span>
                 <span class="series-count">{t(lang, 'series.count', { n: s.count })}</span>
               </a>
             ))

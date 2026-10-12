@@ -1,6 +1,7 @@
 import type { Post, LatestPost, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { t } from '../lib/locale.ts'
+import { localizeName } from '../lib/i18n-names.ts'
 import { BottomSection, Pagination, PostList, Sidebar, TagCloud } from '../templates/components.tsx'
 
 export function TagsIndexView({
@@ -58,7 +59,7 @@ export function TagPostsView({
     <>
       <section class="page-head">
         <h1>
-          <span class="tag">{tag}</span>
+          <span class="tag">{localizeName(tag, lang)}</span>
         </h1>
         <p class="muted">{t(lang, 'tags.count', { n: total })}</p>
       </section>
