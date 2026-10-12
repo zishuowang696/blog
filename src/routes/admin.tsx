@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import type { Context } from 'hono'
+import { setCookie } from 'hono/cookie'
 import { getSessionUser } from '../lib/auth.ts'
 import type { PageInput, PostInput } from '../lib/content.ts'
 import { parseMarkdown, tagsFromText } from '../lib/content.ts'
@@ -189,6 +190,13 @@ adminRoutes.get('/stats', async (c) => {
     />
   )
   return c.html(await renderHtml(c, { title: '访问统计', active: 'console', body }))
+})
+
+adminRoutes.get('/stats/ignore', async (c) => {
+  const gate = await adminOnly(c)
+  if (gate) return gate
+  setCookie(c, 'nv', '1', { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: 'Lax' })
+  return c.redirect('/admin/stats', 303)
 })
 
 adminRoutes.get('/new', async (c) => {

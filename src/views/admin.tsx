@@ -345,6 +345,7 @@ export function StatsView({
       <AdminNav active="stats" />
       <p class="muted">
         只统计<strong>真人</strong>页面访问（已排除搜索引擎蜘蛛、扫描器，<strong>以及你登录后的访问</strong>）；数据仅管理员可见。
+        <a href="/admin/stats/ignore">本浏览器不再统计我的访问</a>
       </p>
 
       <p class="stat-verdict">{verdict}</p>

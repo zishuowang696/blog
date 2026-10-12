@@ -91,8 +91,9 @@ export const trackViews: MiddlewareHandler = async (c, next) => {
   const lower = path.toLowerCase()
   if (SKIP_PREFIX.some((p) => lower === p || lower.startsWith(`${p}/`)) || SKIP_EXT.test(lower)) return
   if (!(c.res.headers.get('content-type') ?? '').includes('text/html')) return
-  // 已登录（通常是你自己）不计入，避免自访问污染统计
-  if (c.req.header('cookie')?.includes('sid=')) return
+  // 已登录（通常是你自己）或主动标记 nv=1 的浏览器，不计入，避免自访问污染统计
+  const cookie = c.req.header('cookie') ?? ''
+  if (cookie.includes('sid=') || cookie.includes('nv=1')) return
   const ua = c.req.header('user-agent') ?? ''
   if (!ua) return
   const ip = clientIp(c)
