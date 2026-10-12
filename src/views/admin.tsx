@@ -371,6 +371,9 @@ export function StatsView({
                 <code>疑似机房</code>：云 / 数据中心运营商 → 服务器（爬虫 / 扫描 / VPN），<strong>非真人</strong>；
               </li>
               <li>
+                <code>疑似爬虫</code>：同一 IP 访问 <strong>≥20 次</strong>或 <strong>≥15 个页面</strong> → 整站采集器；
+              </li>
+              <li>
                 <code>疑似扫描</code>：只访问 <strong>1 次</strong>且<strong>无来源</strong> → 扫描器；
               </li>
               <li>

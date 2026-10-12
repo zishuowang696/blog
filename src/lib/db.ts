@@ -718,6 +718,7 @@ export async function statsBots(days = 7): Promise<BotStat[]> {
 export interface IpStat {
   ip: string
   views: number
+  paths: number
   first: string
   last: string
   referers: string
@@ -725,12 +726,12 @@ export interface IpStat {
 
 export async function statsByIp(days = 7, limit = 25): Promise<IpStat[]> {
   const rows = await useEngine().all(
-    `SELECT ip, COUNT(*) AS views, MIN(created_at) AS first, MAX(created_at) AS last,
+    `SELECT ip, COUNT(*) AS views, COUNT(DISTINCT path) AS paths, MIN(created_at) AS first, MAX(created_at) AS last,
             GROUP_CONCAT(CASE WHEN referer = '' THEN '(direct)' ELSE referer END) AS referers
      FROM page_views WHERE bot = '' AND created_at >= ? AND ip <> '' GROUP BY ip ORDER BY views DESC LIMIT ?`,
     [isoDaysAgo(days), limit],
   )
-  return (rows as unknown as IpStat[]).map((r) => ({ ...r, views: Number(r.views) }))
+  return (rows as unknown as IpStat[]).map((r) => ({ ...r, views: Number(r.views), paths: Number(r.paths) }))
 }
 
 export interface GeoRow {

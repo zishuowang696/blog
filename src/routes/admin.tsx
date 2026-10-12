@@ -164,9 +164,11 @@ adminRoutes.get('/stats', async (c) => {
     const refs = [...new Set(r.referers.split(',').filter((x) => x && x !== '(direct)'))]
     const kind = g && isDatacenter(g.isp)
       ? '疑似机房'
-      : r.views === 1 && refs.length === 0
-        ? '疑似扫描'
-        : '住宅/正常'
+      : r.views >= 20 || r.paths >= 15
+        ? '疑似爬虫'
+        : r.views === 1 && refs.length === 0
+          ? '疑似扫描'
+          : '住宅/正常'
     return {
       ip: r.ip,
       views: r.views,
