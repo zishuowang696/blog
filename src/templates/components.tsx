@@ -27,7 +27,7 @@ function PostCard({ post, lang }: { post: Post; lang: Lang }) {
       <header class="card-head">
         <time datetime={post.created_at}>{fmtDate(post.created_at)}</time>
         {post.series ? (
-          <span class="badge" title={`${seriesLabel(lang)}: ${post.series}`}>
+          <span class="badge" title={`${seriesLabel(lang)}: ${localizeName(post.series, lang)}`}>
             {localizeName(post.series, lang)}
           </span>
         ) : null}
