@@ -6,12 +6,15 @@ import { parseMarkdown, tagsFromText } from '../lib/content.ts'
 import {
   deletePage,
   deletePost,
+  getIpGeo,
   getPage,
   getPostSource,
   listAllPagesMeta,
   listAllPostsMeta,
+  saveIpGeo,
   savePage,
   savePost,
+  statsByIp,
   statsBySource,
   statsDaily,
   statsOverview,
@@ -20,6 +23,7 @@ import {
   statsTopPaths,
   type Post,
 } from '../lib/db.ts'
+import { lookupIp } from '../lib/geo.ts'
 import { resolveLang } from '../lib/locale.ts'
 import { ForbiddenView, NotFoundView, renderHtml } from '../templates/layout.tsx'
 import {
@@ -142,8 +146,34 @@ adminRoutes.get('/stats', async (c) => {
     statsBySource(7),
     statsRecent(30),
   ])
+  const byIp = await statsByIp(7, 25)
+  const geoCache = await getIpGeo(byIp.map((r) => r.ip))
+  const missing = byIp.filter((r) => !geoCache.has(r.ip)).map((r) => r.ip)
+  const fresh = await Promise.all(missing.map(async (ip) => ({ ip, ...(await lookupIp(ip)) })))
+  if (fresh.length > 0) await saveIpGeo(fresh)
+  const geoMap = new Map(geoCache)
+  for (const f of fresh) geoMap.set(f.ip, f)
+  const ipRows = byIp.map((r) => {
+    const g = geoMap.get(r.ip)
+    return {
+      ip: r.ip,
+      views: r.views,
+      first: r.first,
+      last: r.last,
+      referers: [...new Set(r.referers.split(','))].slice(0, 3).join(', '),
+      geo: g ? [g.country, g.region, g.isp].filter(Boolean).join(' / ') : '',
+    }
+  })
   const body = (
-    <StatsView overview={overview} daily={daily} topPaths={topPaths} referers={referers} bySource={bySource} recent={recent} />
+    <StatsView
+      overview={overview}
+      daily={daily}
+      topPaths={topPaths}
+      referers={referers}
+      bySource={bySource}
+      byIp={ipRows}
+      recent={recent}
+    />
   )
   return c.html(await renderHtml(c, { title: '访问统计', active: 'console', body }))
 })

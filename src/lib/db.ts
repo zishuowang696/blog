@@ -600,9 +600,10 @@ function shanghaiDayStartIso(offsetDays = 0): string {
   return new Date(utcOfCnMidnight - 8 * 3600 * 1000).toISOString()
 }
 
-export async function recordView(input: { path: string; ipHash: string; referer: string; ua: string }): Promise<void> {
-  await useEngine().run('INSERT INTO page_views (path, ip_hash, referer, ua, created_at) VALUES (?, ?, ?, ?, ?)', [
+export async function recordView(input: { path: string; ip?: string; ipHash: string; referer: string; ua: string }): Promise<void> {
+  await useEngine().run('INSERT INTO page_views (path, ip, ip_hash, referer, ua, created_at) VALUES (?, ?, ?, ?, ?, ?)', [
     input.path.slice(0, 300),
+    (input.ip ?? '').slice(0, 64),
     input.ipHash,
     input.referer.slice(0, 300),
     input.ua.slice(0, 200),
@@ -674,4 +675,49 @@ export async function statsBySource(days = 7): Promise<SourceStat[]> {
     [isoDaysAgo(days)],
   )
   return (rows as unknown as SourceStat[]).map((r) => ({ category: r.category, pv: Number(r.pv), uv: Number(r.uv) }))
+}
+
+export interface IpStat {
+  ip: string
+  views: number
+  first: string
+  last: string
+  referers: string
+}
+
+export async function statsByIp(days = 7, limit = 25): Promise<IpStat[]> {
+  const rows = await useEngine().all(
+    `SELECT ip, COUNT(*) AS views, MIN(created_at) AS first, MAX(created_at) AS last,
+            GROUP_CONCAT(CASE WHEN referer = '' THEN '(direct)' ELSE referer END) AS referers
+     FROM page_views WHERE created_at >= ? AND ip <> '' GROUP BY ip ORDER BY views DESC LIMIT ?`,
+    [isoDaysAgo(days), limit],
+  )
+  return (rows as unknown as IpStat[]).map((r) => ({ ...r, views: Number(r.views) }))
+}
+
+export interface GeoRow {
+  ip: string
+  country: string
+  region: string
+  isp: string
+}
+
+export async function getIpGeo(ips: string[]): Promise<Map<string, GeoRow>> {
+  const map = new Map<string, GeoRow>()
+  if (ips.length === 0) return map
+  const placeholders = ips.map(() => '?').join(',')
+  const rows = await useEngine().all(`SELECT ip, country, region, isp FROM ip_geo WHERE ip IN (${placeholders})`, ips)
+  for (const r of rows as unknown as GeoRow[]) map.set(r.ip, r)
+  return map
+}
+
+export async function saveIpGeo(rows: GeoRow[]): Promise<void> {
+  const e = useEngine()
+  for (const r of rows) {
+    await e.run(
+      `INSERT INTO ip_geo (ip, country, region, isp, updated_at) VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(ip) DO UPDATE SET country = excluded.country, region = excluded.region, isp = excluded.isp, updated_at = excluded.updated_at`,
+      [r.ip, r.country, r.region, r.isp, nowIso()],
+    )
+  }
 }

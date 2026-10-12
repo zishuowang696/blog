@@ -318,6 +318,7 @@ export function StatsView({
   topPaths,
   referers,
   bySource,
+  byIp,
   recent,
 }: {
   overview: StatsOverview
@@ -325,6 +326,7 @@ export function StatsView({
   topPaths: PathStat[]
   referers: RefererStat[]
   bySource: SourceStat[]
+  byIp: { ip: string; views: number; first: string; last: string; referers: string; geo: string }[]
   recent: RecentView[]
 }) {
   const maxViews = Math.max(1, ...daily.map((d) => d.views))
@@ -433,6 +435,34 @@ export function StatsView({
                 <td>{s.category}</td>
                 <td>{s.pv}</td>
                 <td>{s.uv}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <h2>访客来源（按 IP，近 7 天）</h2>
+      {byIp.length === 0 ? (
+        <p class="empty">暂无。</p>
+      ) : (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>IP</th>
+              <th>归属地 / 运营商</th>
+              <th>次数</th>
+              <th>最近(UTC)</th>
+              <th>来源</th>
+            </tr>
+          </thead>
+          <tbody>
+            {byIp.map((r) => (
+              <tr key={r.ip}>
+                <td>{r.ip}</td>
+                <td>{r.geo || '-'}</td>
+                <td>{r.views}</td>
+                <td>{fmtTs(r.last)}</td>
+                <td>{r.referers || '-'}</td>
               </tr>
             ))}
           </tbody>

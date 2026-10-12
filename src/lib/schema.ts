@@ -77,6 +77,7 @@ CREATE INDEX IF NOT EXISTS idx_post_tags_tag ON post_tags(tag_id);
 CREATE TABLE IF NOT EXISTS page_views (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   path       TEXT NOT NULL,
+  ip         TEXT NOT NULL DEFAULT '',
   ip_hash    TEXT NOT NULL DEFAULT '',
   referer    TEXT NOT NULL DEFAULT '',
   ua         TEXT NOT NULL DEFAULT '',
@@ -85,5 +86,15 @@ CREATE TABLE IF NOT EXISTS page_views (
 
 CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at);
 CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views(path);
+CREATE INDEX IF NOT EXISTS idx_page_views_ip ON page_views(ip);
+
+-- IP 归属地/运营商缓存（报表按需查询后缓存，避免重复请求）
+CREATE TABLE IF NOT EXISTS ip_geo (
+  ip         TEXT PRIMARY KEY,
+  country    TEXT NOT NULL DEFAULT '',
+  region     TEXT NOT NULL DEFAULT '',
+  isp        TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL
+);
 
 `

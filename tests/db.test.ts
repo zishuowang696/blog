@@ -134,9 +134,9 @@ describe('db: 用户与会话', () => {
 describe('db: 访问统计', () => {
   test('记录访问并统计 PV/UV、热门页面、最近访问', async () => {
     const before = await db.statsOverview()
-    await db.recordView({ path: '/', ipHash: 'h1', referer: 'https://x.example', ua: 'UA' })
-    await db.recordView({ path: '/', ipHash: 'h1', referer: '', ua: 'UA' })
-    await db.recordView({ path: '/posts/alpha-post', ipHash: 'h2', referer: '', ua: 'UA' })
+    await db.recordView({ path: '/', ip: '9.9.9.9', ipHash: 'h1', referer: 'https://x.example', ua: 'UA' })
+    await db.recordView({ path: '/', ip: '9.9.9.9', ipHash: 'h1', referer: '', ua: 'UA' })
+    await db.recordView({ path: '/posts/alpha-post', ip: '8.8.8.8', ipHash: 'h2', referer: '', ua: 'UA' })
 
     const after = await db.statsOverview()
     expect(after.pv).toBe(before.pv + 3)
@@ -157,5 +157,9 @@ describe('db: 访问统计', () => {
     const direct = bySource.find((s) => s.category === '直接访问')
     expect(direct?.pv).toBe(2)
     expect(direct?.uv).toBe(2)
+
+    const byIp = await db.statsByIp(7, 10)
+    expect(byIp.find((r) => r.ip === '9.9.9.9')?.views).toBe(2)
+    expect(byIp.find((r) => r.ip === '8.8.8.8')?.views).toBe(1)
   })
 })

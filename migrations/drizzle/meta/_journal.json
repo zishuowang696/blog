@@ -22,6 +22,13 @@
       "when": 1791763764857,
       "tag": "0002_spotty_post",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1791771076381,
+      "tag": "0003_colorful_magneto",
+      "breakpoints": true
     }
   ]
 }

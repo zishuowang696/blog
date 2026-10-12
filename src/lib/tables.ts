@@ -89,10 +89,23 @@ export const pageViews = sqliteTable(
   {
     id: integer('id').primaryKey({ autoIncrement: true }),
     path: text('path').notNull(),
+    ip: text('ip').notNull().default(''),
     ip_hash: text('ip_hash').notNull().default(''),
     referer: text('referer').notNull().default(''),
     ua: text('ua').notNull().default(''),
     created_at: text('created_at').notNull(),
   },
-  (t) => [index('idx_page_views_created').on(t.created_at), index('idx_page_views_path').on(t.path)],
+  (t) => [
+    index('idx_page_views_created').on(t.created_at),
+    index('idx_page_views_path').on(t.path),
+    index('idx_page_views_ip').on(t.ip),
+  ],
 )
+
+export const ipGeo = sqliteTable('ip_geo', {
+  ip: text('ip').primaryKey(),
+  country: text('country').notNull().default(''),
+  region: text('region').notNull().default(''),
+  isp: text('isp').notNull().default(''),
+  updated_at: text('updated_at').notNull(),
+})

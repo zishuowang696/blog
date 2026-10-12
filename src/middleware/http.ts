@@ -76,10 +76,12 @@ export const trackViews: MiddlewareHandler = async (c, next) => {
   if (c.req.header('cookie')?.includes('sid=')) return
   const ua = c.req.header('user-agent') ?? ''
   if (!ua || BOT_RE.test(ua)) return
+  const ip = clientIp(c)
   try {
     await recordView({
       path,
-      ipHash: await hashIp(clientIp(c)),
+      ip,
+      ipHash: await hashIp(ip),
       referer: c.req.header('referer') ?? '',
       ua,
     })
