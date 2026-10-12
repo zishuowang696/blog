@@ -160,6 +160,12 @@ adminRoutes.get('/stats', async (c) => {
   for (const f of fresh) geoMap.set(f.ip, f)
   const ipRows = byIp.map((r) => {
     const g = geoMap.get(r.ip)
+    const refs = [...new Set(r.referers.split(',').filter((x) => x && x !== '(direct)'))]
+    const kind = g && isDatacenter(g.isp)
+      ? '疑似机房'
+      : r.views === 1 && refs.length === 0
+        ? '疑似扫描'
+        : '住宅/正常'
     return {
       ip: r.ip,
       views: r.views,
@@ -167,7 +173,7 @@ adminRoutes.get('/stats', async (c) => {
       last: r.last,
       referers: [...new Set(r.referers.split(','))].slice(0, 3).join(', '),
       geo: g ? [g.country, g.region, g.isp].filter(Boolean).join(' / ') : '',
-      dc: g ? isDatacenter(g.isp) : false,
+      kind,
     }
   })
   const body = (

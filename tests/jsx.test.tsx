@@ -40,7 +40,7 @@ describe('components JSX 渲染', () => {
         topPaths={[{ path: '/', views: 3, visitors: 2 }]}
         referers={[{ referer: '', views: 3 }]}
         bySource={[{ category: '外部链接', pv: 1, uv: 1 }]}
-        byIp={[{ ip: '8.8.8.8', views: 2, first: '2026-10-12T00:00', last: '2026-10-12T01:00', referers: '(direct)', geo: 'United States / California', dc: true }]}
+        byIp={[{ ip: '8.8.8.8', views: 2, first: '2026-10-12T00:00', last: '2026-10-12T01:00', referers: '(direct)', geo: 'United States / California', kind: '疑似机房' }]}
         bots={[{ bot: 'Googlebot', pv: 5, uv: 1, last: '2026-10-12T01:00', ips: '66.249.66.1' }]}
         recent={[{ path: '/', referer: '', created_at: '2026-10-12T01:00' }]}
       />,

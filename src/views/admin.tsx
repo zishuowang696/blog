@@ -327,7 +327,7 @@ export function StatsView({
   topPaths: PathStat[]
   referers: RefererStat[]
   bySource: SourceStat[]
-  byIp: { ip: string; views: number; first: string; last: string; referers: string; geo: string; dc: boolean }[]
+  byIp: { ip: string; views: number; first: string; last: string; referers: string; geo: string; kind: string }[]
   bots: { bot: string; pv: number; uv: number; last: string; ips: string }[]
   recent: RecentView[]
 }) {
@@ -465,7 +465,7 @@ export function StatsView({
               <tr key={r.ip}>
                 <td>{r.ip}</td>
                 <td>{r.geo || '-'}</td>
-                <td class={r.dc ? 'dc' : 'ok-type'}>{r.dc ? '疑似机房' : '住宅/正常'}</td>
+                <td class={r.kind === '住宅/正常' ? 'ok-type' : 'dc'}>{r.kind}</td>
                 <td>{r.views}</td>
                 <td>{fmtTs(r.last)}</td>
                 <td>{r.referers || '-'}</td>
