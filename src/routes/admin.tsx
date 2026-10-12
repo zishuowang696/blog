@@ -16,6 +16,7 @@ import {
   savePost,
   statsByIp,
   statsBySource,
+  statsBots,
   statsDaily,
   statsOverview,
   statsRecent,
@@ -146,6 +147,7 @@ adminRoutes.get('/stats', async (c) => {
     statsBySource(7),
     statsRecent(30),
   ])
+  const botRows = await statsBots(7)
   const byIp = await statsByIp(7, 25)
   const geoCache = await getIpGeo(byIp.map((r) => r.ip))
   const missing = byIp.filter((r) => !geoCache.has(r.ip)).map((r) => r.ip)
@@ -172,6 +174,7 @@ adminRoutes.get('/stats', async (c) => {
       referers={referers}
       bySource={bySource}
       byIp={ipRows}
+      bots={botRows}
       recent={recent}
     />
   )

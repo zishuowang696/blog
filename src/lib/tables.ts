@@ -91,6 +91,7 @@ export const pageViews = sqliteTable(
     path: text('path').notNull(),
     ip: text('ip').notNull().default(''),
     ip_hash: text('ip_hash').notNull().default(''),
+    bot: text('bot').notNull().default(''),
     referer: text('referer').notNull().default(''),
     ua: text('ua').notNull().default(''),
     created_at: text('created_at').notNull(),
@@ -99,6 +100,7 @@ export const pageViews = sqliteTable(
     index('idx_page_views_created').on(t.created_at),
     index('idx_page_views_path').on(t.path),
     index('idx_page_views_ip').on(t.ip),
+    index('idx_page_views_bot').on(t.bot),
   ],
 )
 

@@ -137,6 +137,7 @@ describe('db: 访问统计', () => {
     await db.recordView({ path: '/', ip: '9.9.9.9', ipHash: 'h1', referer: 'https://x.example', ua: 'UA' })
     await db.recordView({ path: '/', ip: '9.9.9.9', ipHash: 'h1', referer: '', ua: 'UA' })
     await db.recordView({ path: '/posts/alpha-post', ip: '8.8.8.8', ipHash: 'h2', referer: '', ua: 'UA' })
+    await db.recordView({ path: '/', ip: '66.249.66.1', ipHash: 'gh', bot: 'Googlebot', referer: '', ua: 'Googlebot' })
 
     const after = await db.statsOverview()
     expect(after.pv).toBe(before.pv + 3)
@@ -161,5 +162,9 @@ describe('db: 访问统计', () => {
     const byIp = await db.statsByIp(7, 10)
     expect(byIp.find((r) => r.ip === '9.9.9.9')?.views).toBe(2)
     expect(byIp.find((r) => r.ip === '8.8.8.8')?.views).toBe(1)
+
+    // 爬虫单独统计，且不污染真人数据
+    const bots = await db.statsBots(7)
+    expect(bots.find((b) => b.bot === 'Googlebot')?.pv).toBe(1)
   })
 })

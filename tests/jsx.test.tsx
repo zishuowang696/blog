@@ -41,11 +41,13 @@ describe('components JSX 渲染', () => {
         referers={[{ referer: '', views: 3 }]}
         bySource={[{ category: '外部链接', pv: 1, uv: 1 }]}
         byIp={[{ ip: '8.8.8.8', views: 2, first: '2026-10-12T00:00', last: '2026-10-12T01:00', referers: '(direct)', geo: 'United States / California' }]}
+        bots={[{ bot: 'Googlebot', pv: 5, uv: 1, last: '2026-10-12T01:00' }]}
         recent={[{ path: '/', referer: '', created_at: '2026-10-12T01:00' }]}
       />,
     )
     expect(html).toContain('8.8.8.8')
     expect(html).toContain('United States / California')
     expect(html).toContain('真实外部读者')
+    expect(html).toContain('Googlebot')
   })
 })

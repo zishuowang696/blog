@@ -319,6 +319,7 @@ export function StatsView({
   referers,
   bySource,
   byIp,
+  bots,
   recent,
 }: {
   overview: StatsOverview
@@ -327,15 +328,18 @@ export function StatsView({
   referers: RefererStat[]
   bySource: SourceStat[]
   byIp: { ip: string; views: number; first: string; last: string; referers: string; geo: string }[]
+  bots: { bot: string; pv: number; uv: number; last: string }[]
   recent: RecentView[]
 }) {
   const maxViews = Math.max(1, ...daily.map((d) => d.views))
+  const botPv = bots.reduce((n, b) => n + b.pv, 0)
   const externalUv = bySource.filter((s) => EXTERNAL_CATS.includes(s.category)).reduce((n, s) => n + s.uv, 0)
   const externalPv = bySource.filter((s) => EXTERNAL_CATS.includes(s.category)).reduce((n, s) => n + s.pv, 0)
   const verdict =
-    externalUv === 0
+    (externalUv === 0
       ? '近 7 天：还没有「从外部找来」的真人读者（当前数字基本都是你自己或站内点击）。'
-      : `近 7 天：有 ${externalUv} 位真实外部读者，共 ${externalPv} 次外部来源访问。`
+      : `近 7 天：有 ${externalUv} 位真实外部读者，共 ${externalPv} 次外部来源访问。`) +
+    `（另有爬虫/蜘蛛抓取 ${botPv} 次）`
   return (
     <>
       <AdminNav active="stats" />
@@ -463,6 +467,32 @@ export function StatsView({
                 <td>{r.views}</td>
                 <td>{fmtTs(r.last)}</td>
                 <td>{r.referers || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <h2>爬虫 / 蜘蛛（近 7 天）</h2>
+      {bots.length === 0 ? (
+        <p class="empty">暂无。</p>
+      ) : (
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>爬虫</th>
+              <th>抓取次数</th>
+              <th>IP 数</th>
+              <th>最近(UTC)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bots.map((b) => (
+              <tr key={b.bot}>
+                <td>{b.bot}</td>
+                <td>{b.pv}</td>
+                <td>{b.uv}</td>
+                <td>{fmtTs(b.last)}</td>
               </tr>
             ))}
           </tbody>

@@ -51,6 +51,25 @@ export const rateLimitSensitive: MiddlewareHandler = async (c, next) => {
 
 const BOT_RE =
   /bot|crawl|spider|slurp|bing|google|baidu|yandex|duckduck|facebook|externalhit|headless|python|curl|wget|okhttp|axios|go-http|java\/|libwww|monitor|uptime|nmap|masscan|scan/i
+
+const BOT_NAMES: [RegExp, string][] = [
+  [/googlebot|apis-google|google/i, 'Googlebot'],
+  [/bingbot|bingpreview|bing/i, 'Bingbot'],
+  [/baiduspider|baidu/i, 'Baiduspider'],
+  [/yandex/i, 'YandexBot'],
+  [/sogou/i, 'Sogou'],
+  [/bytespider/i, 'Bytespider'],
+  [/duckduck/i, 'DuckDuckBot'],
+  [/facebook|externalhit/i, 'facebookexternalhit'],
+  [/semrush|ahrefs|mj12|dotbot|petal|gptbot|claudebot|ccbot|perplexity|applebot|slurp/i, 'SEO/AI 爬虫'],
+  [/python|curl|wget|okhttp|axios|go-http|java\/|libwww/i, '脚本/扫描'],
+]
+
+function botName(ua: string): string {
+  if (!BOT_RE.test(ua)) return ''
+  for (const [re, name] of BOT_NAMES) if (re.test(ua)) return name
+  return '其他爬虫'
+}
 const SKIP_PREFIX = ['/admin', '/css', '/vendor', '/lang', '/.well-known']
 const SKIP_EXT = /\.(css|js|mjs|svg|ico|png|jpe?g|gif|webp|avif|xml|txt|json|map|woff2?)$/i
 const STATS_SALT = 'embedai-stats-v1'
@@ -75,13 +94,14 @@ export const trackViews: MiddlewareHandler = async (c, next) => {
   // 已登录（通常是你自己）不计入，避免自访问污染统计
   if (c.req.header('cookie')?.includes('sid=')) return
   const ua = c.req.header('user-agent') ?? ''
-  if (!ua || BOT_RE.test(ua)) return
+  if (!ua) return
   const ip = clientIp(c)
   try {
     await recordView({
       path,
       ip,
       ipHash: await hashIp(ip),
+      bot: botName(ua),
       referer: c.req.header('referer') ?? '',
       ua,
     })

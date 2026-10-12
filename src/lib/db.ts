@@ -600,11 +600,19 @@ function shanghaiDayStartIso(offsetDays = 0): string {
   return new Date(utcOfCnMidnight - 8 * 3600 * 1000).toISOString()
 }
 
-export async function recordView(input: { path: string; ip?: string; ipHash: string; referer: string; ua: string }): Promise<void> {
-  await useEngine().run('INSERT INTO page_views (path, ip, ip_hash, referer, ua, created_at) VALUES (?, ?, ?, ?, ?, ?)', [
+export async function recordView(input: {
+  path: string
+  ip?: string
+  ipHash: string
+  bot?: string
+  referer: string
+  ua: string
+}): Promise<void> {
+  await useEngine().run('INSERT INTO page_views (path, ip, ip_hash, bot, referer, ua, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)', [
     input.path.slice(0, 300),
     (input.ip ?? '').slice(0, 64),
     input.ipHash,
+    (input.bot ?? '').slice(0, 40),
     input.referer.slice(0, 300),
     input.ua.slice(0, 200),
     nowIso(),
@@ -618,16 +626,16 @@ async function countRange(whereSql: string, args: (string | number)[]): Promise<
 }
 
 export async function statsOverview(): Promise<StatsOverview> {
-  const total = await countRange('', [])
-  const today = await countRange('WHERE created_at >= ?', [shanghaiDayStartIso()])
-  const week = await countRange('WHERE created_at >= ?', [isoDaysAgo(7)])
+  const total = await countRange(`WHERE bot = ''`, [])
+  const today = await countRange(`WHERE bot = '' AND created_at >= ?`, [shanghaiDayStartIso()])
+  const week = await countRange(`WHERE bot = '' AND created_at >= ?`, [isoDaysAgo(7)])
   return { pv: total.pv, uv: total.uv, todayPv: today.pv, todayUv: today.uv, weekPv: week.pv, weekUv: week.uv }
 }
 
 export async function statsDaily(days = 14): Promise<DayStat[]> {
   const rows = await useEngine().all(
     `SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS views, COUNT(DISTINCT ip_hash) AS visitors
-     FROM page_views WHERE created_at >= ? GROUP BY day ORDER BY day ASC`,
+     FROM page_views WHERE bot = '' AND created_at >= ? GROUP BY day ORDER BY day ASC`,
     [isoDaysAgo(days)],
   )
   return (rows as unknown as DayStat[]).map((r) => ({ day: r.day, views: Number(r.views), visitors: Number(r.visitors) }))
@@ -636,7 +644,7 @@ export async function statsDaily(days = 14): Promise<DayStat[]> {
 export async function statsTopPaths(days = 7, limit = 15): Promise<PathStat[]> {
   const rows = await useEngine().all(
     `SELECT path, COUNT(*) AS views, COUNT(DISTINCT ip_hash) AS visitors
-     FROM page_views WHERE created_at >= ? GROUP BY path ORDER BY views DESC LIMIT ?`,
+     FROM page_views WHERE bot = '' AND created_at >= ? GROUP BY path ORDER BY views DESC LIMIT ?`,
     [isoDaysAgo(days), limit],
   )
   return (rows as unknown as PathStat[]).map((r) => ({ path: r.path, views: Number(r.views), visitors: Number(r.visitors) }))
@@ -644,7 +652,7 @@ export async function statsTopPaths(days = 7, limit = 15): Promise<PathStat[]> {
 
 export async function statsReferers(days = 7, limit = 10): Promise<RefererStat[]> {
   const rows = await useEngine().all(
-    `SELECT referer, COUNT(*) AS views FROM page_views WHERE created_at >= ?
+    `SELECT referer, COUNT(*) AS views FROM page_views WHERE bot = '' AND created_at >= ?
      GROUP BY referer ORDER BY views DESC LIMIT ?`,
     [isoDaysAgo(days), limit],
   )
@@ -652,7 +660,10 @@ export async function statsReferers(days = 7, limit = 10): Promise<RefererStat[]
 }
 
 export async function statsRecent(limit = 30): Promise<RecentView[]> {
-  const rows = await useEngine().all('SELECT path, referer, created_at FROM page_views ORDER BY id DESC LIMIT ?', [limit])
+  const rows = await useEngine().all(
+    `SELECT path, referer, created_at FROM page_views WHERE bot = '' ORDER BY id DESC LIMIT ?`,
+    [limit],
+  )
   return rows as unknown as RecentView[]
 }
 
@@ -671,10 +682,26 @@ export async function statsBySource(days = 7): Promise<SourceStat[]> {
        WHEN referer LIKE '%zhihu%' OR referer LIKE '%juejin%' OR referer LIKE '%csdn%' OR referer LIKE '%dev.to%' OR referer LIKE '%medium%' OR referer LIKE '%reddit%' OR referer LIKE '%github%' OR referer LIKE '%weibo%' OR referer LIKE '%twitter%' OR referer LIKE '%x.com%' OR referer LIKE '%linkedin%' OR referer LIKE '%segmentfault%' OR referer LIKE '%cnblogs%' THEN '平台/社交'
        ELSE '外部链接'
      END AS category, COUNT(*) AS pv, COUNT(DISTINCT ip_hash) AS uv
-     FROM page_views WHERE created_at >= ? GROUP BY category ORDER BY pv DESC`,
+     FROM page_views WHERE bot = '' AND created_at >= ? GROUP BY category ORDER BY pv DESC`,
     [isoDaysAgo(days)],
   )
   return (rows as unknown as SourceStat[]).map((r) => ({ category: r.category, pv: Number(r.pv), uv: Number(r.uv) }))
+}
+
+export interface BotStat {
+  bot: string
+  pv: number
+  uv: number
+  last: string
+}
+
+export async function statsBots(days = 7): Promise<BotStat[]> {
+  const rows = await useEngine().all(
+    `SELECT bot, COUNT(*) AS pv, COUNT(DISTINCT ip) AS uv, MAX(created_at) AS last
+     FROM page_views WHERE bot <> '' AND created_at >= ? GROUP BY bot ORDER BY pv DESC LIMIT 20`,
+    [isoDaysAgo(days)],
+  )
+  return (rows as unknown as BotStat[]).map((r) => ({ bot: r.bot, pv: Number(r.pv), uv: Number(r.uv), last: r.last }))
 }
 
 export interface IpStat {
@@ -689,7 +716,7 @@ export async function statsByIp(days = 7, limit = 25): Promise<IpStat[]> {
   const rows = await useEngine().all(
     `SELECT ip, COUNT(*) AS views, MIN(created_at) AS first, MAX(created_at) AS last,
             GROUP_CONCAT(CASE WHEN referer = '' THEN '(direct)' ELSE referer END) AS referers
-     FROM page_views WHERE created_at >= ? AND ip <> '' GROUP BY ip ORDER BY views DESC LIMIT ?`,
+     FROM page_views WHERE bot = '' AND created_at >= ? AND ip <> '' GROUP BY ip ORDER BY views DESC LIMIT ?`,
     [isoDaysAgo(days), limit],
   )
   return (rows as unknown as IpStat[]).map((r) => ({ ...r, views: Number(r.views) }))

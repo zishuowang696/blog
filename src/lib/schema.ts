@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS page_views (
   path       TEXT NOT NULL,
   ip         TEXT NOT NULL DEFAULT '',
   ip_hash    TEXT NOT NULL DEFAULT '',
+  bot        TEXT NOT NULL DEFAULT '',
   referer    TEXT NOT NULL DEFAULT '',
   ua         TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL
@@ -87,6 +88,7 @@ CREATE TABLE IF NOT EXISTS page_views (
 CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at);
 CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views(path);
 CREATE INDEX IF NOT EXISTS idx_page_views_ip ON page_views(ip);
+CREATE INDEX IF NOT EXISTS idx_page_views_bot ON page_views(bot);
 
 -- IP 归属地/运营商缓存（报表按需查询后缓存，避免重复请求）
 CREATE TABLE IF NOT EXISTS ip_geo (
