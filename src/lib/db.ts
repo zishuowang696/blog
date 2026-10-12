@@ -693,15 +693,22 @@ export interface BotStat {
   pv: number
   uv: number
   last: string
+  ips: string
 }
 
 export async function statsBots(days = 7): Promise<BotStat[]> {
   const rows = await useEngine().all(
-    `SELECT bot, COUNT(*) AS pv, COUNT(DISTINCT ip) AS uv, MAX(created_at) AS last
+    `SELECT bot, COUNT(*) AS pv, COUNT(DISTINCT ip) AS uv, MAX(created_at) AS last, GROUP_CONCAT(ip) AS ips
      FROM page_views WHERE bot <> '' AND created_at >= ? GROUP BY bot ORDER BY pv DESC LIMIT 20`,
     [isoDaysAgo(days)],
   )
-  return (rows as unknown as BotStat[]).map((r) => ({ bot: r.bot, pv: Number(r.pv), uv: Number(r.uv), last: r.last }))
+  return (rows as unknown as BotStat[]).map((r) => ({
+    bot: r.bot,
+    pv: Number(r.pv),
+    uv: Number(r.uv),
+    last: r.last,
+    ips: r.ips ?? '',
+  }))
 }
 
 export interface IpStat {

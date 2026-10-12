@@ -328,7 +328,7 @@ export function StatsView({
   referers: RefererStat[]
   bySource: SourceStat[]
   byIp: { ip: string; views: number; first: string; last: string; referers: string; geo: string }[]
-  bots: { bot: string; pv: number; uv: number; last: string }[]
+  bots: { bot: string; pv: number; uv: number; last: string; ips: string }[]
   recent: RecentView[]
 }) {
   const maxViews = Math.max(1, ...daily.map((d) => d.views))
@@ -481,6 +481,7 @@ export function StatsView({
           <thead>
             <tr>
               <th>爬虫</th>
+              <th>IP</th>
               <th>抓取次数</th>
               <th>IP 数</th>
               <th>最近(UTC)</th>
@@ -490,6 +491,7 @@ export function StatsView({
             {bots.map((b) => (
               <tr key={b.bot}>
                 <td>{b.bot}</td>
+                <td>{b.ips || '-'}</td>
                 <td>{b.pv}</td>
                 <td>{b.uv}</td>
                 <td>{fmtTs(b.last)}</td>

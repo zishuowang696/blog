@@ -147,7 +147,10 @@ adminRoutes.get('/stats', async (c) => {
     statsBySource(7),
     statsRecent(30),
   ])
-  const botRows = await statsBots(7)
+  const botRows = (await statsBots(7)).map((b) => ({
+    ...b,
+    ips: [...new Set(b.ips.split(',').filter(Boolean))].slice(0, 6).join(', '),
+  }))
   const byIp = await statsByIp(7, 25)
   const geoCache = await getIpGeo(byIp.map((r) => r.ip))
   const missing = byIp.filter((r) => !geoCache.has(r.ip)).map((r) => r.ip)
