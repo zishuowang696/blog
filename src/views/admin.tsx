@@ -349,6 +349,43 @@ export function StatsView({
 
       <p class="stat-verdict">{verdict}</p>
 
+      <details class="stats-help">
+        <summary>怎么读这张表（判断口径）</summary>
+        <ul>
+          <li>
+            <strong>真人</strong>：UA 不含爬虫特征，且<strong>你未登录</strong>时的访问（你登录后看站不算）。
+          </li>
+          <li>
+            <strong>爬虫</strong>：标出名字（Googlebot / Bingbot / Baiduspider / Applebot…），是搜索引擎在抓取 ——{' '}
+            <strong>收录前兆</strong>，不是读者。
+          </li>
+          <li>
+            <strong>来源分类</strong>：<code>搜索引擎 / 平台·社交 / 外部链接</code> 才算「<strong>有人从外面找来</strong>」；
+            <code>直接访问 / 站内点击</code> 不算外部引流。
+          </li>
+          <li>
+            <strong>访客类型（按 IP）</strong>：
+            <ul>
+              <li>
+                <code>疑似机房</code>：云 / 数据中心运营商 → 服务器（爬虫 / 扫描 / VPN），<strong>非真人</strong>；
+              </li>
+              <li>
+                <code>疑似扫描</code>：只访问 <strong>1 次</strong>且<strong>无来源</strong> → 扫描器；
+              </li>
+              <li>
+                <code>住宅/正常</code>：可能是真人。
+              </li>
+            </ul>
+          </li>
+          <li>
+            <strong>真正读者的口径</strong>：<code>住宅/正常</code> + <strong>有外部来源</strong> + <strong>访问多个页面</strong> → 才当潜在读者。
+          </li>
+        </ul>
+        <p class="muted">
+          数字只当信号 —— 真正的进度 = <strong>发出去的内容 + 客户对话</strong>。
+        </p>
+      </details>
+
       <div class="stat-cards">
         <div class="stat-card">
           <span class="stat-num">{overview.todayPv}</span>
