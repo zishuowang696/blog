@@ -29,6 +29,7 @@ const NAME_EN: Record<string, string> = {
   '职业': 'Career',
   '自动化': 'Automation',
   '记忆': 'Agent Memory',
+  '上下文': 'Context',
   '调试': 'Debugging',
   '转岗': 'Career Switch',
   '边缘': 'Edge',
