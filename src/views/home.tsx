@@ -74,7 +74,7 @@ export function HomeView({
             lang={lang}
           />
         </div>
-        <Sidebar lang={lang} latest={latest} series={series} />
+        <Sidebar lang={lang} latest={latest} series={series} showSeries={false} />
       </div>
       <BottomSection tags={tags} lang={lang} />
     </>

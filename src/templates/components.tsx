@@ -140,10 +140,12 @@ export function Sidebar({
   lang,
   latest,
   series,
+  showSeries = true,
 }: {
   lang: Lang
   latest: LatestPost[]
   series: TagCount[]
+  showSeries?: boolean
 }) {
   return (
     <aside class="sidebar">
@@ -162,7 +164,7 @@ export function Sidebar({
           </a>
         </div>
       </div>
-      {series.length > 0 ? (
+      {showSeries && series.length > 0 ? (
         <div class="side-card">
           <h3 class="side-title">{t(lang, 'nav.series')}</h3>
           <ul class="latest-list">
