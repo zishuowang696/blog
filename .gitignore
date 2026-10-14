@@ -27,3 +27,6 @@ upstream-embedai/
 
 # 运营/商业文档（不进公开仓库）
 growth/
+
+# CSDN 分发用的临时 md
+.csdn/
