@@ -43,6 +43,7 @@ const NAME_EN: Record<string, string> = {
   '从 0 构建 AI Agent': 'Build an AI Agent from Scratch',
   '从 0 看懂 Attention': 'Understanding Attention from Scratch',
   'AI 工具评测': 'AI Tool Reviews',
+  '看懂 MCP': 'Understanding MCP',
 }
 
 export function localizeName(name: string, lang: Lang): string {
