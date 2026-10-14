@@ -10,7 +10,7 @@ This post is about a downloader I wrote: **`scripts/gh-download.sh`**.
 - **Direct from this site**: <https://embedai.com.cn/dl/gh-download.sh>
 - **Source repo**: <https://github.com/zishuowang696/gh-download>
 - **Windows version**: `gh-download.ps1` (same repo; direct: <https://embedai.com.cn/dl/gh-download.ps1>)
-- **Local Web UI**: `bun web/server.ts` → open `http://localhost:8787` (list assets, pick, download)
+- **Local Web UI** (single file): <https://embedai.com.cn/dl/gh-download-ui.ts> → run `bun gh-download-ui.ts`, open `http://localhost:8787` (list assets, pick, download)
 
 ![gh-download local Web UI: paste repo/tag, list assets, pick and download](/img/gh-download-ui.png)
 

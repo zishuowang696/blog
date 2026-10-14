@@ -40,11 +40,13 @@ curl.exe -fsSL https://embedai.com.cn/dl/gh-download.ps1 -o gh-download.ps1
 ./gh-download.ps1 <owner/repo> <tag> -Pattern '*windows*.zip' -Dir .\dl
 ```
 
-**本地 Web UI**（不想敲命令；需 [Bun](https://bun.sh)）
+**本地 Web UI**（不想敲命令；需 [Bun](https://bun.sh)，单文件）
+
+- **本站直链**：<https://embedai.com.cn/dl/gh-download-ui.ts>
 
 ```bash
-git clone https://github.com/zishuowang696/gh-download && cd gh-download
-bun web/server.ts        # 打开 http://localhost:8787
+curl -fsSL https://embedai.com.cn/dl/gh-download-ui.ts -o gh-download-ui.ts
+bun gh-download-ui.ts        # 浏览器打开 http://localhost:8787
 ```
 粘贴 `owner/repo` + `tag`（或直接一个下载链接）→ 列出资产 → 勾选 → 下载（后台仍是多镜像 + aria2，日志实时滚动）。
 

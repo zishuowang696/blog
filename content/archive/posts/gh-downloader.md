@@ -14,7 +14,7 @@ published: true
 - **本站直链**：<https://embedai.com.cn/dl/gh-download.sh>
 - **源码仓库**：<https://github.com/zishuowang696/gh-download>
 - **Windows 版**：`gh-download.ps1`（同仓库；本站直链 <https://embedai.com.cn/dl/gh-download.ps1>）
-- **本地 Web UI**：`bun web/server.ts` → 浏览器打开 `http://localhost:8787`（列资产、勾选、下载）
+- **本地 Web UI**（单文件）：本站直链 <https://embedai.com.cn/dl/gh-download-ui.ts> → `bun gh-download-ui.ts`，浏览器打开 `http://localhost:8787`（列资产、勾选、下载）
 
 ![gh-download 本地 Web UI：粘贴仓库/标签 → 列出资产 → 勾选下载](/img/gh-download-ui.png)
 
