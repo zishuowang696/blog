@@ -61,6 +61,14 @@ describe('renderMarkdown', () => {
     expect(html).toContain('<strong>加粗</strong>')
     expect(html).toContain('<a href="https://example.com">链接</a>')
   })
+
+  test('自动链接：<url> 与裸网址，且不重复包裹', () => {
+    const html = renderMarkdown('见 <https://embedai.com.cn/x> 或 https://github.com/a/b 结尾。')
+    expect(html).toContain('<a href="https://embedai.com.cn/x">https://embedai.com.cn/x</a>')
+    expect(html).toContain('<a href="https://github.com/a/b">https://github.com/a/b</a>')
+    expect(html).not.toContain('<a href="<a')
+    expect(html).not.toContain('href="https://github.com/a/b">https://github.com/a/b">')
+  })
 })
 
 describe('extractPlainText', () => {

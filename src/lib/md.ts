@@ -46,6 +46,13 @@ function inline(src: string): string {
   })
   s = s.replace(/!\[([^\]]*)\]\(([^\s)]+)\)/g, (_m, alt: string, url: string) => `<img src="${attr(url)}" alt="${attr(alt)}">`)
   s = s.replace(/\[([^\]]+)\]\(([^\s)]+)\)/g, (_m, text: string, url: string) => `<a href="${attr(url)}">${text}</a>`)
+  // 自动链接：<https://...>
+  s = s.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, (_m, u: string) => `<a href="${attr(u)}">${u}</a>`)
+  // 自动链接：裸网址（避开已在 href="…" 或 <a>…</a> 文本里的，避免二次包裹）
+  s = s.replace(
+    /(^|[\s(（【，。；、:：])(https?:\/\/[^\s<)）】"']+)/g,
+    (_m, pre: string, u: string) => `${pre}<a href="${attr(u)}">${u}</a>`,
+  )
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
   s = s.replace(/(^|[^*\w])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>')
   s = s.replace(/\u0000(\d+)\u0000/g, (_m, i: string) => `<code>${codes[Number(i)] ?? ''}</code>`)
