@@ -16,6 +16,8 @@ published: true
 - **Windows 版**：`gh-download.ps1`（同仓库；本站直链 <https://embedai.com.cn/dl/gh-download.ps1>）
 - **本地 Web UI**：`bun web/server.ts` → http://localhost:8787（列资产、勾选、下载）
 
+![gh-download 本地 Web UI：粘贴仓库/标签 → 列出资产 → 勾选下载](/img/gh-download-ui.png)
+
 ## 核心思路（一句话）
 
 > **先用 Range 请求筛出"能断点续传"的镜像，再让 aria2 把同一个文件的多个镜像当"镜像源"并行拉。**

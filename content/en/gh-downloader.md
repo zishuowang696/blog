@@ -12,6 +12,8 @@ This post is about a downloader I wrote: **`scripts/gh-download.sh`**.
 - **Windows version**: `gh-download.ps1` (same repo; direct: <https://embedai.com.cn/dl/gh-download.ps1>)
 - **Local Web UI**: `bun web/server.ts` → http://localhost:8787 (list assets, pick, download)
 
+![gh-download local Web UI: paste repo/tag, list assets, pick and download](/img/gh-download-ui.png)
+
 ## The core idea (one line)
 
 > **First filter mirrors with a Range request (resumable), then let aria2 pull the same file from several mirrors in parallel.**

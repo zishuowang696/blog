@@ -48,6 +48,8 @@ bun web/server.ts        # 打开 http://localhost:8787
 ```
 粘贴 `owner/repo` + `tag`（或直接一个下载链接）→ 列出资产 → 勾选 → 下载（后台仍是多镜像 + aria2，日志实时滚动）。
 
+![gh-download 本地 Web UI](/img/gh-download-ui.png)
+
 **依赖**：`curl`（Win10+ 自带 `curl.exe`）；`aria2c`（强烈推荐，缺失会回退 curl 并提示安装）；按 `owner/repo` 自动列资产时需要 `gh`。
 
 **环境变量**：`EMBEDAI_MIRRORS`（镜像前缀，须支持 Range）、`EMBEDAI_JOBS`、`EMBEDAI_CONN`。
