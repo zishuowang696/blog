@@ -49,21 +49,37 @@ Inside the agent, just say it in English:
 
 (The CLI path — `npx rea-agents@latest` analyze — works the same way.)
 
-## What you get back
+## What you get back (our real result)
 
-REA returns results **together with evidence**. A typical reply:
+I actually ran it on **Linux + Ghidra 12.1.4 + Node 24 + REA 6.4.0**.
 
-- **pseudocode** (roughly `int main() { puts("Hello, REA!"); return 0; }`);
-- the **matching assembly / strings / call graph** — as **evidence**;
-- plus its **limitations** (what's inferred vs. what's uncertain).
+**With symbols**: `rea decompile ./hello_sym main` →
 
-**That's REA's positioning**: it doesn't say "trust me" — it gives you **conclusion + evidence + limitations**, which is far better than an AI guessing.
+```c
+undefined8 main(void)
+{
+  puts("Hello, REA!");
+  return 0;
+}
+```
 
-And you can keep asking:
+And it returns not just code, but **with evidence**:
 
-> "Which address holds that string? Why `puts` instead of `printf`?"
+- `provider: ghidra 12.1.4`, `confidence: observed`;
+- a list of `limitations` (explicitly: "**this is decompiler output, not source, and not text-equivalent to Hopper output**").
 
-(The second one is: the compiler **optimized `printf("...\n")` into `puts`** — the AI can point that out.)
+**A fun catch**: we wrote `printf("Hello, REA!\n")`, but the compiler **optimized it into `puts`** — REA lays that bare.
+
+**On the stripped `hello`**: `rea decompile ./hello main` →
+
+```
+error: Analysis failed
+message: "Unknown Ghidra procedure name or address: main"
+```
+
+**That's the reality of "no symbols"**: names are gone, so you (or the AI) must locate it **by address** — it's **not a "one-click to source" magic trick.**
+
+**That's REA's positioning**: it doesn't say "trust me" — it gives you **conclusion + evidence + limitations**, far better than an AI guessing.
 
 ## The catch: it's fast, but you must be able to verify
 

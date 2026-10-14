@@ -53,21 +53,37 @@ npx rea-agents setup
 
 （也可以走命令行：`npx rea-agents@latest` 的 analyze 命令，逻辑一样。）
 
-## 你会拿到什么
+## 你会拿到什么（我们的真实结果）
 
-REA 把结果**连同证据一起**给 agent，典型回应是：
+我在 **Linux + Ghidra 12.1.4 + Node 24 + REA 6.4.0** 上真跑了一遍。
 
-- **伪代码**（大致就是 `int main() { puts("Hello, REA!"); return 0; }`）；
-- **对应的汇编 / 字符串 / 调用关系**——作为**证据**；
-- 以及它的**局限**（哪些是推断、哪些没把握）。
+**带符号版**：`rea decompile ./hello_sym main` →
 
-**这就是 REA 的定位**：它不说"相信我"，而是**"结论 + 证据 + 局限"**——这一点比"AI 拍脑袋"靠谱得多。
+```c
+undefined8 main(void)
+{
+  puts("Hello, REA!");
+  return 0;
+}
+```
 
-而且你还能**接着追问**，让 agent 深入：
+而且它返回的不只是代码，**还带着证据**：
 
-> "那个字符串在文件里哪个地址？为什么调的是 `puts` 而不是 `printf`？"
+- `provider: ghidra 12.1.4`、`confidence: observed`；
+- 一串 `limitations`（明确说"**这是反编译输出、不是源码，也不等同于 Hopper 的输出**"）。
 
-（后者其实是：编译器把 `printf("...\n")` **优化成了 `puts`**——AI 能帮你把这个点出来。）
+**一个彩蛋**：我们写的是 `printf("Hello, REA!\n")`，但编译器把它**优化成了 `puts`**——REA 直接摆出来了。
+
+**而在 strip 过的 `hello` 上**：`rea decompile ./hello main` →
+
+```
+error: Analysis failed
+message: "Unknown Ghidra procedure name or address: main"
+```
+
+**这就是"没有符号"的现实**：函数名被抹了，你（或 AI）得**按地址**去定位——**它不是"一键变源码"的魔法。**
+
+**这就是 REA 的定位**：不说"相信我"，而是**"结论 + 证据 + 局限"**——比"AI 拍脑袋"靠谱得多。
 
 ## 关键：它快，但你得能验证
 
