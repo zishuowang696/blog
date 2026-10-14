@@ -41,6 +41,8 @@ const NAME_EN: Record<string, string> = {
   'OpenWrt 编译入门': 'OpenWrt Build Intro',
   'Yocto 构建系统笔记': 'Yocto Build System Notes',
   '从 0 构建 AI Agent': 'Build an AI Agent from Scratch',
+  '从 0 看懂 Attention': 'Understanding Attention from Scratch',
+  'AI 工具评测': 'AI Tool Reviews',
 }
 
 export function localizeName(name: string, lang: Lang): string {
