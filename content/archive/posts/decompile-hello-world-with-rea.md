@@ -37,7 +37,7 @@ npx rea-agents setup
 
 **一个前提**：**原生二进制**（像这个 ELF）需要一个**分析引擎**——**Ghidra（免费）**、Hopper 或 IDA。JS / .NET 的静态分析则免引擎。装好引擎、重启 agent，就能用了。
 
-> **引擎（Ghidra）怎么快速拿到？** 用它自己的下载器就行（多镜像并行）：
+> **引擎（Ghidra）怎么快速拿到？** 用它自己的下载器就行（多镜像并行，**GitHub：<https://github.com/zishuowang696/gh-download>**）：
 >
 > ```bash
 > scripts/gh-download.sh NationalSecurityAgency/ghidra Ghidra_12.1.4_build --pattern '*PUBLIC*.zip' -d ./ghidra

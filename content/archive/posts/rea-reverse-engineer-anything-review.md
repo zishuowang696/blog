@@ -21,7 +21,7 @@ published: true
 
 对工程师来说，**这是杠杆**。有杠杆不用，等于自废武功。
 
-> **想上手？** 引擎用免费的 **Ghidra** 就行；它在国内下载慢——用我写的[下载器](/posts/gh-downloader)拉，543 MB 实测 **4.7 MiB/s**。然后 [让 agent 反编译一个 Hello World](/posts/decompile-hello-world-with-rea) 练手。
+> **想上手？** 引擎用免费的 **Ghidra** 就行；它在国内下载慢——用我写的下载器拉（**GitHub：<https://github.com/zishuowang696/gh-download>**），543 MB 实测 **4.7 MiB/s**。然后 [让 agent 反编译一个 Hello World](/posts/decompile-hello-world-with-rea) 练手。
 
 ## 2. 但前提是：去逆"有价值的产品"
 

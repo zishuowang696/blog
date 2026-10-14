@@ -33,7 +33,7 @@ Pick **your agent** (Claude Code / Codex / Cursor…). It will:
 
 **One prerequisite**: a **native binary** (like this ELF) needs an **analysis engine** — **Ghidra (free)**, Hopper, or IDA. JS / .NET static analysis needs no engine. Install an engine, restart the agent, done.
 
-> **Need Ghidra fast?** Use its own downloader (multi-mirror parallel):
+> **Need Ghidra fast?** Use its own downloader (multi-mirror parallel, **GitHub: <https://github.com/zishuowang696/gh-download>**):
 >
 > ```bash
 > scripts/gh-download.sh NationalSecurityAgency/ghidra Ghidra_12.1.4_build --pattern '*PUBLIC*.zip' -d ./ghidra

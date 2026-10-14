@@ -17,7 +17,7 @@ It drives the cost of "**understanding a piece of software**" from *weeks or yea
 
 For an engineer, **that's leverage.** Refusing to use leverage is choosing to fight with one hand tied behind your back.
 
-> **Want to try it?** The free **Ghidra** engine is enough; it downloads slowly in China — grab it with [my downloader](/en/posts/gh-downloader) (543 MB at **4.7 MiB/s**). Then practice by [decompiling a Hello World with an agent](/en/posts/decompile-hello-world-with-rea).
+> **Want to try it?** The free **Ghidra** engine is enough; it downloads slowly in China — grab it with my downloader (**GitHub: <https://github.com/zishuowang696/gh-download>**), 543 MB at **4.7 MiB/s**. Then practice by [decompiling a Hello World with an agent](/en/posts/decompile-hello-world-with-rea).
 
 ## 2. The premise: reverse-engineer *valuable* products
 
