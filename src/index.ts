@@ -5,7 +5,7 @@ import { initLocalDb, rootDir } from './lib/engine/sqlite.ts'
 import { SITE_NAME } from './templates/util.ts'
 
 const publicRoot = join(rootDir, 'public')
-for (const prefix of ['/css', '/js', '/vendor', '/img']) {
+for (const prefix of ['/css', '/js', '/vendor', '/img', '/dl']) {
   app.use(`${prefix}/*`, serveStatic({ root: publicRoot }))
 }
 app.get('/favicon.svg', serveStatic({ root: publicRoot }))

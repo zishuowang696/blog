@@ -11,7 +11,8 @@ published: true
 
 这篇介绍一个自己写的下载器：**`scripts/gh-download.sh`**。
 
-仓库：<https://github.com/zishuowang696/embedai>（`scripts/gh-download.sh`）
+- **本站直链**：<https://embedai.com.cn/dl/gh-download.sh>
+- **源码仓库**：<https://github.com/zishuowang696/embedai>（`scripts/gh-download.sh`）
 
 ## 核心思路（一句话）
 

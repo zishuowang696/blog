@@ -7,7 +7,8 @@ When you build an embedded distro, **downloading** is often the biggest time sin
 
 This post is about a downloader I wrote: **`scripts/gh-download.sh`**.
 
-Repo: <https://github.com/zishuowang696/embedai> (`scripts/gh-download.sh`)
+- **Direct from this site**: <https://embedai.com.cn/dl/gh-download.sh>
+- **Source repo**: <https://github.com/zishuowang696/embedai> (`scripts/gh-download.sh`)
 
 ## The core idea (one line)
 
