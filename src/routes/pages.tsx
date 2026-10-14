@@ -12,3 +12,11 @@ pageRoutes.get('/about', async (c) => {
   const body = <StaticPageView page={page} />
   return c.html(await renderHtml(c, { title: page.title, active: 'about', body }))
 })
+
+// 其它静态页（如 /tools）：存在就渲染，否则交给后续路由
+pageRoutes.get('/:slug', async (c, next) => {
+  const page = await getPage(c.req.param('slug'))
+  if (!page) return next()
+  const body = <StaticPageView page={page} />
+  return c.html(await renderHtml(c, { title: page.title, body }))
+})

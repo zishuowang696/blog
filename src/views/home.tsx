@@ -2,7 +2,7 @@ import type { Post, LatestPost, TagCount } from '../lib/db.ts'
 import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
 import { BottomSection, Pagination, PostList, Sidebar } from '../templates/components.tsx'
-import { SITE_DESC } from '../templates/util.ts'
+import { siteDesc } from '../templates/util.ts'
 
 export function HomeView({
   posts,
@@ -27,7 +27,7 @@ export function HomeView({
     <>
       <section class="hero">
         <h1>{t(lang, 'home.hero')}</h1>
-        <p>{SITE_DESC}</p>
+        <p>{siteDesc(lang)}</p>
         <div class="hero-actions">
           <a class="btn" href={langHref(lang, '/tags')}>
             {t(lang, 'nav.tags')}

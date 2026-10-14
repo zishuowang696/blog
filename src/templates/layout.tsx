@@ -3,7 +3,7 @@ import type { Child } from 'hono/jsx'
 import type { User } from '../lib/db.ts'
 import { getSessionUser, isAdmin } from '../lib/auth.ts'
 import { resolveLang, stripLang, t, EN_PREFIX, langHref, type Lang } from '../lib/locale.ts'
-import { SITE_DESC, SITE_NAME } from './util.ts'
+import { SITE_NAME, siteDesc } from './util.ts'
 import { envStr } from '../lib/env.ts'
 
 export type NavKey = 'home' | 'tags' | 'series' | 'about' | 'console' | ''
@@ -85,9 +85,9 @@ export function Layout({ title, description, active, user, lang, path, query, pr
   const docTitle = title.startsWith(SITE_NAME) ? title : `${title} · ${SITE_NAME}`
   const siteUrl = (envStr('SITE_URL') ?? 'http://localhost:3000').replace(/\/+$/, '')
   const canonical = siteUrl + path + q
-  const pageDesc = description ?? SITE_DESC
+  const pageDesc = description ?? siteDesc(lang)
   const ld: Record<string, unknown>[] = [
-    { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, description: SITE_DESC, url: siteUrl, inLanguage: lang },
+    { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, description: siteDesc(lang), url: siteUrl, inLanguage: lang },
     ...(jsonLd ?? []),
   ]
   const nav = (key: NavKey, label: string, href: string) => (
@@ -164,7 +164,7 @@ export function Layout({ title, description, active, user, lang, path, query, pr
                   <span class="logo-mark">{LOGO_MARK}</span>
                   <span class="logo-text">{SITE_NAME}</span>
                 </a>
-                <p class="foot-desc">{SITE_DESC}</p>
+                <p class="foot-desc">{siteDesc(lang)}</p>
               </div>
               <div>
                 <h4>{t(lang, 'nav.posts')}</h4>

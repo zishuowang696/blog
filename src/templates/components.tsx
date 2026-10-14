@@ -1,7 +1,7 @@
 import type { JSXNode } from 'hono/jsx'
 import type { Comment, Post, LatestPost, TagCount, User } from '../lib/db.ts'
 import { langHref, t, type Lang } from '../lib/locale.ts'
-import { fmtDate, seriesHref, SITE_DESC, SITE_NAME, tagHref } from './util.ts'
+import { fmtDate, seriesHref, SITE_NAME, siteDesc, tagHref } from './util.ts'
 import { localizeName } from '../lib/i18n-names.ts'
 
 function seriesLabel(lang: Lang): string {
@@ -149,7 +149,7 @@ export function Sidebar({
     <aside class="sidebar">
       <div class="side-card">
         <div class="side-brand">{SITE_NAME}</div>
-        <p>{SITE_DESC}</p>
+        <p>{siteDesc(lang)}</p>
         <div class="side-links">
           <a class="btn small ghost" href={langHref(lang, '/about')}>
             {t(lang, 'nav.about')}

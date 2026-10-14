@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { listRecentPosts } from '../lib/db.ts'
 import { envStr } from '../lib/env.ts'
 import { langHref, resolveLang } from '../lib/locale.ts'
-import { SITE_DESC, SITE_NAME } from '../templates/util.ts'
+import { SITE_NAME, siteDesc } from '../templates/util.ts'
 
 export const feedRoutes = new Hono()
 
@@ -38,7 +38,7 @@ feedRoutes.get('/feed.xml', async (c) => {
 <channel>
   <title>${esc(SITE_NAME)}</title>
   <link>${esc(`${base}${langHref(lang, '/')}`)}</link>
-  <description>${esc(SITE_DESC)}</description>
+  <description>${esc(siteDesc(lang))}</description>
   <language>${lang === 'zh' ? 'zh-CN' : 'en'}</language>
   <atom:link href="${esc(self)}" rel="self" type="application/rss+xml"/>
 ${items}
