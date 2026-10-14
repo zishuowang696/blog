@@ -3,7 +3,7 @@ title: "MCP 的「客户端」到底在哪？你没写它，却一直在用它"
 date: 2026-10-14
 tags: [mcp, ai-agent, tutorial, protocol]
 summary: "很多人被 MCP 的 Host / Client / Server『三件套』搞懵：不是说要写 client 吗？可我看别人只写了 server，opencode / Cursor 一连就能跑。其实——client 一直在，只是藏在 Host 里，对你透明。"
-series: "看懂 MCP"
+series: "从 0 构建 AI Agent"
 published: true
 ---
 
