@@ -30,7 +30,17 @@ chmod +x gh-download.sh
 ./gh-download.sh https://github.com/<owner>/<repo>/releases/download/<tag>/<file>
 ```
 
-**依赖**：`curl`；`aria2c`（强烈推荐，缺失会回退 curl 并提示安装）；按 `owner/repo` 自动列资产时需要 `gh`。
+**Windows / PowerShell 版**（`gh-download.ps1`，Win10+ 自带 curl）
+
+```powershell
+# 本站直链
+curl.exe -fsSL https://embedai.com.cn/dl/gh-download.ps1 -o gh-download.ps1
+
+# 按 owner/repo + tag，过滤后下载
+./gh-download.ps1 <owner/repo> <tag> -Pattern '*windows*.zip' -Dir .\dl
+```
+
+**依赖**：`curl`（Win10+ 自带 `curl.exe`）；`aria2c`（强烈推荐，缺失会回退 curl 并提示安装）；按 `owner/repo` 自动列资产时需要 `gh`。
 
 **环境变量**：`EMBEDAI_MIRRORS`（镜像前缀，须支持 Range）、`EMBEDAI_JOBS`、`EMBEDAI_CONN`。
 

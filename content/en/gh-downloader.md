@@ -9,6 +9,7 @@ This post is about a downloader I wrote: **`scripts/gh-download.sh`**.
 
 - **Direct from this site**: <https://embedai.com.cn/dl/gh-download.sh>
 - **Source repo**: <https://github.com/zishuowang696/gh-download>
+- **Windows version**: `gh-download.ps1` (same repo; direct: <https://embedai.com.cn/dl/gh-download.ps1>)
 
 ## The core idea (one line)
 
