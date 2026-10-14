@@ -8,7 +8,7 @@ When you build an embedded distro, **downloading** is often the biggest time sin
 This post is about a downloader I wrote: **`scripts/gh-download.sh`**.
 
 - **Direct from this site**: <https://embedai.com.cn/dl/gh-download.sh>
-- **Source repo**: <https://github.com/zishuowang696/embedai> (`scripts/gh-download.sh`)
+- **Source repo**: <https://github.com/zishuowang696/gh-download>
 
 ## The core idea (one line)
 
@@ -75,6 +75,19 @@ gid   |stat|avg speed  |path/URI
 
 - Here only **`ghfast.top`** passed the Range probe (`ghproxy.net` didn't at the time) → it used just that one;
 - If both pass, it puts **both mirrors on one line** and downloads in parallel.
+
+**Large-file test**: try the **Ghidra 12.1.4 release (543 MB)**:
+
+```console
+$ scripts/gh-download.sh NationalSecurityAgency/ghidra Ghidra_12.1.4_build --pattern '*PUBLIC*.zip' -d ./ghidra
+[#4fa3b8 543MiB/543MiB(99%) CN:1 DL:76KiB ETA:3s]
+Download Results:
+4fa3b8|OK  |   4.7MiB/s|./ghidra/ghidra_12.1.4_PUBLIC_20260921.zip
+完成 → ./ghidra
+```
+
+- **543 MB at 4.7 MiB/s, in one go** (multi-mirror parallel);
+- vs. direct/single-mirror ~0.19 MiB/s → **~20× faster**.
 
 ## Tips / gotchas
 

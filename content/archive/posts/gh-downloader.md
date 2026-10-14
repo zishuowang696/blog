@@ -12,7 +12,7 @@ published: true
 这篇介绍一个自己写的下载器：**`scripts/gh-download.sh`**。
 
 - **本站直链**：<https://embedai.com.cn/dl/gh-download.sh>
-- **源码仓库**：<https://github.com/zishuowang696/embedai>（`scripts/gh-download.sh`）
+- **源码仓库**：<https://github.com/zishuowang696/gh-download>
 
 ## 核心思路（一句话）
 
@@ -81,6 +81,19 @@ gid   |stat|avg speed  |path/URI
 
 - 本例只探测到 **`ghfast.top`** 支持 Range（`ghproxy.net` 当时没通过）→ 就只用它下；
 - 若两个都可用，就会**把两个镜像放进同一行并行拉**。
+
+**大文件实测**：拿 **Ghidra 12.1.4 的发布包（543 MB）** 再试一次：
+
+```console
+$ scripts/gh-download.sh NationalSecurityAgency/ghidra Ghidra_12.1.4_build --pattern '*PUBLIC*.zip' -d ./ghidra
+[#4fa3b8 543MiB/543MiB(99%) CN:1 DL:76KiB ETA:3s]
+Download Results:
+4fa3b8|OK  |   4.7MiB/s|./ghidra/ghidra_12.1.4_PUBLIC_20260921.zip
+完成 → ./ghidra
+```
+
+- **543 MB、平均 4.7 MiB/s、一次下完**（多镜像并行）；
+- 对比：直连/单镜像只有 ~0.19 MiB/s → **快了约 20 倍**。
 
 ## 经验 / 坑
 

@@ -10,7 +10,7 @@ date: 2026-10-14
 > 多镜像测速 + Range 校验 → aria2 多源并行 → 断点续传 →（有则）sha256 校验。
 
 - **本站直链**：<https://embedai.com.cn/dl/gh-download.sh>
-- **源码仓库**：<https://github.com/zishuowang696/embedai>（`scripts/gh-download.sh`）
+- **源码仓库**：<https://github.com/zishuowang696/gh-download>
 - **讲解文章**：[/posts/gh-downloader](/posts/gh-downloader)
 
 **用法**
