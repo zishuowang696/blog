@@ -237,6 +237,28 @@ export function BottomSection({ tags, lang }: { tags: TagCount[]; lang: Lang }) 
   )
 }
 
+export function PostCta({ lang }: { lang: Lang }) {
+  return (
+    <section class="post-cta">
+      <div class="post-cta-text">
+        <h2>{t(lang, 'cta.title')}</h2>
+        <p>{t(lang, 'cta.text')}</p>
+      </div>
+      <div class="post-cta-actions">
+        <a class="btn" href={langHref(lang, '/about')}>
+          {t(lang, 'cta.consult')}
+        </a>
+        <a class="btn ghost small" href={langHref(lang, '/feed.xml')}>
+          {t(lang, 'cta.rss')}
+        </a>
+        <a class="btn ghost small" href="https://afdian.com/a/embedai" target="_blank" rel="noopener">
+          {t(lang, 'cta.support')}
+        </a>
+      </div>
+    </section>
+  )
+}
+
 export function CommentBody({ body }: { body: string }) {
   return <div class="comment-body">{body}</div>
 }

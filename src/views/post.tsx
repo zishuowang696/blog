@@ -3,7 +3,7 @@ import type { Lang } from '../lib/locale.ts'
 import { langHref, t } from '../lib/locale.ts'
 import { localizeName } from '../lib/i18n-names.ts'
 import { withToc } from '../lib/md.ts'
-import { CommentsBox, TagLinks } from '../templates/components.tsx'
+import { CommentsBox, PostCta, TagLinks } from '../templates/components.tsx'
 import { fmtDate } from '../templates/util.ts'
 
 function Neighbor({ label, post, lang }: { label: string; post: Post | null; lang: Lang }) {
@@ -59,6 +59,7 @@ export function PostView({
           </nav>
         </footer>
       </article>
+      <PostCta lang={lang} />
       <CommentsBox postSlug={post.slug} comments={comments} user={user} lang={lang} />
     </>
   )
