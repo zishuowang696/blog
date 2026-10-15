@@ -50,7 +50,7 @@ export const rateLimitSensitive: MiddlewareHandler = async (c, next) => {
 }
 
 const BOT_RE =
-  /bot|crawl|spider|slurp|bing|google|baidu|yandex|duckduck|facebook|externalhit|headless|python|curl|wget|okhttp|axios|go-http|java\/|libwww|monitor|uptime|nmap|masscan|scan/i
+  /bot|crawl|spider|slurp|bing|google|baidu|yandex|duckduck|facebook|externalhit|headless|phantomjs|python|curl|wget|okhttp|axios|go-http|java\/|libwww|node-fetch|undici|monitor|uptime|pingdom|statuscake|site24|gtmetrix|lighthouse|zabbix|nagios|censys|shodan|zgrab|netcraft|bitsight|expanse|binaryedge|securityscorecard|netsystemsresearch|internet-measurement|builtwith|dataprovider|datanyze|similarweb|screaming|petal|nmap|masscan|scan/i
 
 const BOT_NAMES: [RegExp, string][] = [
   [/googlebot|apis-google|google/i, 'Googlebot'],
@@ -62,10 +62,13 @@ const BOT_NAMES: [RegExp, string][] = [
   [/duckduck/i, 'DuckDuckBot'],
   [/facebook|externalhit/i, 'facebookexternalhit'],
   [/semrush|ahrefs|mj12|dotbot|petal|gptbot|claudebot|ccbot|perplexity|applebot|slurp/i, 'SEO/AI 爬虫'],
-  [/python|curl|wget|okhttp|axios|go-http|java\/|libwww/i, '脚本/扫描'],
+  [/builtwith|dataprovider|datanyze|similarweb|screaming|opensiteexplorer/i, '营销数据爬虫'],
+  [/censys|shodan|zgrab|netcraft|bitsight|expanse|binaryedge|securityscorecard|netsystemsresearch|internet-measurement/i, '安全扫描'],
+  [/uptime|pingdom|statuscake|site24|gtmetrix|lighthouse|zabbix|nagios|monitor/i, '监控'],
+  [/python|curl|wget|okhttp|axios|go-http|java\/|libwww|node-fetch|undici|headless|phantomjs/i, '脚本/扫描'],
 ]
 
-function botName(ua: string): string {
+export function botName(ua: string): string {
   if (!BOT_RE.test(ua)) return ''
   for (const [re, name] of BOT_NAMES) if (re.test(ua)) return name
   return '其他爬虫'
