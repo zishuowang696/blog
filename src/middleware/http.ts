@@ -73,6 +73,25 @@ export function botName(ua: string): string {
   for (const [re, name] of BOT_NAMES) if (re.test(ua)) return name
   return '其他爬虫'
 }
+
+// 行为级反爬：同一 IP 在一个窗口内访问大量「不同」路径 → 判为爬虫（UA 可被伪装绕过）。
+// 只影响统计归类，不拦截任何请求；有 UA 名的搜索引擎优先走 botName，不会被这里覆盖。
+const CRAWL_WINDOW_MS = 1_800_000
+const CRAWL_MAX_PATHS = 50
+const CRAWL_MAP_LIMIT = 5000
+const crawlSeen = new Map<string, { t: number; p: string }[]>()
+
+export function isCrawlerByBehavior(ip: string, path: string, now: number = Date.now()): boolean {
+  const cutoff = now - CRAWL_WINDOW_MS
+  const rec = (crawlSeen.get(ip) ?? []).filter((e) => e.t > cutoff)
+  rec.push({ t: now, p: path })
+  if (rec.length > 300) rec.splice(0, rec.length - 300)
+  crawlSeen.set(ip, rec)
+  if (crawlSeen.size > CRAWL_MAP_LIMIT) {
+    for (const [k, v] of crawlSeen) if (v.every((e) => e.t <= cutoff)) crawlSeen.delete(k)
+  }
+  return new Set(rec.map((e) => e.p)).size >= CRAWL_MAX_PATHS
+}
 const SKIP_PREFIX = ['/admin', '/css', '/vendor', '/lang', '/.well-known']
 const SKIP_EXT = /\.(css|js|mjs|svg|ico|png|jpe?g|gif|webp|avif|xml|txt|json|map|woff2?)$/i
 const STATS_SALT = 'embedai-stats-v1'
@@ -100,12 +119,13 @@ export const trackViews: MiddlewareHandler = async (c, next) => {
   const ua = c.req.header('user-agent') ?? ''
   if (!ua) return
   const ip = clientIp(c)
+  const bot = botName(ua) || (isCrawlerByBehavior(ip, path) ? '爬虫(行为)' : '')
   try {
     await recordView({
       path,
       ip,
       ipHash: await hashIp(ip),
-      bot: botName(ua),
+      bot,
       referer: c.req.header('referer') ?? '',
       ua,
     })
