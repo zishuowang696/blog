@@ -2,7 +2,7 @@
 title: "AMX 原理（3）：libamxc 实战——6 个例子讲清 C 的容器"
 date: 2026-10-18
 tags: [prpl, amx, c, 容器]
-series: "AMX 原理"
+series: "深入理解 PRPL 之 AMX 相关库"
 summary: "libamxc 是 AMX 的基础容器库：链表、哈希、动态字符串、Variant、数组、集合。纯 C、不用 C++ 运行库、strip 后约 187K、只依赖 libc——可以直接用在任意 C 项目里。这篇用 6 个可编译的例子讲清用法与边界。"
 published: true
 ---
