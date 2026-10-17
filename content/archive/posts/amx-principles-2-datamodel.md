@@ -1,7 +1,7 @@
 ---
 title: "Ambiorix 原理（2）：数据模型——对象、参数与路径"
 date: 2026-10-18
-tags: [prpl, amx, 架构, 嵌入式]
+tags: [prpl, prplos, ambiorix, amx, tr-181, 嵌入式]
 series: "深入理解 PRPL 之 Ambiorix 相关库"
 summary: "AMX 的核心是一棵可寻址的对象树：对象有参数、函数、子对象和实例，路径负责定位。这篇讲清对象/参数/函数/路径/事务，以及为什么 ODL 是「可读性」的来源。"
 published: true

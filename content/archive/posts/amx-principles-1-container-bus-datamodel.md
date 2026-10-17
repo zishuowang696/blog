@@ -1,7 +1,7 @@
 ---
 title: "Ambiorix 原理（1）：C 版的「Spring 容器」——组件、总线与数据模型"
 date: 2026-10-18
-tags: [prpl, amx, 架构, 嵌入式]
+tags: [prpl, prplos, ambiorix, amx, c, 架构]
 series: "深入理解 PRPL 之 Ambiorix 相关库"
 summary: "AMX（Ambiorix）是 prplOS 的核心框架。它用 C 实现了一套「组件容器 + 总线抽象 + 数据模型」。对 Java 背景的人，可以把它理解成 C 版的 Spring——但像什么、又不像什么，这一篇讲清楚。"
 published: true

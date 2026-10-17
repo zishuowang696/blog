@@ -1,7 +1,7 @@
 ---
 title: "我找了 C 的「容器」很多年，直到遇见 Ambiorix"
 date: 2026-10-16
-tags: [amx, prpl, c, 思考]
+tags: [amx, prpl, prplos, ambiorix, c, 思考]
 series: "深入理解 PRPL 之 Ambiorix 相关库"
 summary: "写 C 的人都有一个隐痛：没有标准容器。十几年里我一直在找「C 的容器」，也自己写过，但效果不理想。直到在 prplOS 里看到 AMX，我才明白：我要的从来不是一个 list/hash 库，而是「容器化的系统骨架」。这篇是我的心路，也是这个系列的开头。"
 published: true
