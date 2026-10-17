@@ -74,6 +74,8 @@ C++ 有 STL，Java 有集合，Go 有 map/slice。C 呢？链表、哈希、动�
 **它把"容器"做成了"系统骨架"。** 这正是我找了多年、却一直没找到的那一层。
 
 > **AMX 不只是 prpl 的：它的容器（List / Hash / String / Variant）可以直接用在你的 C 项目里。**
+>
+> **纯 C（C11），不需要 C++ 运行库；`libamxc.so` strip 后约 187K，只依赖 libc。**
 
 ## 它到底省什么：工作量，和可读性
 
