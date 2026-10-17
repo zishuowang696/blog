@@ -4,7 +4,7 @@ date: 2026-10-17
 tags: [openwrt, 内存优化, zram, flash]
 series: "OpenWrt 内存优化"
 summary: "ZRAM 不是「凭空多出内存」：它把一段 RAM 做成压缩的交换区，用 CPU 时间换空间。那为什么不干脆用 Flash 做 swap？因为 Flash 有写入寿命。这一篇讲透原理、压缩比、取舍与验证方法。"
-published: true
+published: false
 ---
 
 > 这是「OpenWrt 内存优化」系列的一篇。总纲见 [OpenWrt 固件内存优化](/posts/openwrt-memory-optimization)。
