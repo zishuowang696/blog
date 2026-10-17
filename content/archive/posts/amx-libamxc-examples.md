@@ -10,6 +10,8 @@ published: true
 > 系列第 3 篇。前两篇：[C 版 Spring 容器](/posts/amx-principles-1-container-bus-datamodel) · [数据模型](/posts/amx-principles-2-datamodel)。
 > 本文所有例子都在 PC 上**实际编译并运行过**。
 
+> **完整可运行代码：https://github.com/zishuowang696/amx-examples**
+
 ## 为什么值得看
 C 没有标准容器：链表、哈希、动态字符串、变长数组——每个项目自己写一遍。
 `libamxc` 把这些做成了**工业级、可复用**的库：
