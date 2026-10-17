@@ -1,8 +1,8 @@
 ---
-title: "AMX 原理（4）：libamxc 是不是 C 的 STL？"
+title: "Ambiorix 原理（4）：libamxc 是不是 C 的 STL？"
 date: 2026-10-18
 tags: [prpl, amx, c, 容器]
-series: "深入理解 PRPL 之 AMX 相关库"
+series: "深入理解 PRPL 之 Ambiorix 相关库"
 summary: "不是。它借了 STL 的「容器」思想，但用的是 C 的做法：void* + 侵入式 it + 宏取类型。没有模板、没有 <algorithm>、没有 allocator。这篇用一张对比表说清楚它像什么、不像什么。"
 published: true
 ---
