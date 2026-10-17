@@ -4,7 +4,7 @@ date: 2026-10-17
 tags: [openwrt, 内存优化, zram, 工程方法]
 series: "OpenWrt 内存优化"
 summary: "不是每个项目都有条件做 benchmark。真实做法是：拿供应商意见、做理论评估、拆竞品对照，三路交叉先定方案，上线后再用最小成本验证。这一篇讲这套决策方法。"
-published: false
+published: true
 ---
 
 > 系列第 2 篇。第 1 篇：[ZRAM 到底怎么省内存](/posts/zram-explained-flash-wear)。

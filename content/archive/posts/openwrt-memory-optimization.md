@@ -4,7 +4,7 @@ date: 2026-10-17
 tags: [openwrt, 内存优化, 嵌入式, 性能]
 series: "OpenWrt 内存优化"
 summary: "路由器内存优化不是「删几个包」：从去掉 Java/Python，到追查保留内存、tmpfs、ZRAM，再到用 smaps 的 PSS 验证。核心不是技巧，是「别轻信数字，自己去量」。"
-published: false
+published: true
 ---
 
 路由器内存优化，最常见的误区是：**看 `free` 说"还有"，就以为够了；或者听供应商说"只占这么多"，就信了。**
