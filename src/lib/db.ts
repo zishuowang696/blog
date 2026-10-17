@@ -327,7 +327,9 @@ export async function listPosts(opts: { page?: number; tag?: string; series?: st
   const total = Number(totalRow?.n ?? 0)
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
-  const rows = await e.all(`${localizedSelect(lang)} ${whereSql} ORDER BY posts.created_at DESC, posts.id DESC LIMIT ? OFFSET ?`, [...args, limit, offset])
+  // 系列按阅读顺序（最早在前）；其它列表按最新在前
+  const order = opts.series ? 'ASC' : 'DESC'
+  const rows = await e.all(`${localizedSelect(lang)} ${whereSql} ORDER BY posts.created_at ${order}, posts.id ${order} LIMIT ? OFFSET ?`, [...args, limit, offset])
   return {
     items: rows.map((r) => postFrom(r as unknown as PostRow)),
     hasMore: page < totalPages,
