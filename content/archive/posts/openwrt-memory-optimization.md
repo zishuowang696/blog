@@ -2,6 +2,7 @@
 title: "OpenWrt 固件内存优化：从裁剪到 ZRAM 的一套可验证方法"
 date: 2026-10-17
 tags: [openwrt, 内存优化, 嵌入式, 性能]
+series: "OpenWrt 内存优化"
 summary: "路由器内存优化不是「删几个包」：从去掉 Java/Python，到追查保留内存、tmpfs、ZRAM，再到用 smaps 的 PSS 验证。核心不是技巧，是「别轻信数字，自己去量」。"
 published: true
 ---
